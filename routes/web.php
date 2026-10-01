@@ -5,6 +5,7 @@ use App\Http\Controllers\AdminUserController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\NewsletterController;
 use App\Http\Controllers\ProfilController;
 use App\Http\Controllers\SearchController;
 use App\Http\Controllers\StatistikController;
@@ -12,6 +13,7 @@ use Illuminate\Support\Facades\Route;
 
 // ── Publik ───────────────────────────────────────────────────────────────────
 Route::get('/',               [ArticleController::class, 'index'])->name('articles.index');
+Route::post('/newsletter/subscribe', [NewsletterController::class, 'subscribe'])->name('newsletter.subscribe');
 Route::get('/berita/{slug}',  [ArticleController::class, 'show'])->name('articles.show');
 Route::get('/kategori/{slug}',[CategoryController::class, 'show'])->name('categories.show');
 Route::get('/cari',           [SearchController::class, 'index'])->name('search');

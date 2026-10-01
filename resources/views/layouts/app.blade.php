@@ -82,8 +82,7 @@
         @foreach(config('categories') as $slug => $cat)
           <li>
             <a href="{{ route('categories.show', $slug) }}"
-               class="{{ request()->is('kategori/' . $slug) ? 'active' : '' }}"
-               style="{{ request()->is('kategori/' . $slug) ? '--cat-color:' . $cat['color'] : '' }}">
+               class="{{ request()->is('kategori/' . $slug) ? 'active' : '' }}">
               {{ $cat['name'] }}
             </a>
           </li>
@@ -109,6 +108,7 @@
 
   <div class="footer-main">
     <div class="container footer-grid">
+
       <div class="f-col f-about">
         <a href="{{ route('articles.index') }}" class="f-logo">
           <span class="logo-word">News<span class="x">X</span>Paper</span>
@@ -122,6 +122,7 @@
           <a href="#" aria-label="YouTube">▶</a>
         </div>
       </div>
+
       <div class="f-col">
         <h4 class="f-title">Kategori</h4>
         <ul class="f-links">
@@ -130,6 +131,7 @@
           @endforeach
         </ul>
       </div>
+
       <div class="f-col">
         <h4 class="f-title">Perusahaan</h4>
         <ul class="f-links">
@@ -140,19 +142,49 @@
           <li><a href="#">Hubungi kami</a></li>
         </ul>
       </div>
+
       <div class="f-col f-news">
         <h4 class="f-title">Buletin</h4>
         <p>Dapatkan ringkasan berita pilihan langsung di email kamu.</p>
-        <form class="f-form" onsubmit="event.preventDefault();this.reset();alert('Terima kasih! Fitur langganan belum aktif.');">
-          <input type="email" placeholder="Alamat email" aria-label="Email buletin" required>
-          <button type="submit">Langganan</button>
+
+        {{-- Flash messages newsletter --}}
+        @if(session('newsletter_success'))
+          <div class="nl-alert nl-success" role="alert">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>
+            {{ session('newsletter_success') }}
+          </div>
+        @elseif(session('newsletter_info'))
+          <div class="nl-alert nl-info" role="alert">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+            {{ session('newsletter_info') }}
+          </div>
+        @endif
+
+        {{-- Form newsletter — real Laravel POST --}}
+        <form class="f-form" method="POST" action="{{ route('newsletter.subscribe') }}" novalidate>
+          @csrf
+          <div class="f-form-group">
+            <input type="email"
+                   name="email"
+                   value="{{ old('email') }}"
+                   placeholder="Alamat email"
+                   aria-label="Alamat email untuk newsletter"
+                   autocomplete="email"
+                   class="{{ $errors->has('email') ? 'f-input-error' : '' }}">
+            <button type="submit">Langganan</button>
+          </div>
+          @error('email')
+            <p class="nl-error">{{ $message }}</p>
+          @enderror
         </form>
+
         <ul class="f-contact">
           <li>redaksi@newsxpaper.test</li>
           <li>+62 21 0000 0000</li>
           <li>Jl. Contoh No. 1, Jakarta</li>
         </ul>
       </div>
+
     </div>
   </div>
 
@@ -219,13 +251,13 @@
           list.appendChild(li);
         });
         show();
-      } catch(e) { /* aborted */ }
+      } catch(e) { /* aborted or network error */ }
     }, 300);
   });
 
-  // Keyboard nav
+  // Keyboard navigation
   input.addEventListener('keydown', e => {
-    const items = list.querySelectorAll('li');
+    const items  = list.querySelectorAll('li');
     const active = list.querySelector('li.sg-active');
     let idx = Array.from(items).indexOf(active);
     if (e.key === 'ArrowDown') {
@@ -249,6 +281,14 @@
   document.addEventListener('click', e => {
     if (!e.target.closest('.search-wrap')) hide();
   });
+})();
+
+// ── Auto-scroll ke pesan newsletter jika ada ────────────────────
+(function() {
+  const nl = document.querySelector('.nl-alert');
+  if (nl) {
+    nl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  }
 })();
 </script>
 @stack('scripts')

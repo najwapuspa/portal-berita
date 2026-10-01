@@ -321,3 +321,228 @@ mark { background: #fff5a0; padding: 0 2px; }
   .article-title { font-size: 22px; }
   .search-filter-form { flex-direction: column; align-items: flex-start; }
 }
+
+/* ─── Featured Article (artikel paling atas) ───────────────────── */
+.featured-article {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0;
+  margin: 24px 0 20px;
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  overflow: hidden;
+  min-height: 380px;
+  background: #111;
+}
+
+/* Bagian gambar */
+.fa-img-wrap {
+  position: relative;
+  overflow: hidden;
+  background: linear-gradient(135deg, #614385, #516395);
+  min-height: 320px;
+}
+
+/* Gambar utama: cover penuh */
+.fa-img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  display: block;
+  transition: transform .4s ease;
+}
+.featured-article:hover .fa-img {
+  transform: scale(1.03);
+}
+
+/* Fallback: jika gambar error, tampilkan gradient */
+.fa-img-fallback {
+  background: linear-gradient(135deg, #614385, #516395);
+}
+
+/* Overlay gelap di bagian bawah gambar */
+.fa-img-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to right, rgba(0,0,0,.15), rgba(0,0,0,.04));
+  pointer-events: none;
+}
+
+/* Badge kategori di pojok kiri bawah gambar */
+.fa-cat-badge {
+  position: absolute;
+  left: 16px;
+  bottom: 16px;
+  display: inline-block;
+  color: #fff;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .06em;
+  padding: 5px 14px;
+  border-radius: 2px;
+  z-index: 2;
+  transition: opacity .15s;
+}
+.fa-cat-badge:hover { opacity: .85; }
+
+/* Bagian info teks */
+.fa-info {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 36px 36px 32px;
+  background: #fff;
+  gap: 0;
+}
+
+.fa-title {
+  font-size: clamp(20px, 2.2vw, 30px);
+  font-weight: 700;
+  line-height: 1.25;
+  margin: 0 0 14px;
+  color: var(--ink);
+}
+.fa-title a { color: inherit; }
+.fa-title a:hover { color: var(--blue); }
+
+.fa-excerpt {
+  font-size: 14px;
+  line-height: 1.7;
+  color: #555;
+  margin: 0 0 18px;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.fa-meta {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 14px;
+  font-size: 12px;
+  color: #888;
+  margin-bottom: 22px;
+}
+.fa-author, .fa-date, .fa-views {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+.fa-author { font-weight: 600; color: #444; }
+
+/* Tombol Baca Selengkapnya */
+.fa-read-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 24px;
+  background: var(--ink);
+  color: #fff;
+  font-size: 13px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .06em;
+  border-radius: 2px;
+  align-self: flex-start;
+  transition: background .15s, gap .15s;
+}
+.fa-read-btn:hover {
+  background: var(--blue);
+  gap: 12px;
+}
+
+/* Responsif featured article */
+@media (max-width: 900px) {
+  .featured-article {
+    grid-template-columns: 1fr;
+    min-height: 0;
+  }
+  .fa-img-wrap { min-height: 240px; }
+  .fa-info { padding: 24px 24px 28px; }
+}
+@media (max-width: 600px) {
+  .fa-img-wrap { min-height: 200px; }
+  .fa-info { padding: 18px 18px 22px; }
+  .fa-title { font-size: 18px; }
+  .fa-excerpt { -webkit-line-clamp: 2; }
+}
+
+/* ─── Newsletter (footer) ───────────────────────────────────────── */
+
+/* Form dengan input + tombol dalam satu baris */
+.f-form-group {
+  display: flex;
+  margin: 14px 0 0;
+}
+.f-form-group input[type="email"] {
+  flex: 1;
+  min-width: 0;
+  height: 40px;
+  padding: 0 12px;
+  font: inherit;
+  font-size: 13px;
+  color: #fff;
+  background: #2a2a2a;
+  border: 1px solid #3a3a3a;
+  border-right: 0;
+  outline: none;
+  transition: border-color .15s;
+}
+.f-form-group input[type="email"]:focus {
+  border-color: var(--blue);
+}
+.f-form-group input[type="email"].f-input-error {
+  border-color: #e74c3c;
+}
+.f-form-group button {
+  height: 40px;
+  padding: 0 16px;
+  font: inherit;
+  font-size: 12px;
+  font-weight: 700;
+  color: #fff;
+  background: var(--blue);
+  border: 0;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: filter .15s;
+}
+.f-form-group button:hover { filter: brightness(1.15); }
+
+/* Pesan error validasi */
+.nl-error {
+  margin: 6px 0 0;
+  font-size: 12px;
+  color: #ff9999;
+  line-height: 1.4;
+}
+
+/* Alert sukses / info sudah terdaftar */
+.nl-alert {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  margin: 12px 0 8px;
+  padding: 10px 13px;
+  border-radius: 4px;
+  font-size: 12.5px;
+  line-height: 1.5;
+  font-weight: 500;
+}
+.nl-alert svg { flex: 0 0 auto; margin-top: 1px; }
+.nl-success {
+  background: rgba(46, 213, 115, .15);
+  border-left: 3px solid #2ed573;
+  color: #7fff9e;
+}
+.nl-info {
+  background: rgba(77, 178, 236, .15);
+  border-left: 3px solid var(--blue);
+  color: #a8d8f0;
+}
