@@ -11,19 +11,26 @@ class CategorySeeder extends Seeder
     public function run(): void
     {
         $categories = [
-            ['name' => 'Politik',   'description' => 'Berita seputar politik dan pemerintahan'],
-            ['name' => 'Ekonomi',   'description' => 'Berita ekonomi, bisnis, dan keuangan'],
-            ['name' => 'Olahraga',  'description' => 'Berita olahraga terkini'],
-            ['name' => 'Teknologi', 'description' => 'Berita teknologi, inovasi, dan gadget'],
-            ['name' => 'Opini',     'description' => 'Kolom opini dan analisis mendalam'],
+            ['name' => 'Nasional',      'description' => 'Berita nasional dan dalam negeri terkini'],
+            ['name' => 'Internasional', 'description' => 'Berita dunia dan internasional terkini'],
+            ['name' => 'Politik',       'description' => 'Berita seputar politik dan pemerintahan'],
+            ['name' => 'Ekonomi',       'description' => 'Berita ekonomi, bisnis, dan keuangan'],
+            ['name' => 'Teknologi',     'description' => 'Berita teknologi, inovasi, dan gadget'],
+            ['name' => 'Pendidikan',    'description' => 'Berita dunia pendidikan dan akademik'],
+            ['name' => 'Kesehatan',     'description' => 'Berita kesehatan, medis, dan gaya hidup sehat'],
+            ['name' => 'Olahraga',      'description' => 'Berita olahraga terkini'],
+            ['name' => 'Hiburan',       'description' => 'Berita hiburan, film, musik, dan selebriti'],
+            ['name' => 'Gaya Hidup',    'description' => 'Tren gaya hidup, kuliner, dan perjalanan'],
+            ['name' => 'Lingkungan',    'description' => 'Berita lingkungan hidup dan perubahan iklim'],
+            ['name' => 'Opini',         'description' => 'Kolom opini dan analisis mendalam'],
         ];
 
-        foreach ($categories as $category) {
+        foreach ($categories as $data) {
             Category::firstOrCreate(
-                ['slug' => Str::slug($category['name'])],
+                ['slug' => Str::slug($data['name'])],
                 [
-                    'name'        => $category['name'],
-                    'description' => $category['description'],
+                    'name'        => $data['name'],
+                    'description' => $data['description'],
                 ]
             );
         }

@@ -339,9 +339,10 @@
       </section>
       @endif
 
-      {{-- ===== BERITA PER KATEGORI ===== --}}
+      {{-- ===== BERITA PER KATEGORI (grid 2 kolom, semua 12 kategori) ===== --}}
       @if(isset($beritaPerKategori) && $beritaPerKategori->isNotEmpty())
-        @foreach($beritaPerKategori as $katGroup)
+        {{-- Group pertama: 2 kategori besar (satu berita besar + 3 kecil) --}}
+        @foreach($beritaPerKategori->take(2) as $katGroup)
           @if($katGroup['items']->isNotEmpty())
           <section class="block" style="--accent: {{ $katGroup['color'] }}">
             <div class="block-head" style="border-bottom: 2px solid {{ $katGroup['color'] }}">
@@ -352,7 +353,6 @@
               </a>
             </div>
             <div class="kat-row">
-              {{-- Artikel besar (kiri) --}}
               @php $katBig = $katGroup['items']->first(); $katBigImg = $katBig->image ? (\Illuminate\Support\Str::startsWith($katBig->image, ['http://', 'https://']) ? $katBig->image : asset('storage/' . $katBig->image)) : $placeholder; @endphp
               <article class="kat-big">
                 <a href="{{ route('articles.show', $katBig->slug) }}" class="card-thumb g0"
@@ -364,26 +364,19 @@
                 </h3>
                 <div class="card-meta">
                   <b>{{ optional($katBig->user)->name ?? 'Admin' }}</b>
-                  <span>–</span>
-                  <span>{{ $katBig->created_at->translatedFormat('j M Y') }}</span>
+                  <span>–</span><span>{{ $katBig->created_at->translatedFormat('j M Y') }}</span>
                   <span>👁 {{ number_format($katBig->views, 0, ',', '.') }}</span>
                 </div>
                 <p class="excerpt">{{ \Illuminate\Support\Str::limit(strip_tags($katBig->content), 120) }}</p>
               </article>
-
-              {{-- Daftar artikel kecil (kanan) --}}
               <div class="kat-list">
                 @foreach($katGroup['items']->skip(1) as $katItem)
                   @php $katImg = $katItem->image ? (\Illuminate\Support\Str::startsWith($katItem->image, ['http://', 'https://']) ? $katItem->image : asset('storage/' . $katItem->image)) : $placeholder; @endphp
                   <a href="{{ route('articles.show', $katItem->slug) }}" class="list-item">
-                    <span class="list-thumb g{{ $loop->index % 5 }}"
-                          style="background-image: url('{{ $katImg }}')"></span>
+                    <span class="list-thumb g{{ $loop->index % 5 }}" style="background-image: url('{{ $katImg }}')"></span>
                     <div>
                       <h4 class="list-title">{{ \Illuminate\Support\Str::limit($katItem->title, 65) }}</h4>
-                      <span class="card-meta">
-                        {{ $katItem->created_at->translatedFormat('j M Y') }}
-                        · 👁 {{ number_format($katItem->views, 0, ',', '.') }}
-                      </span>
+                      <span class="card-meta">{{ $katItem->created_at->translatedFormat('j M Y') }} · 👁 {{ number_format($katItem->views, 0, ',', '.') }}</span>
                     </div>
                   </a>
                 @endforeach
@@ -392,6 +385,35 @@
           </section>
           @endif
         @endforeach
+
+        {{-- Sisa kategori: tampil dalam grid 2 kolom mini agar tidak terlalu panjang --}}
+        @php $sisaKat = $beritaPerKategori->skip(2)->values(); @endphp
+        @if($sisaKat->isNotEmpty())
+        <div class="kat-section-grid">
+          @foreach($sisaKat as $katGroup)
+            @if($katGroup['items']->isNotEmpty())
+            <div class="kat-section-block">
+              <div class="block-head" style="border-bottom: 2px solid {{ $katGroup['color'] }}; margin-bottom:12px">
+                <span class="block-title" style="background: {{ $katGroup['color'] }}; font-size:11px">{{ $katGroup['name'] }}</span>
+                <a href="{{ route('categories.show', $katGroup['slug']) }}" style="font-size:11px;color:{{ $katGroup['color'] }};font-weight:700">Selengkapnya →</a>
+              </div>
+              <div class="kat-mini-list">
+                @foreach($katGroup['items']->take(3) as $km)
+                  @php $kmImg = $km->image ? (\Illuminate\Support\Str::startsWith($km->image, ['http://', 'https://']) ? $km->image : asset('storage/' . $km->image)) : $placeholder; @endphp
+                  <a href="{{ route('articles.show', $km->slug) }}" class="kat-mini-item">
+                    <span class="kat-mini-thumb" style="background-image: url('{{ $kmImg }}')" aria-hidden="true"></span>
+                    <div class="kat-mini-info">
+                      <span class="kat-mini-title">{{ \Illuminate\Support\Str::limit($km->title, 70) }}</span>
+                      <span class="kat-mini-meta">{{ $km->created_at->translatedFormat('j M Y') }}</span>
+                    </div>
+                  </a>
+                @endforeach
+              </div>
+            </div>
+            @endif
+          @endforeach
+        </div>
+        @endif
       @endif
 
       {{-- ===== PAGINATION ===== --}}

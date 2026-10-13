@@ -102,10 +102,27 @@
       <ul class="menu" id="main-menu">
         <li><a href="{{ route('articles.index') }}"
                class="{{ request()->routeIs('articles.index') ? 'active' : '' }}">Berita</a></li>
-        @foreach(config('categories') as $slug => $cat)
+        {{-- Kategori utama tampil langsung (8 pertama) --}}
+        @php $catArray = array_slice(config('categories'), 0, 8, true); @endphp
+        @foreach($catArray as $slug => $cat)
           <li><a href="{{ route('categories.show', $slug) }}"
                  class="{{ request()->is('kategori/' . $slug) ? 'active' : '' }}">{{ $cat['name'] }}</a></li>
         @endforeach
+        {{-- Sisa kategori dalam dropdown "Lainnya" --}}
+        @php $moreArray = array_slice(config('categories'), 8, null, true); @endphp
+        @if(count($moreArray) > 0)
+          <li class="menu-more">
+            <button class="menu-more-btn" id="menu-more-btn" aria-expanded="false" aria-haspopup="true">
+              Lainnya <span class="menu-more-arrow">▾</span>
+            </button>
+            <ul class="menu-dropdown" id="menu-dropdown" role="menu">
+              @foreach($moreArray as $slug => $cat)
+                <li role="none"><a href="{{ route('categories.show', $slug) }}" role="menuitem"
+                   class="{{ request()->is('kategori/' . $slug) ? 'active' : '' }}">{{ $cat['name'] }}</a></li>
+              @endforeach
+            </ul>
+          </li>
+        @endif
       </ul>
     </div>
   </nav>
@@ -115,15 +132,6 @@
 
 {{-- ===== FOOTER ===== --}}
 <footer class="site-footer">
-  <div class="sponsor-strip">
-    <div class="container">
-      <span class="sponsor-label">Didukung oleh</span>
-      <div class="sponsor-logos">
-        <span>SPONSOR 1</span><span>SPONSOR 2</span>
-        <span>SPONSOR 3</span><span>SPONSOR 4</span><span>SPONSOR 5</span>
-      </div>
-    </div>
-  </div>
 
   <div class="footer-main">
     <div class="container footer-grid">
@@ -272,6 +280,21 @@
 (function() {
   const nl = document.querySelector('.nl-alert');
   if (nl) nl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+})();
+
+// ── Dropdown "Lainnya" ────────────────────────────────────────
+(function() {
+  const btn  = document.getElementById('menu-more-btn');
+  const menu = document.getElementById('menu-dropdown');
+  if (!btn || !menu) return;
+  function close() { menu.classList.remove('open'); btn.setAttribute('aria-expanded','false'); }
+  function open()  { menu.classList.add('open');    btn.setAttribute('aria-expanded','true'); }
+  btn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    menu.classList.contains('open') ? close() : open();
+  });
+  document.addEventListener('click', () => close());
+  document.addEventListener('keydown', e => { if(e.key==='Escape') close(); });
 })();
 </script>
 @stack('scripts')
