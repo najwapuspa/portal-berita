@@ -22,4 +22,9 @@ class Article extends Model
     {
         return $this->hasMany(Comment::class);
     }
+
+    public function bookmarks()
+    {
+        return $this->hasMany(\App\Models\Bookmark::class);
+    }
 }

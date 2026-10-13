@@ -4,6 +4,7 @@ use App\Http\Controllers\ArticleController;
 use App\Http\Controllers\AdminUserController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\CategoryController;
+use App\Http\Controllers\CommentController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\NewsletterController;
 use App\Http\Controllers\ProfilController;
@@ -38,11 +39,18 @@ Route::middleware('auth')->group(function () {
     Route::patch('/profil/nama',     [ProfilController::class, 'nama'])->name('profil.nama');
     Route::put('/profil/password',   [ProfilController::class, 'password'])->name('profil.password');
 
+    // Komentar — user login bisa kirim, admin bisa hapus
+    Route::post('/berita/{slug}/komentar', [CommentController::class, 'store'])->name('comments.store');
+    Route::delete('/komentar/{comment}',   [CommentController::class, 'destroy'])->name('comments.destroy');
+
     // ── Admin only ───────────────────────────────────────────────────────────
     Route::middleware('admin')->prefix('admin')->name('admin.')->group(function () {
 
         // Dashboard
         Route::get('/dashboard', [DashboardController::class, 'admin'])->name('dashboard');
+
+        // Kelola Komentar
+        Route::get('/komentar', [CommentController::class, 'adminIndex'])->name('comments.index');
 
         // Kelola Berita
         Route::get('/berita',              [ArticleController::class, 'adminIndex'])->name('articles.index');

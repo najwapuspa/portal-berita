@@ -546,3 +546,365 @@ mark { background: #fff5a0; padding: 0 2px; }
   border-left: 3px solid var(--blue);
   color: #a8d8f0;
 }
+
+/* ─── Form komentar & daftar komentar ──────────────────────────── */
+
+/* Alert sukses setelah kirim komentar */
+.comment-alert {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 14px;
+  border-radius: 4px;
+  font-size: 13px;
+  font-weight: 500;
+  margin-bottom: 20px;
+}
+.comment-alert-ok {
+  background: #f0fdf4;
+  border-left: 3px solid #22c55e;
+  color: #15803d;
+}
+
+/* Form komentar */
+.comment-form {
+  background: #f9f9f9;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  padding: 18px 20px;
+  margin-bottom: 28px;
+}
+.cf-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+.cf-avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: var(--blue);
+  color: #fff;
+  display: grid;
+  place-items: center;
+  font-size: 15px;
+  font-weight: 700;
+  flex: 0 0 auto;
+}
+.cf-name {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--ink);
+}
+.cf-textarea {
+  width: 100%;
+  padding: 12px 14px;
+  font: inherit;
+  font-size: 14px;
+  line-height: 1.6;
+  color: var(--ink);
+  background: #fff;
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  resize: vertical;
+  min-height: 100px;
+  outline: none;
+  transition: border-color .15s, box-shadow .15s;
+  box-sizing: border-box;
+}
+.cf-textarea:focus {
+  border-color: var(--blue);
+  box-shadow: 0 0 0 3px rgba(77, 178, 236, .15);
+}
+.cf-textarea.cf-error {
+  border-color: #e74c3c;
+}
+.cf-error-msg {
+  font-size: 12px;
+  color: #e74c3c;
+  margin: 5px 0 0;
+}
+.cf-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 10px;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.cf-hint {
+  font-size: 12px;
+  color: #aaa;
+}
+.cf-submit {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 10px 22px;
+  background: var(--ink);
+  color: #fff;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 700;
+  border: 0;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background .15s;
+}
+.cf-submit:hover { background: var(--blue); }
+.cf-submit:active { transform: translateY(1px); }
+
+/* Prompt login untuk komentar */
+.comment-login-prompt {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 18px;
+  background: #f5f8fb;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  font-size: 14px;
+  color: #555;
+  margin-bottom: 28px;
+}
+.comment-login-prompt a {
+  color: var(--blue);
+  font-weight: 700;
+  text-decoration: underline;
+}
+
+/* Daftar komentar */
+.comments-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+.comment-item {
+  display: flex;
+  gap: 14px;
+  padding: 18px 0;
+  border-bottom: 1px solid var(--line);
+}
+.comment-item:last-child { border-bottom: 0; }
+.comment-avatar {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  background: #e5e5e5;
+  display: grid;
+  place-items: center;
+  font-size: 14px;
+  font-weight: 700;
+  color: #555;
+  flex: 0 0 auto;
+}
+.comment-body { flex: 1; min-width: 0; }
+.comment-meta {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-bottom: 6px;
+}
+.comment-meta strong { font-size: 14px; color: var(--ink); }
+.comment-meta time   { font-size: 12px; color: #aaa; }
+.comment-body p      { margin: 0; font-size: 14px; line-height: 1.65; color: #444; word-break: break-word; }
+
+/* Tombol hapus komentar (admin) */
+.comment-delete-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 10px;
+  background: none;
+  border: 1px solid #fca5a5;
+  border-radius: 4px;
+  font: inherit;
+  font-size: 11px;
+  font-weight: 600;
+  color: #dc2626;
+  cursor: pointer;
+  transition: background .12s;
+}
+.comment-delete-btn:hover {
+  background: #fef2f2;
+}
+
+/* Responsif komentar */
+@media (max-width: 600px) {
+  .comment-form { padding: 14px 14px; }
+  .cf-footer { flex-direction: column; align-items: flex-end; }
+  .comment-item { gap: 10px; }
+}
+
+/* ─── Navigasi prev / next artikel ────────────────────────────── */
+.article-nav {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  margin: 36px 0;
+  padding: 20px 0;
+  border-top: 2px solid var(--line);
+  border-bottom: 2px solid var(--line);
+}
+.an-prev { text-align: left; }
+.an-next { text-align: right; }
+.an-link {
+  display: inline-flex;
+  flex-direction: column;
+  gap: 5px;
+  max-width: 100%;
+  text-decoration: none;
+}
+.an-link-right { align-items: flex-end; }
+.an-dir {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .06em;
+  color: #888;
+}
+.an-title {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--ink);
+  line-height: 1.4;
+  transition: color .15s;
+}
+.an-link:hover .an-title { color: var(--blue); }
+@media (max-width: 600px) {
+  .article-nav { grid-template-columns: 1fr; }
+  .an-next { text-align: left; }
+  .an-link-right { align-items: flex-start; }
+}
+
+/* ─── Pagination homepage ──────────────────────────────────────── */
+.homepage-pager {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin: 36px 0 20px;
+  padding-top: 24px;
+  border-top: 1px solid var(--line);
+}
+.hp-btn {
+  display: inline-flex;
+  align-items: center;
+  padding: 8px 18px;
+  font-size: 13px;
+  font-weight: 700;
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  color: var(--ink);
+  text-decoration: none;
+  transition: background .15s, border-color .15s;
+}
+.hp-btn:hover   { background: var(--blue); border-color: var(--blue); color: #fff; }
+.hp-btn-off     { color: #bbb; cursor: default; }
+.hp-pages       { display: flex; gap: 4px; flex-wrap: wrap; }
+.hp-page {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px; height: 36px;
+  font-size: 13px;
+  font-weight: 600;
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  text-decoration: none;
+  color: var(--ink);
+  transition: background .15s;
+}
+.hp-page:hover       { background: #f3f4f6; }
+.hp-page-active      { background: var(--ink); color: #fff; border-color: var(--ink); cursor: default; }
+
+/* ─── Image mode tabs (form admin) ────────────────────────────── */
+.img-mode-tabs {
+  display: flex;
+  gap: 0;
+  margin-bottom: 2px;
+  border-bottom: 2px solid var(--line);
+}
+.img-mode-tab {
+  padding: 8px 20px;
+  font: 600 13px Roboto, sans-serif;
+  background: none;
+  border: none;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -2px;
+  cursor: pointer;
+  color: var(--muted);
+  transition: color .15s;
+}
+.img-mode-tab.on  { color: var(--ink); border-bottom-color: var(--brand); }
+.img-mode-tab:hover { color: var(--ink); }
+.form-hint { font-size: 12px; color: var(--muted); margin: 4px 0 0; }
+
+/* ─── Perbaikan relatif gambar thumbnail dashboard user ────────── */
+.nc-img { background-size: cover; background-position: center; }
+
+/* ─── Pilihan Editor ────────────────────────────────────────────── */
+.editor-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px 24px;
+}
+.eg-card {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+.eg-img {
+  position: relative;
+  display: block;
+  aspect-ratio: 16 / 10;
+  background-size: cover;
+  background-position: center;
+  overflow: hidden;
+  transition: opacity .15s;
+}
+.eg-img:hover { opacity: .9; }
+.eg-img .tag { position: absolute; left: 0; bottom: 0; }
+.eg-body { padding: 10px 0 0; }
+.eg-title {
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 1.35;
+  margin: 0 0 6px;
+}
+.eg-title a:hover { color: var(--blue); }
+.eg-meta {
+  font-size: 11px;
+  color: var(--muted);
+  display: flex;
+  gap: 8px;
+}
+
+/* ─── Berita per kategori ───────────────────────────────────────── */
+.kat-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+}
+.kat-big { display: flex; flex-direction: column; gap: 0; }
+.kat-big .card-thumb { aspect-ratio: 16 / 10; }
+.kat-list {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+/* Responsif section baru */
+@media (max-width: 900px) {
+  .editor-grid { grid-template-columns: 1fr 1fr; }
+  .kat-row { grid-template-columns: 1fr; }
+}
+@media (max-width: 600px) {
+  .editor-grid { grid-template-columns: 1fr; }
+}

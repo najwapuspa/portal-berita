@@ -1,31 +1,36 @@
 @extends('layouts.app')
 
 @section('title', 'News X Paper – the art of publishing')
+@section('description', 'Kabar terkini seputar politik, ekonomi, olahraga, teknologi, dan opini dari News X Paper.')
 
 @section('content')
 @php
+  // Helper: normalkan URL gambar artikel
+  $imgUrl = function(?string $img): ?string {
+    if (!$img || trim($img) === '') return null;
+    if (\Illuminate\Support\Str::startsWith($img, ['http://', 'https://'])) return $img;
+    return asset('storage/' . $img);
+  };
+
+  $placeholder = asset('images/placeholder-news.svg');
+
   $str = fn($v) => is_string($v) && $v !== '' ? $v : null;
 
-  $items = collect($articles)->values()->map(function ($a) use ($str) {
+  // $articles adalah LengthAwarePaginator dari controller
+  $items = collect($articles->items())->values()->map(function ($a) use ($str, $imgUrl) {
     $cat     = $str(data_get($a, 'category.name')) ?? 'Berita';
     $catSlug = $str(data_get($a, 'category.slug')) ?? '';
     $catColor= config('categories.' . $catSlug . '.color', '#222');
-    $author  = $str(data_get($a, 'user.name')) ?? 'Admin';
-    $img     = $str(data_get($a, 'image'));
-    // Normalkan path gambar: jika bukan URL absolut, jadikan storage URL
-    if ($img && ! \Illuminate\Support\Str::startsWith($img, ['http://', 'https://', '/'])) {
-      $img = asset('storage/' . $img);
-    }
-    $slug = data_get($a, 'slug');
-    $body = $str(data_get($a, 'content')) ?? '';
+    $body    = $str(data_get($a, 'content')) ?? '';
+    $slug    = data_get($a, 'slug');
     return [
       'title'    => $str(data_get($a, 'title')) ?? 'Tanpa judul',
       'url'      => $slug ? route('articles.show', $slug) : '#',
       'cat'      => $cat,
       'catSlug'  => $catSlug,
       'catColor' => $catColor,
-      'author'   => $author,
-      'img'      => $img,
+      'author'   => $str(data_get($a, 'user.name')) ?? 'Admin',
+      'img'      => $imgUrl(data_get($a, 'image')),
       'date'     => \Illuminate\Support\Carbon::parse(data_get($a, 'created_at') ?? now())->locale('id')->translatedFormat('j M Y'),
       'comments' => (int) data_get($a, 'comments_count', 0),
       'views'    => (int) data_get($a, 'views', 0),
@@ -33,82 +38,64 @@
     ];
   });
 
-  // Fallback jika kosong
+  // Fallback jika tidak ada artikel sama sekali
   if ($items->isEmpty()) {
     $items = collect([
-      ['title' => 'Harga Bahan Pokok Stabil Menjelang Akhir Bulan',   'cat' => 'Ekonomi',   'catSlug' => 'ekonomi'],
-      ['title' => 'Startup Lokal Raih Pendanaan Baru',                 'cat' => 'Teknologi', 'catSlug' => 'teknologi'],
-      ['title' => 'Pemerintah Umumkan Kebijakan Baru Tahun Ini',       'cat' => 'Politik',   'catSlug' => 'politik'],
-      ['title' => 'Perkembangan Kecerdasan Buatan Semakin Pesat',      'cat' => 'Teknologi', 'catSlug' => 'teknologi'],
-      ['title' => 'Tim Nasional Bersiap Hadapi Laga Kualifikasi',      'cat' => 'Olahraga',  'catSlug' => 'olahraga'],
-      ['title' => 'Opini: Membaca Berita Tanpa Terjebak Judul',        'cat' => 'Opini',     'catSlug' => 'opini'],
+      ['title'=>'Harga Bahan Pokok Stabil','cat'=>'Ekonomi','catSlug'=>'ekonomi'],
+      ['title'=>'Startup Lokal Raih Pendanaan','cat'=>'Teknologi','catSlug'=>'teknologi'],
+      ['title'=>'Pemerintah Umumkan Kebijakan','cat'=>'Politik','catSlug'=>'politik'],
+      ['title'=>'Perkembangan Kecerdasan Buatan','cat'=>'Teknologi','catSlug'=>'teknologi'],
+      ['title'=>'Tim Nasional Lolos Kualifikasi','cat'=>'Olahraga','catSlug'=>'olahraga'],
+      ['title'=>'Opini: Membaca Berita Kritis','cat'=>'Opini','catSlug'=>'opini'],
     ])->map(fn($s) => $s + [
-      'url' => '#', 'author' => 'Admin', 'img' => null, 'comments' => 0, 'views' => 0,
-      'catColor' => '#222',
-      'date'     => now()->locale('id')->translatedFormat('j M Y'),
-      'excerpt'  => 'Ringkasan berita akan tampil setelah artikel pertama dipublikasikan.',
+      'url'=>'#','author'=>'Admin','img'=>null,'comments'=>0,'views'=>0,
+      'catColor'=>'#222',
+      'date'=>now()->locale('id')->translatedFormat('j M Y'),
+      'excerpt'=>'Ringkasan berita akan tampil setelah artikel pertama dipublikasikan.',
     ]);
   }
 
   $n    = $items->count();
-  $pick = fn($i) => $items[$i % $n];
+  $pick = fn($i) => $items[$i % max($n, 1)];
 
-  // Featured = artikel pertama (terbaru)
-  $featured = $pick(0);
+  $featured     = $pick(0);
+  $popItems     = isset($artikelPopuler) ? $artikelPopuler : collect();
+  $trendingList = isset($trending) ? $trending : collect();
 
-  // Artikel populer dari controller
-  $popItems = isset($artikelPopuler) ? $artikelPopuler : collect();
-
-  // Filter jangan lewatkan (politik + ekonomi, fallback semua)
-  $trenItems = $items->filter(fn($x) => in_array($x['catSlug'], ['politik', 'ekonomi']))->values();
-  if ($trenItems->count() < 4) { $trenItems = $items; }
-  $tN = $trenItems->count();
+  // Filter jangan lewatkan
+  $trenItems = $items->filter(fn($x) => in_array($x['catSlug'], ['politik','ekonomi']))->values();
+  if ($trenItems->count() < 4) $trenItems = $items;
+  $tN = max($trenItems->count(), 1);
   $tp = fn($i) => $trenItems[$i % $tN];
 
   // Filter ekonomi
   $ekoItems = $items->filter(fn($x) => $x['catSlug'] === 'ekonomi')->values();
-  if ($ekoItems->count() < 2) { $ekoItems = $items; }
-  $eN = $ekoItems->count();
+  if ($ekoItems->count() < 2) $ekoItems = $items;
+  $eN = max($ekoItems->count(), 1);
   $ek = fn($i) => $ekoItems[$i % $eN];
-
-  // Trending
-  $trendingList = isset($trending) ? $trending : collect();
 @endphp
 
 <div class="container">
 
-  {{-- ===== FEATURED ARTICLE (artikel paling atas) ===== --}}
+  {{-- ===== FEATURED ARTICLE ===== --}}
   <section class="featured-article" aria-label="Artikel utama">
-    {{-- Gambar featured --}}
     <div class="fa-img-wrap">
-      @if($featured['img'])
-        <img
-          src="{{ $featured['img'] }}"
-          alt="{{ $featured['title'] }}"
-          class="fa-img"
-          loading="eager"
-          onerror="this.closest('.fa-img-wrap').classList.add('fa-img-fallback'); this.style.display='none';"
-        >
-      @endif
-      {{-- Overlay + badge kategori di atas gambar --}}
+      <img src="{{ $featured['img'] ?? $placeholder }}"
+           alt="{{ $featured['title'] }}"
+           class="fa-img"
+           loading="eager"
+           onerror="this.src='{{ $placeholder }}'">
       <div class="fa-img-overlay" aria-hidden="true"></div>
-      <a href="{{ route('categories.show', $featured['catSlug'] ?: 'politik') }}"
-         class="fa-cat-badge"
-         style="background: {{ $featured['catColor'] }}">
+      <a href="{{ $featured['catSlug'] ? route('categories.show', $featured['catSlug']) : '#' }}"
+         class="fa-cat-badge" style="background: {{ $featured['catColor'] }}">
         {{ $featured['cat'] }}
       </a>
     </div>
-
-    {{-- Info artikel featured --}}
     <div class="fa-info">
-      <h1 class="fa-title">
-        <a href="{{ $featured['url'] }}">{{ $featured['title'] }}</a>
-      </h1>
-
+      <h1 class="fa-title"><a href="{{ $featured['url'] }}">{{ $featured['title'] }}</a></h1>
       @if($featured['excerpt'])
         <p class="fa-excerpt">{{ $featured['excerpt'] }}</p>
       @endif
-
       <div class="fa-meta">
         <span class="fa-author">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-8 8-8s8 4 8 8"/></svg>
@@ -125,8 +112,7 @@
           </span>
         @endif
       </div>
-
-      <a href="{{ $featured['url'] }}" class="fa-read-btn" aria-label="Baca selengkapnya: {{ $featured['title'] }}">
+      <a href="{{ $featured['url'] }}" class="fa-read-btn">
         Baca Selengkapnya
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
       </a>
@@ -151,34 +137,21 @@
     </div>
   </div>
 
-  {{-- ===== HERO GRID (4 artikel) ===== --}}
+  {{-- ===== HERO GRID ===== --}}
   <section class="hero" aria-label="Berita utama">
     @foreach([0, 1, 2, 3] as $k)
-      @php $a = $pick($k); @endphp
-      <a href="{{ $a['url'] }}"
-         class="hero-item hero-{{ $k }} g{{ $k % 5 }}"
-         style="{{ $a['img'] ? 'background-image: url(' . $a['img'] . ');' : '' }}"
+      @php $a = $pick($k); $bg = $a['img'] ?? $placeholder; @endphp
+      <a href="{{ $a['url'] }}" class="hero-item hero-{{ $k }} g{{ $k % 5 }}"
+         style="background-image: url('{{ $bg }}')"
          aria-label="{{ $a['title'] }}">
-        {{--
-          Tag <img> disembunyikan — hanya untuk trigger onerror fallback.
-          Gambar ditampilkan via background-image CSS agar object-fit cover bekerja.
-        --}}
-        @if($a['img'])
-          <img src="{{ $a['img'] }}"
-               alt=""
-               loading="{{ $k === 0 ? 'eager' : 'lazy' }}"
-               style="position:absolute;width:0;height:0;opacity:0;pointer-events:none"
-               onerror="this.closest('.hero-item').style.backgroundImage='none'">
-        @endif
+        <img src="{{ $bg }}" alt="" loading="{{ $k === 0 ? 'eager' : 'lazy' }}"
+             style="position:absolute;width:0;height:0;opacity:0;pointer-events:none"
+             onerror="this.closest('.hero-item').style.backgroundImage='url({{ $placeholder }})'">
         <div class="hero-body">
-          <span class="tag" style="{{ $a['catColor'] !== '#222' ? 'background:' . $a['catColor'] : '' }}">
-            {{ $a['cat'] }}
-          </span>
+          <span class="tag" style="{{ $a['catColor'] !== '#222' ? 'background:' . $a['catColor'] : '' }}">{{ $a['cat'] }}</span>
           <h2 class="hero-title">{{ $a['title'] }}</h2>
           @if($k === 0)
-            <div class="hero-meta">
-              <b>{{ $a['author'] }}</b> – {{ $a['date'] }}
-            </div>
+            <div class="hero-meta"><b>{{ $a['author'] }}</b> – {{ $a['date'] }}</div>
           @endif
         </div>
       </a>
@@ -189,7 +162,7 @@
     {{-- ===== KOLOM UTAMA ===== --}}
     <div class="main-col">
 
-      {{-- Jangan Lewatkan dengan tab filter --}}
+      {{-- Jangan Lewatkan --}}
       <section class="block b-yellow">
         <div class="block-head">
           <span class="block-title">Jangan Lewatkan</span>
@@ -200,15 +173,13 @@
           </div>
         </div>
 
-        @php $big = $tp(0); @endphp
+        @php $big = $tp(0); $bigBg = $big['img'] ?? $placeholder; @endphp
 
-        {{-- Tab: Semua --}}
         <div id="jl-semua" class="tab-pane">
           <div class="dm">
             <article>
-              <a href="{{ $big['url'] }}"
-                 class="card-thumb g4"
-                 style="{{ $big['img'] ? 'background-image: url(' . $big['img'] . ');' : '' }}"
+              <a href="{{ $big['url'] }}" class="card-thumb g4"
+                 style="background-image: url('{{ $bigBg }}')"
                  aria-label="{{ $big['title'] }}">
                 <span class="tag">{{ $big['cat'] }}</span>
               </a>
@@ -226,7 +197,7 @@
                 @php $a = $tp($i); @endphp
                 <a href="{{ $a['url'] }}" class="list-item">
                   <span class="list-thumb g{{ $i % 5 }}"
-                    style="{{ $a['img'] ? 'background-image: url(' . $a['img'] . ');' : '' }}"></span>
+                        style="background-image: url('{{ $a['img'] ?? $placeholder }}')"></span>
                   <div>
                     <h4 class="list-title">{{ $a['title'] }}</h4>
                     <span class="card-meta">{{ $a['date'] }}</span>
@@ -237,11 +208,11 @@
           </div>
         </div>
 
-        {{-- Tab: Politik --}}
+        {{-- Tab Politik --}}
         @php
           $polItems = $items->filter(fn($x) => $x['catSlug'] === 'politik')->values();
           if ($polItems->isEmpty()) $polItems = $items;
-          $pN = $polItems->count();
+          $pN = max($polItems->count(), 1);
           $pp = fn($i) => $polItems[$i % $pN];
         @endphp
         <div id="jl-politik" class="tab-pane" style="display:none">
@@ -250,35 +221,29 @@
               @php $a = $pp($i); @endphp
               <a href="{{ $a['url'] }}" class="list-item">
                 <span class="list-thumb g{{ $i % 5 }}"
-                  style="{{ $a['img'] ? 'background-image: url(' . $a['img'] . ');' : '' }}"></span>
-                <div>
-                  <h4 class="list-title">{{ $a['title'] }}</h4>
-                  <span class="card-meta">{{ $a['date'] }}</span>
-                </div>
+                      style="background-image: url('{{ $a['img'] ?? $placeholder }}')"></span>
+                <div><h4 class="list-title">{{ $a['title'] }}</h4><span class="card-meta">{{ $a['date'] }}</span></div>
               </a>
             @endfor
           </div>
         </div>
 
-        {{-- Tab: Ekonomi --}}
+        {{-- Tab Ekonomi --}}
         <div id="jl-ekonomi" class="tab-pane" style="display:none">
           <div class="list">
             @for($i = 0; $i < min(5, $eN); $i++)
               @php $a = $ek($i); @endphp
               <a href="{{ $a['url'] }}" class="list-item">
                 <span class="list-thumb g{{ $i % 5 }}"
-                  style="{{ $a['img'] ? 'background-image: url(' . $a['img'] . ');' : '' }}"></span>
-                <div>
-                  <h4 class="list-title">{{ $a['title'] }}</h4>
-                  <span class="card-meta">{{ $a['date'] }}</span>
-                </div>
+                      style="background-image: url('{{ $a['img'] ?? $placeholder }}')"></span>
+                <div><h4 class="list-title">{{ $a['title'] }}</h4><span class="card-meta">{{ $a['date'] }}</span></div>
               </a>
             @endfor
           </div>
         </div>
       </section>
 
-      {{-- Ekonomi dengan tab --}}
+      {{-- Ekonomi --}}
       <section class="block b-green">
         <div class="block-head">
           <span class="block-title">Ekonomi</span>
@@ -288,22 +253,17 @@
             <span class="tab" data-tab="ek-pasar">Pasar</span>
           </div>
         </div>
-
         <div id="ek-semua" class="tab-pane">
           <div class="split">
             @foreach([0, 1] as $i)
               @php $a = $ek($i); @endphp
               <article>
-                <a href="{{ $a['url'] }}"
-                   class="card-thumb g{{ ($i + 1) % 5 }}"
-                   style="{{ $a['img'] ? 'background-image: url(' . $a['img'] . ');' : '' }}">
+                <a href="{{ $a['url'] }}" class="card-thumb g{{ ($i+1)%5 }}"
+                   style="background-image: url('{{ $a['img'] ?? $placeholder }}')">
                   <span class="tag">{{ $a['cat'] }}</span>
                 </a>
                 <h3 class="card-title"><a href="{{ $a['url'] }}">{{ $a['title'] }}</a></h3>
-                <div class="card-meta">
-                  <b>{{ $a['author'] }}</b><span>–</span><span>{{ $a['date'] }}</span>
-                  <span class="badge-count">{{ $a['comments'] }}</span>
-                </div>
+                <div class="card-meta"><b>{{ $a['author'] }}</b><span>–</span><span>{{ $a['date'] }}</span><span class="badge-count">{{ $a['comments'] }}</span></div>
                 <p class="excerpt">{{ $a['excerpt'] }}</p>
               </article>
             @endforeach
@@ -312,51 +272,162 @@
             @for($i = 2; $i < min(6, $eN); $i++)
               @php $a = $ek($i); @endphp
               <a href="{{ $a['url'] }}" class="list-item">
-                <span class="list-thumb g{{ $i % 5 }}"
-                  style="{{ $a['img'] ? 'background-image: url(' . $a['img'] . ');' : '' }}"></span>
-                <div>
-                  <h4 class="list-title">{{ $a['title'] }}</h4>
-                  <span class="card-meta">{{ $a['date'] }}</span>
-                </div>
+                <span class="list-thumb g{{ $i%5 }}" style="background-image: url('{{ $a['img'] ?? $placeholder }}')"></span>
+                <div><h4 class="list-title">{{ $a['title'] }}</h4><span class="card-meta">{{ $a['date'] }}</span></div>
               </a>
             @endfor
           </div>
         </div>
-
         <div id="ek-bisnis" class="tab-pane" style="display:none">
           @php $a = $ek(0); @endphp
           <div class="list">
             <a href="{{ $a['url'] }}" class="list-item">
-              <span class="list-thumb g1"
-                style="{{ $a['img'] ? 'background-image: url(' . $a['img'] . ');' : '' }}"></span>
-              <div>
-                <h4 class="list-title">{{ $a['title'] }}</h4>
-                <span class="card-meta">{{ $a['date'] }}</span>
-              </div>
+              <span class="list-thumb g1" style="background-image: url('{{ $a['img'] ?? $placeholder }}')"></span>
+              <div><h4 class="list-title">{{ $a['title'] }}</h4><span class="card-meta">{{ $a['date'] }}</span></div>
             </a>
           </div>
         </div>
-
         <div id="ek-pasar" class="tab-pane" style="display:none">
           @php $a = $ek(1 % $eN); @endphp
           <div class="list">
             <a href="{{ $a['url'] }}" class="list-item">
-              <span class="list-thumb g3"
-                style="{{ $a['img'] ? 'background-image: url(' . $a['img'] . ');' : '' }}"></span>
-              <div>
-                <h4 class="list-title">{{ $a['title'] }}</h4>
-                <span class="card-meta">{{ $a['date'] }}</span>
-              </div>
+              <span class="list-thumb g3" style="background-image: url('{{ $a['img'] ?? $placeholder }}')"></span>
+              <div><h4 class="list-title">{{ $a['title'] }}</h4><span class="card-meta">{{ $a['date'] }}</span></div>
             </a>
           </div>
         </div>
       </section>
 
+      {{-- ===== PILIHAN EDITOR ===== --}}
+      @if(isset($pilihanEditor) && $pilihanEditor->isNotEmpty())
+      <section class="block b-dark" style="margin-top:8px">
+        <div class="block-head">
+          <span class="block-title">Pilihan Editor</span>
+          <a href="{{ route('articles.index') }}" style="font-size:12px;color:var(--muted)">Lihat semua</a>
+        </div>
+        <div class="editor-grid">
+          @foreach($pilihanEditor->take(6) as $ep)
+            @php
+              $epImg = $ep->image
+                ? (\Illuminate\Support\Str::startsWith($ep->image, ['http://', 'https://']) ? $ep->image : asset('storage/' . $ep->image))
+                : $placeholder;
+              $epColor = config('categories.' . optional($ep->category)->slug . '.color', '#222');
+            @endphp
+            <article class="eg-card">
+              <a href="{{ route('articles.show', $ep->slug) }}" class="eg-img"
+                 style="background-image: url('{{ $epImg }}')"
+                 aria-label="{{ $ep->title }}">
+                <img src="{{ $epImg }}" alt="" loading="lazy"
+                     style="position:absolute;width:0;height:0;opacity:0"
+                     onerror="this.closest('.eg-img').style.backgroundImage='url({{ $placeholder }})'">
+                <span class="tag" style="{{ $epColor !== '#222' ? 'background:' . $epColor : '' }}">
+                  {{ optional($ep->category)->name ?? 'Berita' }}
+                </span>
+              </a>
+              <div class="eg-body">
+                <h4 class="eg-title">
+                  <a href="{{ route('articles.show', $ep->slug) }}">{{ $ep->title }}</a>
+                </h4>
+                <div class="eg-meta">
+                  <span>{{ $ep->created_at->locale('id')->translatedFormat('j M Y') }}</span>
+                  <span>👁 {{ number_format($ep->views, 0, ',', '.') }}</span>
+                </div>
+              </div>
+            </article>
+          @endforeach
+        </div>
+      </section>
+      @endif
+
+      {{-- ===== BERITA PER KATEGORI ===== --}}
+      @if(isset($beritaPerKategori) && $beritaPerKategori->isNotEmpty())
+        @foreach($beritaPerKategori as $katGroup)
+          @if($katGroup['items']->isNotEmpty())
+          <section class="block" style="--accent: {{ $katGroup['color'] }}">
+            <div class="block-head" style="border-bottom: 2px solid {{ $katGroup['color'] }}">
+              <span class="block-title" style="background: {{ $katGroup['color'] }}">{{ $katGroup['name'] }}</span>
+              <a href="{{ route('categories.show', $katGroup['slug']) }}"
+                 style="font-size:12px;color:{{ $katGroup['color'] }};font-weight:700">
+                Selengkapnya →
+              </a>
+            </div>
+            <div class="kat-row">
+              {{-- Artikel besar (kiri) --}}
+              @php $katBig = $katGroup['items']->first(); $katBigImg = $katBig->image ? (\Illuminate\Support\Str::startsWith($katBig->image, ['http://', 'https://']) ? $katBig->image : asset('storage/' . $katBig->image)) : $placeholder; @endphp
+              <article class="kat-big">
+                <a href="{{ route('articles.show', $katBig->slug) }}" class="card-thumb g0"
+                   style="background-image: url('{{ $katBigImg }}')" aria-label="{{ $katBig->title }}">
+                  <span class="tag" style="background: {{ $katGroup['color'] }}">{{ $katGroup['name'] }}</span>
+                </a>
+                <h3 class="card-title" style="font-size:17px">
+                  <a href="{{ route('articles.show', $katBig->slug) }}">{{ $katBig->title }}</a>
+                </h3>
+                <div class="card-meta">
+                  <b>{{ optional($katBig->user)->name ?? 'Admin' }}</b>
+                  <span>–</span>
+                  <span>{{ $katBig->created_at->translatedFormat('j M Y') }}</span>
+                  <span>👁 {{ number_format($katBig->views, 0, ',', '.') }}</span>
+                </div>
+                <p class="excerpt">{{ \Illuminate\Support\Str::limit(strip_tags($katBig->content), 120) }}</p>
+              </article>
+
+              {{-- Daftar artikel kecil (kanan) --}}
+              <div class="kat-list">
+                @foreach($katGroup['items']->skip(1) as $katItem)
+                  @php $katImg = $katItem->image ? (\Illuminate\Support\Str::startsWith($katItem->image, ['http://', 'https://']) ? $katItem->image : asset('storage/' . $katItem->image)) : $placeholder; @endphp
+                  <a href="{{ route('articles.show', $katItem->slug) }}" class="list-item">
+                    <span class="list-thumb g{{ $loop->index % 5 }}"
+                          style="background-image: url('{{ $katImg }}')"></span>
+                    <div>
+                      <h4 class="list-title">{{ \Illuminate\Support\Str::limit($katItem->title, 65) }}</h4>
+                      <span class="card-meta">
+                        {{ $katItem->created_at->translatedFormat('j M Y') }}
+                        · 👁 {{ number_format($katItem->views, 0, ',', '.') }}
+                      </span>
+                    </div>
+                  </a>
+                @endforeach
+              </div>
+            </div>
+          </section>
+          @endif
+        @endforeach
+      @endif
+
+      {{-- ===== PAGINATION ===== --}}
+      @if($articles->hasPages())
+        <nav class="homepage-pager" aria-label="Navigasi halaman berita">
+          {{-- Prev --}}
+          @if($articles->onFirstPage())
+            <span class="hp-btn hp-btn-off">‹ Sebelumnya</span>
+          @else
+            <a href="{{ $articles->previousPageUrl() }}" class="hp-btn">‹ Sebelumnya</a>
+          @endif
+
+          {{-- Nomor halaman --}}
+          <div class="hp-pages">
+            @foreach($articles->getUrlRange(1, $articles->lastPage()) as $page => $url)
+              @if($page == $articles->currentPage())
+                <span class="hp-page hp-page-active">{{ $page }}</span>
+              @else
+                <a href="{{ $url }}" class="hp-page">{{ $page }}</a>
+              @endif
+            @endforeach
+          </div>
+
+          {{-- Next --}}
+          @if($articles->hasMorePages())
+            <a href="{{ $articles->nextPageUrl() }}" class="hp-btn">Berikutnya ›</a>
+          @else
+            <span class="hp-btn hp-btn-off">Berikutnya ›</span>
+          @endif
+        </nav>
+      @endif
+
     </div>
 
     {{-- ===== SIDEBAR ===== --}}
     <aside>
-      {{-- Tetap terhubung --}}
       <section class="side-block block b-dark" style="margin-bottom:32px">
         <div class="block-head"><span class="block-title">Tetap Terhubung</span></div>
         <div class="social-list">
@@ -366,18 +437,20 @@
         </div>
       </section>
 
-      {{-- Ruang iklan --}}
       <div class="side-block"><div class="ad-box">Ruang Iklan<br>300 × 250</div></div>
 
-      {{-- Terpopuler by views --}}
       <section class="side-block block b-dark" style="margin-top:32px">
         <div class="block-head"><span class="block-title">Terpopuler</span></div>
         <div class="pop-grid">
           @if($popItems->isNotEmpty())
             @foreach($popItems->take(4) as $i => $pop)
+              @php
+                $popImg = $pop->image
+                  ? (\Illuminate\Support\Str::startsWith($pop->image, ['http://', 'https://']) ? $pop->image : asset('storage/' . $pop->image))
+                  : $placeholder;
+              @endphp
               <a href="{{ route('articles.show', $pop->slug) }}" aria-label="{{ $pop->title }}">
-                <span class="pop-thumb g{{ $i % 5 }}"
-                  style="{{ $pop->image ? 'background-image: url(' . $pop->image . ');' : '' }}"></span>
+                <span class="pop-thumb g{{ $i % 5 }}" style="background-image: url('{{ $popImg }}')"></span>
                 <div class="pop-title">{{ \Illuminate\Support\Str::limit($pop->title, 55) }}</div>
               </a>
             @endforeach
@@ -385,8 +458,7 @@
             @foreach([1, 2, 3, 4] as $i)
               @php $a = $pick($i); @endphp
               <a href="{{ $a['url'] }}">
-                <span class="pop-thumb g{{ $i % 5 }}"
-                  style="{{ $a['img'] ? 'background-image: url(' . $a['img'] . ');' : '' }}"></span>
+                <span class="pop-thumb g{{ $i % 5 }}" style="background-image: url('{{ $a['img'] ?? $placeholder }}')"></span>
                 <div class="pop-title">{{ $a['title'] }}</div>
               </a>
             @endforeach
@@ -400,35 +472,26 @@
 
 @push('scripts')
 <script>
-// ── Trending ticker ──────────────────────────────────────────────
 (function() {
   const ticker = document.getElementById('trending-ticker');
   if (!ticker) return;
   const items = ticker.querySelectorAll('.ticker-item');
-  if (items.length === 0) return;
+  if (!items.length) return;
   let idx = 0;
-  function show(i) {
-    items.forEach((el, j) => el.style.display = j === i ? 'block' : 'none');
-  }
+  const show = i => items.forEach((el, j) => el.style.display = j === i ? 'block' : 'none');
   show(0);
   const timer = setInterval(() => { idx = (idx + 1) % items.length; show(idx); }, 4000);
-  document.getElementById('tick-next')?.addEventListener('click', () => {
-    clearInterval(timer); idx = (idx + 1) % items.length; show(idx);
-  });
-  document.getElementById('tick-prev')?.addEventListener('click', () => {
-    clearInterval(timer); idx = (idx - 1 + items.length) % items.length; show(idx);
-  });
+  document.getElementById('tick-next')?.addEventListener('click', () => { clearInterval(timer); idx = (idx+1)%items.length; show(idx); });
+  document.getElementById('tick-prev')?.addEventListener('click', () => { clearInterval(timer); idx = (idx-1+items.length)%items.length; show(idx); });
 })();
 
-// ── Tab filter ───────────────────────────────────────────────────
 document.querySelectorAll('.block-tabs').forEach(tabGroup => {
   tabGroup.querySelectorAll('.tab').forEach(tab => {
     tab.addEventListener('click', () => {
       tabGroup.querySelectorAll('.tab').forEach(t => t.classList.remove('on'));
       tab.classList.add('on');
       const paneId = tab.dataset.tab;
-      const block  = tabGroup.closest('.block');
-      block.querySelectorAll('.tab-pane').forEach(p => {
+      tabGroup.closest('.block').querySelectorAll('.tab-pane').forEach(p => {
         p.style.display = p.id === paneId ? '' : 'none';
       });
     });

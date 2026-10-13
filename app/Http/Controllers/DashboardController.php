@@ -94,12 +94,20 @@ class DashboardController extends Controller
             ->take(5)
             ->get();
 
+        // Daftar komentar milik user ini (terbaru 10)
+        $komentarSaya = Comment::with('article')
+            ->where('user_id', $user->id)
+            ->latest()
+            ->take(10)
+            ->get();
+
         return view('dashboard.user', [
             'user'           => $user,
             'jumlahKomentar' => Comment::where('user_id', $user->id)->count(),
             'artikelTerbaru' => $artikelTerbaru,
             'artikelPopuler' => $artikelPopuler,
             'kategori'       => Category::orderBy('name')->get(),
+            'komentarSaya'   => $komentarSaya,
         ]);
     }
 }

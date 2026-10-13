@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 450" width="800" height="450">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#1a1a2e;stop-opacity:1"/>
+      <stop offset="100%" style="stop-color:#16213e;stop-opacity:1"/>
+    </linearGradient>
+  </defs>
+  <!-- Background -->
+  <rect width="800" height="450" fill="url(#bg)"/>
+  <!-- Grid lines subtle -->
+  <line x1="0" y1="150" x2="800" y2="150" stroke="#ffffff08" stroke-width="1"/>
+  <line x1="0" y1="300" x2="800" y2="300" stroke="#ffffff08" stroke-width="1"/>
+  <line x1="200" y1="0" x2="200" y2="450" stroke="#ffffff08" stroke-width="1"/>
+  <line x1="400" y1="0" x2="400" y2="450" stroke="#ffffff08" stroke-width="1"/>
+  <line x1="600" y1="0" x2="600" y2="450" stroke="#ffffff08" stroke-width="1"/>
+  <!-- Icon gambar di tengah -->
+  <g transform="translate(400,225)">
+    <!-- Frame gambar -->
+    <rect x="-52" y="-40" width="104" height="80" rx="6" fill="none" stroke="#4db2ec" stroke-width="2.5" opacity="0.7"/>
+    <!-- Gunung/landscape icon -->
+    <path d="M-32 24 L-8 -10 L8 8 L18 -4 L40 24 Z" fill="none" stroke="#4db2ec" stroke-width="2" stroke-linejoin="round" opacity="0.7"/>
+    <!-- Matahari -->
+    <circle cx="-20" cy="-18" r="8" fill="none" stroke="#4db2ec" stroke-width="2" opacity="0.7"/>
+    <!-- Teks NEWS X PAPER -->
+    <text y="58" text-anchor="middle" font-family="Roboto,Arial,sans-serif" font-size="13" font-weight="700" fill="#4db2ec" opacity="0.9" letter-spacing="3">NEWS X PAPER</text>
+    <text y="78" text-anchor="middle" font-family="Roboto,Arial,sans-serif" font-size="10" fill="#ffffff50" letter-spacing="1">the art of publishing</text>
+  </g>
+</svg>

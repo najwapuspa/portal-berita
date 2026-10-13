@@ -4,23 +4,35 @@
 @section('hero', isset($article) ? 'Edit Berita' : 'Tambah Berita Baru')
 
 @section('konten')
+@php
+  $existingImg = null;
+  if (isset($article) && $article->image) {
+    $existingImg = \Illuminate\Support\Str::startsWith($article->image, ['http://', 'https://'])
+      ? $article->image
+      : asset('storage/' . $article->image);
+  }
+@endphp
+
 <div class="panel" style="max-width:860px">
+  {{-- enctype multipart untuk upload file --}}
   <form method="POST"
-        action="{{ isset($article) ? route('admin.articles.update', $article) : route('admin.articles.store') }}">
+        action="{{ isset($article) ? route('admin.articles.update', $article) : route('admin.articles.store') }}"
+        enctype="multipart/form-data">
     @csrf
     @if(isset($article)) @method('PUT') @endif
 
+    {{-- Judul --}}
     <div class="form-row">
       <div class="form-col">
         <label for="title">Judul <span class="req">*</span></label>
         <input id="title" name="title" type="text"
                value="{{ old('title', $article->title ?? '') }}"
-               placeholder="Masukkan judul berita…"
-               required autocomplete="off">
+               placeholder="Masukkan judul berita…" required autocomplete="off">
         @error('title')<p class="err">{{ $message }}</p>@enderror
       </div>
     </div>
 
+    {{-- Kategori + Status --}}
     <div class="form-row form-2col">
       <div class="form-col">
         <label for="category_id">Kategori <span class="req">*</span></label>
@@ -44,31 +56,62 @@
       </div>
     </div>
 
+    {{-- Gambar: upload file ATAU URL --}}
     <div class="form-row">
       <div class="form-col">
-        <label for="image">URL Gambar</label>
-        <input id="image" name="image" type="url"
-               value="{{ old('image', $article->image ?? '') }}"
-               placeholder="https://images.unsplash.com/…"
-               oninput="previewImg(this.value)">
-        @error('image')<p class="err">{{ $message }}</p>@enderror
-        <div id="img-preview" style="margin-top:10px">
-          @if(isset($article) && $article->image)
-            <img src="{{ $article->image }}" alt="Preview" id="preview-tag"
-                 style="max-width:100%;height:180px;object-fit:cover;border-radius:4px"
+        <label>Gambar Artikel</label>
+
+        {{-- Tab pilihan --}}
+        <div class="img-mode-tabs">
+          <button type="button" class="img-mode-tab on" id="tab-file" onclick="switchImgMode('file')">
+            Upload File
+          </button>
+          <button type="button" class="img-mode-tab" id="tab-url" onclick="switchImgMode('url')">
+            URL Gambar
+          </button>
+        </div>
+
+        {{-- Mode upload file --}}
+        <div id="img-mode-file">
+          <input id="image_file" name="image_file" type="file"
+                 accept="image/jpeg,image/png,image/webp,image/gif"
+                 onchange="previewUpload(this)"
+                 style="margin-top:8px">
+          <p class="form-hint">JPEG, PNG, WebP, GIF · Maks. 2 MB</p>
+          @error('image_file')<p class="err">{{ $message }}</p>@enderror
+        </div>
+
+        {{-- Mode URL --}}
+        <div id="img-mode-url" style="display:none">
+          <input id="image_url" name="image_url" type="url"
+                 value="{{ old('image_url', isset($article) && \Illuminate\Support\Str::startsWith($article->image ?? '', ['http://', 'https://']) ? $article->image : '') }}"
+                 placeholder="https://images.unsplash.com/…"
+                 oninput="previewUrl(this.value)"
+                 style="margin-top:8px">
+          @error('image_url')<p class="err">{{ $message }}</p>@enderror
+        </div>
+
+        {{-- Preview --}}
+        <div style="margin-top:12px" id="img-preview-wrap">
+          @if($existingImg)
+            <p style="font-size:12px;color:var(--muted);margin:0 0 6px">Gambar saat ini:</p>
+            <img src="{{ $existingImg }}" alt="Gambar saat ini" id="preview-tag"
+                 style="max-width:100%;height:180px;object-fit:cover;border-radius:4px;display:block"
                  onerror="this.style.display='none'">
           @else
-            <img id="preview-tag" alt="Preview" style="display:none;max-width:100%;height:180px;object-fit:cover;border-radius:4px">
+            <img id="preview-tag" alt="Preview gambar"
+                 style="display:none;max-width:100%;height:180px;object-fit:cover;border-radius:4px">
           @endif
         </div>
       </div>
     </div>
 
+    {{-- Isi Berita --}}
     <div class="form-row">
       <div class="form-col">
         <label for="content">Isi Berita <span class="req">*</span></label>
         <textarea id="content" name="content" rows="14"
-                  placeholder="Tulis isi artikel di sini… (HTML diperbolehkan)"
+                  placeholder="Tulis isi artikel… (HTML diperbolehkan)"
                   required>{{ old('content', $article->content ?? '') }}</textarea>
         @error('content')<p class="err">{{ $message }}</p>@enderror
       </div>
@@ -86,10 +129,35 @@
 
 @push('scripts')
 <script>
-function previewImg(url) {
+function switchImgMode(mode) {
+  document.getElementById('img-mode-file').style.display = mode === 'file' ? '' : 'none';
+  document.getElementById('img-mode-url').style.display  = mode === 'url'  ? '' : 'none';
+  document.getElementById('tab-file').classList.toggle('on', mode === 'file');
+  document.getElementById('tab-url').classList.toggle('on',  mode === 'url');
+
+  // Kosongkan input yang tidak dipakai agar tidak konflik
+  if (mode === 'file') document.getElementById('image_url').value = '';
+  else                 document.getElementById('image_file').value = '';
+}
+
+function previewUpload(input) {
+  const img = document.getElementById('preview-tag');
+  if (input.files && input.files[0]) {
+    const reader = new FileReader();
+    reader.onload = e => { img.src = e.target.result; img.style.display = 'block'; };
+    reader.readAsDataURL(input.files[0]);
+  }
+}
+
+function previewUrl(url) {
   const img = document.getElementById('preview-tag');
   if (url) { img.src = url; img.style.display = 'block'; }
-  else      { img.style.display = 'none'; }
+  else      img.style.display = 'none';
 }
+
+// Jika artikel sudah punya URL gambar, aktifkan tab URL secara otomatis
+@if(isset($article) && $article->image && \Illuminate\Support\Str::startsWith($article->image, ['http://', 'https://']))
+  switchImgMode('url');
+@endif
 </script>
 @endpush

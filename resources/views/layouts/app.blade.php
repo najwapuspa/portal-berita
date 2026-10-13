@@ -3,8 +3,36 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  {{-- SEO dasar --}}
   <title>@yield('title', 'News X Paper – the art of publishing')</title>
   <meta name="description" content="@yield('description', 'News X Paper — kabar terkini seputar politik, ekonomi, olahraga, teknologi, dan opini.')">
+  <meta name="robots" content="index, follow">
+  <link rel="canonical" href="{{ url()->current() }}">
+
+  {{-- Open Graph default (bisa di-override tiap halaman) --}}
+  <meta property="og:site_name" content="News X Paper">
+  <meta property="og:type"      content="website">
+  <meta property="og:url"       content="{{ url()->current() }}">
+  <meta property="og:title"     content="@yield('og_title', 'News X Paper – the art of publishing')">
+  <meta property="og:description" content="@yield('og_description', 'Kabar terkini seputar politik, ekonomi, olahraga, teknologi, dan opini.')">
+  @hasSection('og_image')
+    <meta property="og:image"   content="@yield('og_image')">
+    <meta property="og:image:width"  content="1200">
+    <meta property="og:image:height" content="630">
+  @endif
+
+  {{-- Twitter Card --}}
+  <meta name="twitter:card"        content="summary_large_image">
+  <meta name="twitter:title"       content="@yield('og_title', 'News X Paper')">
+  <meta name="twitter:description" content="@yield('og_description', 'Kabar terkini seputar politik, ekonomi, olahraga, dan teknologi.')">
+  @hasSection('og_image')
+    <meta name="twitter:image"  content="@yield('og_image')">
+  @endif
+
+  {{-- Slot tambahan meta dari halaman anak --}}
+  @stack('meta')
+
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700;900&display=swap" rel="stylesheet">
@@ -17,7 +45,6 @@
 <header class="site-header">
   <div class="container hd-row">
 
-    {{-- Logo --}}
     <a href="{{ route('articles.index') }}" class="logo" aria-label="News X Paper Beranda">
       <span class="logo-word">News<span class="x">X</span>Paper</span>
       <span class="logo-tag">the art of publishing</span>
@@ -65,27 +92,19 @@
       @endauth
     </div>
 
-    {{-- Hamburger mobile --}}
     <button class="hamburger-nav" id="hamburger-nav" aria-label="Buka navigasi" aria-expanded="false">
       <span></span><span></span><span></span>
     </button>
   </div>
 
-  {{-- Navigasi kategori --}}
   <nav class="mainnav" id="mainnav" aria-label="Kategori berita">
     <div class="container">
       <ul class="menu" id="main-menu">
-        <li>
-          <a href="{{ route('articles.index') }}"
-             class="{{ request()->routeIs('articles.index') ? 'active' : '' }}">Berita</a>
-        </li>
+        <li><a href="{{ route('articles.index') }}"
+               class="{{ request()->routeIs('articles.index') ? 'active' : '' }}">Berita</a></li>
         @foreach(config('categories') as $slug => $cat)
-          <li>
-            <a href="{{ route('categories.show', $slug) }}"
-               class="{{ request()->is('kategori/' . $slug) ? 'active' : '' }}">
-              {{ $cat['name'] }}
-            </a>
-          </li>
+          <li><a href="{{ route('categories.show', $slug) }}"
+                 class="{{ request()->is('kategori/' . $slug) ? 'active' : '' }}">{{ $cat['name'] }}</a></li>
         @endforeach
       </ul>
     </div>
@@ -147,7 +166,6 @@
         <h4 class="f-title">Buletin</h4>
         <p>Dapatkan ringkasan berita pilihan langsung di email kamu.</p>
 
-        {{-- Flash messages newsletter --}}
         @if(session('newsletter_success'))
           <div class="nl-alert nl-success" role="alert">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>
@@ -160,15 +178,11 @@
           </div>
         @endif
 
-        {{-- Form newsletter — real Laravel POST --}}
         <form class="f-form" method="POST" action="{{ route('newsletter.subscribe') }}" novalidate>
           @csrf
           <div class="f-form-group">
-            <input type="email"
-                   name="email"
-                   value="{{ old('email') }}"
-                   placeholder="Alamat email"
-                   aria-label="Alamat email untuk newsletter"
+            <input type="email" name="email" value="{{ old('email') }}"
+                   placeholder="Alamat email" aria-label="Alamat email untuk newsletter"
                    autocomplete="email"
                    class="{{ $errors->has('email') ? 'f-input-error' : '' }}">
             <button type="submit">Langganan</button>
@@ -201,7 +215,6 @@
 </footer>
 
 <script>
-// ── Hamburger mobile nav ─────────────────────────────────────────
 (function() {
   const btn  = document.getElementById('hamburger-nav');
   const menu = document.getElementById('main-menu');
@@ -212,22 +225,17 @@
   });
 })();
 
-// ── Autosuggest ──────────────────────────────────────────────────
 (function() {
-  const input  = document.getElementById('search-input');
-  const list   = document.getElementById('suggest-list');
+  const input = document.getElementById('search-input');
+  const list  = document.getElementById('suggest-list');
   if (!input || !list) return;
-
   let timer, controller;
-
-  function hide() { list.hidden = true; input.setAttribute('aria-expanded', 'false'); }
-  function show() { list.hidden = false; input.setAttribute('aria-expanded', 'true'); }
-
+  const hide = () => { list.hidden = true; input.setAttribute('aria-expanded','false'); };
+  const show = () => { list.hidden = false; input.setAttribute('aria-expanded','true'); };
   input.addEventListener('input', () => {
     clearTimeout(timer);
     const q = input.value.trim();
     if (q.length < 2) { hide(); return; }
-
     timer = setTimeout(async () => {
       if (controller) controller.abort();
       controller = new AbortController();
@@ -239,56 +247,31 @@
         data.forEach(item => {
           const li = document.createElement('li');
           li.setAttribute('role', 'option');
-          li.innerHTML = `<span class="sg-type sg-${item.type}">${item.type === 'kategori' ? '📂' : '📰'}</span>
-                          <span class="sg-label">${item.label}</span>`;
+          li.innerHTML = `<span class="sg-type">${item.type === 'kategori' ? '📂' : '📰'}</span><span class="sg-label">${item.label}</span>`;
           li.addEventListener('click', () => {
-            if (item.type === 'kategori') {
-              window.location.href = '/kategori/' + item.slug;
-            } else {
-              window.location.href = '/berita/' + item.slug;
-            }
+            window.location.href = item.type === 'kategori' ? '/kategori/' + item.slug : '/berita/' + item.slug;
           });
           list.appendChild(li);
         });
         show();
-      } catch(e) { /* aborted or network error */ }
+      } catch(e) {}
     }, 300);
   });
-
-  // Keyboard navigation
   input.addEventListener('keydown', e => {
     const items  = list.querySelectorAll('li');
     const active = list.querySelector('li.sg-active');
     let idx = Array.from(items).indexOf(active);
-    if (e.key === 'ArrowDown') {
-      e.preventDefault();
-      if (active) active.classList.remove('sg-active');
-      idx = (idx + 1) % items.length;
-      items[idx]?.classList.add('sg-active');
-    } else if (e.key === 'ArrowUp') {
-      e.preventDefault();
-      if (active) active.classList.remove('sg-active');
-      idx = (idx - 1 + items.length) % items.length;
-      items[idx]?.classList.add('sg-active');
-    } else if (e.key === 'Enter' && active) {
-      e.preventDefault();
-      active.click();
-    } else if (e.key === 'Escape') {
-      hide();
-    }
+    if (e.key === 'ArrowDown')  { e.preventDefault(); if(active) active.classList.remove('sg-active'); items[(idx+1)%items.length]?.classList.add('sg-active'); }
+    else if (e.key === 'ArrowUp')   { e.preventDefault(); if(active) active.classList.remove('sg-active'); items[(idx-1+items.length)%items.length]?.classList.add('sg-active'); }
+    else if (e.key === 'Enter' && active) { e.preventDefault(); active.click(); }
+    else if (e.key === 'Escape') hide();
   });
-
-  document.addEventListener('click', e => {
-    if (!e.target.closest('.search-wrap')) hide();
-  });
+  document.addEventListener('click', e => { if(!e.target.closest('.search-wrap')) hide(); });
 })();
 
-// ── Auto-scroll ke pesan newsletter jika ada ────────────────────
 (function() {
   const nl = document.querySelector('.nl-alert');
-  if (nl) {
-    nl.scrollIntoView({ behavior: 'smooth', block: 'center' });
-  }
+  if (nl) nl.scrollIntoView({ behavior: 'smooth', block: 'center' });
 })();
 </script>
 @stack('scripts')
