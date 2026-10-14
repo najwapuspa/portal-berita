@@ -25,3 +25,7 @@ _ide_helper.php
 Homestead.json
 Homestead.yaml
 Thumbs.db
+
+# Backup database — jangan commit ke repository
+*.sql
+backup_*.sql

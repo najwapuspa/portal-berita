@@ -1012,3 +1012,136 @@ mark { background: #fff5a0; padding: 0 2px; }
 @media (max-width: 900px) {
   .kat-section-grid { grid-template-columns: 1fr; gap: 20px; }
 }
+
+/* ─── Metadata artikel: sumber berita RSS ──────────────────────── */
+.article-source-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 3px 10px;
+  background: #f0f7ff;
+  border: 1px solid #4db2ec;
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 700;
+  color: #1e8fd6;
+  margin-left: 8px;
+  vertical-align: middle;
+  text-transform: uppercase;
+  letter-spacing: .04em;
+}
+
+/* ─── Kartu berita terkini RSS (section Berita Terkini) ─────────── */
+.rss-feed-section {
+  margin: 40px 0;
+}
+.rss-feed-title {
+  font-size: 13px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .06em;
+  color: #888;
+  margin: 0 0 16px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--line);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.rss-feed-title::before {
+  content: "";
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #1e8fd6;
+  animation: rss-pulse 2s infinite;
+}
+@keyframes rss-pulse {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: .3; }
+}
+
+/* Lista berita RSS — layout horizontal scroll pada mobile */
+.rss-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+.rss-item {
+  display: grid;
+  grid-template-columns: 80px 1fr;
+  gap: 12px;
+  padding: 14px 0;
+  border-bottom: 1px solid var(--line);
+  align-items: start;
+  text-decoration: none;
+  color: inherit;
+  transition: background .12s;
+}
+.rss-item:last-child { border-bottom: 0; }
+.rss-item:hover .rss-item-title { color: var(--blue); }
+
+.rss-thumb {
+  display: block;
+  aspect-ratio: 4/3;
+  background-size: cover;
+  background-position: center;
+  background-color: #e5e5e5;
+  border-radius: 3px;
+  flex: 0 0 auto;
+}
+.rss-item-body { display: flex; flex-direction: column; gap: 4px; }
+.rss-item-meta {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+  font-size: 11px;
+  color: var(--muted);
+}
+.rss-source-tag {
+  background: #e8f4fc;
+  color: #1e8fd6;
+  font-weight: 700;
+  padding: 1px 6px;
+  border-radius: 3px;
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: .04em;
+}
+.rss-item-title {
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1.4;
+  margin: 0;
+  color: var(--ink);
+}
+.rss-read-time {
+  font-size: 11px;
+  color: var(--muted);
+  display: flex;
+  align-items: center;
+  gap: 3px;
+}
+
+/* ─── Meta kartu berita standard (waktu baca + tanggal) ─────────── */
+.card-readtime {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 11px;
+  color: var(--muted);
+  font-weight: 500;
+}
+.card-pub-date {
+  font-size: 11px;
+  color: var(--muted);
+}
+.card-source {
+  font-size: 10px;
+  font-weight: 700;
+  color: #1e8fd6;
+  text-transform: uppercase;
+  letter-spacing: .04em;
+}

@@ -308,10 +308,10 @@
         <div class="editor-grid">
           @foreach($pilihanEditor->take(6) as $ep)
             @php
-              $epImg = $ep->image
-                ? (\Illuminate\Support\Str::startsWith($ep->image, ['http://', 'https://']) ? $ep->image : asset('storage/' . $ep->image))
-                : $placeholder;
+              $epImg = $ep->image_url ?? $placeholder;
               $epColor = config('categories.' . optional($ep->category)->slug . '.color', '#222');
+              $epReadTime = $ep->read_time_minutes;
+              $epDate = $ep->display_date;
             @endphp
             <article class="eg-card">
               <a href="{{ route('articles.show', $ep->slug) }}" class="eg-img"
@@ -329,11 +329,66 @@
                   <a href="{{ route('articles.show', $ep->slug) }}">{{ $ep->title }}</a>
                 </h4>
                 <div class="eg-meta">
-                  <span>{{ $ep->created_at->locale('id')->translatedFormat('j M Y') }}</span>
-                  <span>👁 {{ number_format($ep->views, 0, ',', '.') }}</span>
+                  <span class="card-pub-date">{{ $epDate->setTimezone('Asia/Jakarta')->translatedFormat('j M Y') }}</span>
+                  <span class="card-readtime">
+                    <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                    {{ $epReadTime }} menit
+                  </span>
+                  @if($ep->source_name)
+                    <span class="card-source">{{ $ep->source_name }}</span>
+                  @endif
                 </div>
               </div>
             </article>
+          @endforeach
+        </div>
+      </section>
+      @endif
+
+      {{-- ===== BERITA TERKINI (dari RSS) ===== --}}
+      @if(isset($beritaRss) && $beritaRss->isNotEmpty())
+      <section class="block" style="margin-top:8px">
+        <div class="block-head" style="border-bottom: 2px solid #1e8fd6">
+          <span class="block-title" style="background:#1e8fd6">Berita Terkini</span>
+          <span style="font-size:12px;color:#888;display:flex;align-items:center;gap:5px">
+            <span style="width:7px;height:7px;border-radius:50%;background:#e74c3c;animation:rss-pulse 2s infinite;display:inline-block"></span>
+            Diperbarui otomatis
+          </span>
+        </div>
+        <div class="rss-list">
+          @foreach($beritaRss as $rItem)
+            @php
+              $rImg   = $rItem->image_url ?? $placeholder;
+              $rDate  = $rItem->display_date->setTimezone('Asia/Jakarta');
+              $rRead  = $rItem->read_time_minutes;
+              $rColor = config('categories.' . optional($rItem->category)->slug . '.color', '#1e8fd6');
+            @endphp
+            <a href="{{ route('articles.show', $rItem->slug) }}" class="rss-item">
+              <span class="rss-thumb"
+                    style="background-image: url('{{ $rImg }}')"
+                    role="img" aria-label="{{ $rItem->title }}"></span>
+              <div class="rss-item-body">
+                <div class="rss-item-meta">
+                  @if($rItem->source_name)
+                    <span class="rss-source-tag">{{ $rItem->source_name }}</span>
+                  @endif
+                  <span style="background:{{ $rColor }};color:#fff;padding:1px 6px;border-radius:3px;font-size:10px;font-weight:700">
+                    {{ optional($rItem->category)->name ?? 'Berita' }}
+                  </span>
+                  <span>{{ $rDate->translatedFormat('j M Y, H:i') }} WIB</span>
+                  <span class="rss-read-time">
+                    <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                    {{ $rRead }} menit
+                  </span>
+                </div>
+                <h4 class="rss-item-title">{{ $rItem->title }}</h4>
+                @if($rItem->excerpt)
+                  <p style="margin:3px 0 0;font-size:12px;color:#888;line-height:1.45">
+                    {{ \Illuminate\Support\Str::limit($rItem->excerpt, 100) }}
+                  </p>
+                @endif
+              </div>
+            </a>
           @endforeach
         </div>
       </section>

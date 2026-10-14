@@ -17,7 +17,7 @@ class ArticleController extends Controller
     // PUBLIK
     // ─────────────────────────────────────────────────────────────
 
-    /** Beranda — daftar artikel published dengan pagination */
+    /** Beranda — daftar artikel published dengan pagination + variasi per sesi */
     public function index(Request $request)
     {
         $categories = Category::withCount([
@@ -33,19 +33,39 @@ class ArticleController extends Controller
         }
 
         // Paginate — 12 per halaman untuk homepage
-        $articles = $query->latest()->paginate(12)->withQueryString();
+        $articles = $query->latest('published_at')->latest()->paginate(12)->withQueryString();
 
+        // Terpopuler — 6 artikel dengan views tertinggi
         $artikelPopuler = Article::where('status', 'published')
             ->orderByDesc('views')
             ->take(6)
             ->get();
 
+        // Trending — 8 terpopuler sebagai ticker
         $trending = Article::where('status', 'published')
             ->orderByDesc('views')
             ->take(8)
             ->get();
 
+        // ── Variasi random per sesi ────────────────────────────────
+        // Seed berubah tiap sesi baru tapi konsisten dalam satu sesi.
+        // Dipakai untuk bagian "Pilihan Editor" agar variatif tiap refresh.
+        $sessionSeed = session()->get('homepage_seed');
+        if (! $sessionSeed) {
+            $sessionSeed = rand(1, 9999);
+            session()->put('homepage_seed', $sessionSeed);
+        }
+
+        // Pilihan editor: ambil artikel acak berdasarkan seed sesi
+        // Gunakan RAND(seed) agar berbeda tiap sesi tapi konsisten dalam sesi
+        $pilihanEditor = Article::with('category')
+            ->where('status', 'published')
+            ->orderByRaw('RAND(' . (int) $sessionSeed . ')')
+            ->take(6)
+            ->get();
+
         // Berita terbaru per kategori untuk section tambahan
+        // Menggunakan published_at jika tersedia, fallback ke created_at
         $beritaPerKategori = collect(config('categories'))->map(function ($cfg, $slug) {
             return [
                 'slug'   => $slug,
@@ -54,22 +74,24 @@ class ArticleController extends Controller
                 'items'  => Article::with(['category', 'user'])
                     ->whereHas('category', fn ($q) => $q->where('slug', $slug))
                     ->where('status', 'published')
+                    ->orderByDesc('published_at')
                     ->latest()
                     ->take(4)
                     ->get(),
             ];
         })->filter(fn ($item) => $item['items']->count() > 0)->values();
 
-        // Pilihan editor (top 6 views dari artikel yang bukan 4 teratas)
-        $pilihanEditor = Article::with('category')
+        // Berita terkini dari RSS (source_name tidak null) — 8 terbaru
+        $beritaRss = Article::with('category')
             ->where('status', 'published')
-            ->orderByDesc('views')
-            ->skip(4)->take(6)
+            ->whereNotNull('source_name')
+            ->orderByDesc('published_at')
+            ->take(8)
             ->get();
 
         return view('articles.index', compact(
             'articles', 'categories', 'artikelPopuler', 'trending',
-            'beritaPerKategori', 'pilihanEditor'
+            'beritaPerKategori', 'pilihanEditor', 'beritaRss'
         ));
     }
 
@@ -104,15 +126,18 @@ class ArticleController extends Controller
             ->take(4)
             ->get();
 
-        // ── Navigasi prev/next (berdasarkan waktu publish) ──
+        // ── Navigasi prev/next berdasarkan published_at (fallback created_at) ──
+        $dateCol     = 'created_at';
+        $articleDate = $article->created_at;
+
         $prevArticle = Article::where('status', 'published')
-            ->where('created_at', '<', $article->created_at)
-            ->orderByDesc('created_at')
+            ->where($dateCol, '<', $articleDate)
+            ->orderByDesc($dateCol)
             ->first(['id', 'title', 'slug']);
 
         $nextArticle = Article::where('status', 'published')
-            ->where('created_at', '>', $article->created_at)
-            ->orderBy('created_at')
+            ->where($dateCol, '>', $articleDate)
+            ->orderBy($dateCol)
             ->first(['id', 'title', 'slug']);
 
         return view('articles.show', compact(
