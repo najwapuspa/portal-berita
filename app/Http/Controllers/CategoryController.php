@@ -11,54 +11,49 @@ class CategoryController extends Controller
 {
     public function show(Request $request, string $slug)
     {
-        // Validasi slug ada di config
-        $categories = config('categories');
-        abort_unless(isset($categories[$slug]), 404);
-        $cfg = $categories[$slug];
-
-        // Cari kategori di database
+        // 1. Cari kategori di database — sumber kebenaran utama
         $category = Category::where('slug', $slug)->first();
 
-        // Kalau kategori belum ada di DB, tampilkan halaman kosong
+        // Jika tidak ada di DB → 404
         if (! $category) {
-            $paginator = new \Illuminate\Pagination\LengthAwarePaginator(
-                collect(), 0, 9, 1, ['path' => $request->url()]
-            );
-            return view('articles.category', [
-                'slug'      => $slug,
-                'cfg'       => $cfg,
-                'paginator' => $paginator,
-                'total'     => 0,
-            ]);
+            abort(404, 'Kategori tidak ditemukan.');
         }
 
-        // Query artikel langsung dari DB — efisien, support pagination
+        // 2. Ambil config tampilan (warna, nama display) — boleh fallback jika tidak ada di config
+        $configCategories = config('categories', []);
+        $cfg = $configCategories[$slug] ?? [
+            'name'  => $category->name,
+            'color' => '#1e8fd6',
+        ];
+
+        // 3. Query artikel — langsung ke DB, efisien, support pagination
         $paginator = Article::with(['category', 'user'])
             ->withCount('comments')
             ->where('category_id', $category->id)
             ->where('status', 'published')
+            ->latest('published_at')
             ->latest()
             ->paginate(9)
-            ->through(function ($a) {
-                $img = $a->image;
-                if ($img && ! Str::startsWith($img, ['http://', 'https://', '/'])) {
-                    $img = asset('storage/' . $img);
-                }
+            ->through(function ($a) use ($slug) {
                 return [
-                    'title'    => $a->title,
-                    'url'      => route('articles.show', $a->slug),
-                    'cat'      => optional($a->category)->name ?? 'Berita',
-                    'author'   => optional($a->user)->name ?? 'Admin',
-                    'img'      => $img,
-                    'date'     => $a->created_at->locale('id')->translatedFormat('j M Y'),
-                    'comments' => $a->comments_count,
-                    'excerpt'  => Str::limit(strip_tags($a->content), 130),
+                    'title'     => $a->title,
+                    'url'       => route('articles.show', $a->slug),
+                    'cat'       => optional($a->category)->name ?? 'Berita',
+                    'catSlug'   => optional($a->category)->slug ?? $slug,
+                    'author'    => optional($a->user)->name ?? 'Admin',
+                    'img'       => $a->image_url,          // accessor — selalu ada fallback
+                    'date'      => $a->display_date->setTimezone('Asia/Jakarta')->locale('id')->translatedFormat('j M Y'),
+                    'comments'  => $a->comments_count,
+                    'excerpt'   => $a->excerpt_short,
+                    'read_time' => $a->read_time_minutes,
+                    'source'    => $a->source_name,
                 ];
             });
 
         return view('articles.category', [
             'slug'      => $slug,
             'cfg'       => $cfg,
+            'category'  => $category,
             'paginator' => $paginator,
             'total'     => $paginator->total(),
         ]);

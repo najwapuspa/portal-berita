@@ -3,374 +3,691 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Masuk Admin – News X Paper</title>
+  <title>Masuk – News X Paper</title>
+  <meta name="robots" content="noindex">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Raleway:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   <style>
-    :root {
-      --card-top: rgba(96, 34, 160, .80);
-      --card-bottom: rgba(58, 14, 118, .90);
-      --field: rgba(255, 255, 255, .22);
-      --field-focus: rgba(255, 255, 255, .34);
-      --text: #fff;
-      --text-soft: rgba(255, 255, 255, .78);
-      --error-bg: rgba(255, 255, 255, .16);
-      --error-text: #ffd3dc;
-      --font: "Raleway", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
-    }
-
-    * { box-sizing: border-box; }
-    html, body { margin: 0; height: 100%; }
-
+    /* ─── Reset & Base ─────────────────────────────────────────── */
+    *, *::before, *::after { box-sizing: border-box; }
+    html, body { margin: 0; min-height: 100%; }
     body {
-      font-family: var(--font);
-      color: var(--text);
+      font-family: 'Inter', system-ui, -apple-system, sans-serif;
+      background: #0b1220;
+      color: #1a202c;
       -webkit-font-smoothing: antialiased;
     }
 
-    /* ---------- Latar belakang ---------- */
-    .stage {
+    /* ─── Layout split ─────────────────────────────────────────── */
+    .login-page {
+      display: grid;
+      grid-template-columns: 1fr 480px;
+      min-height: 100vh;
+    }
+
+    /* ─── Panel kiri: identitas editorial ─────────────────────── */
+    .editorial-panel {
       position: relative;
-      min-height: 100vh;
       overflow: hidden;
-      background: linear-gradient(180deg, #4318b5 0%, #6a24bd 38%, #a63fbc 66%, #d95fb2 86%, #c247a6 100%);
+      background: #0b1220;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      padding: 48px 56px;
     }
-    .sky {
-      position: absolute; inset: 0;
+    .editorial-panel::before {
+      content: '';
+      position: absolute;
+      inset: 0;
       background:
-        radial-gradient(ellipse 30% 20% at 16% 58%, rgba(255, 160, 220, .55), transparent 70%),
-        radial-gradient(ellipse 34% 24% at 44% 30%, rgba(255, 255, 255, .20), transparent 70%),
-        radial-gradient(ellipse 26% 18% at 30% 72%, rgba(255, 140, 210, .50), transparent 70%),
-        radial-gradient(ellipse 22% 30% at 88% 46%, rgba(255, 150, 230, .32), transparent 70%),
-        radial-gradient(ellipse 40% 16% at 62% 14%, rgba(180, 140, 255, .28), transparent 70%);
-      filter: blur(6px);
-    }
-    .scene {
-      position: absolute; left: 0; bottom: 0;
-      width: 100%; height: 44%;
-      pointer-events: none;
-    }
-    .moon {
-      position: absolute; left: 15%; bottom: 13%;
-      width: 34px; height: 34px; border-radius: 50%;
-      background: rgba(255, 220, 245, .75);
-      box-shadow: 0 0 24px rgba(255, 200, 240, .6);
-    }
-
-    /* Dekorasi: cincin dan segitiga */
-    .ring {
-      position: absolute; border-radius: 50%;
-      border: 7px solid rgba(190, 88, 224, .75);
-      pointer-events: none;
-    }
-    .ring.r1 { width: 64px;  height: 64px;  top: -14px; left: 22px; }
-    .ring.r2 { width: 92px;  height: 92px;  right: 4%;  bottom: 34%; border-color: rgba(176, 60, 140, .6); }
-    .ring.r3 { width: 92px;  height: 92px;  right: calc(4% + 40px); bottom: 30%; border-color: rgba(176, 60, 140, .6); }
-    .ring.r4 { width: 130px; height: 130px; left: 17%; bottom: -26px; border-color: rgba(200, 80, 220, .7); }
-    .tri {
-      position: absolute; top: 0; left: 50%;
-      width: 0; height: 0;
-      border-top: 24px solid transparent;
-      border-bottom: 24px solid transparent;
-      border-left: 40px solid rgba(255, 255, 255, .22);
+        radial-gradient(ellipse 70% 60% at 20% 110%, rgba(99,102,241,.18) 0%, transparent 70%),
+        radial-gradient(ellipse 50% 40% at 90% -10%, rgba(139,92,246,.12) 0%, transparent 60%);
       pointer-events: none;
     }
 
-    /* ---------- Isi halaman ---------- */
-    .wrap {
-      position: relative; z-index: 2;
-      min-height: 100vh;
-      max-width: 1100px;
-      margin: 0 auto;
-      padding: 40px 28px;
+    /* Garis vertikal dekoratif kanan */
+    .editorial-panel::after {
+      content: '';
+      position: absolute;
+      top: 0; right: 0;
+      width: 1px;
+      height: 100%;
+      background: linear-gradient(to bottom, transparent, rgba(99,102,241,.4) 30%, rgba(99,102,241,.4) 70%, transparent);
+    }
+
+    /* Wordmark logo */
+    .ep-logo {
+      position: relative;
+      z-index: 1;
+    }
+    .ep-logo-wordmark {
+      display: flex;
+      align-items: baseline;
+      gap: 2px;
+      line-height: 1;
+    }
+    .ep-logo-text {
+      font-family: 'Playfair Display', Georgia, serif;
+      font-size: 28px;
+      font-weight: 800;
+      color: #ffffff;
+      letter-spacing: -.5px;
+    }
+    .ep-logo-text .x-accent {
+      color: #818cf8;
+    }
+    .ep-logo-tagline {
+      font-size: 11px;
+      font-weight: 500;
+      letter-spacing: .18em;
+      text-transform: uppercase;
+      color: rgba(255,255,255,.38);
+      margin-top: 7px;
+      display: block;
+    }
+
+    /* Konten tengah editorial */
+    .ep-body {
+      position: relative;
+      z-index: 1;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      padding: 60px 0;
+    }
+    .ep-overline {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: .2em;
+      text-transform: uppercase;
+      color: #818cf8;
+      margin-bottom: 20px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .ep-overline::before {
+      content: '';
+      display: block;
+      width: 32px;
+      height: 1.5px;
+      background: #818cf8;
+    }
+    .ep-headline {
+      font-family: 'Playfair Display', Georgia, serif;
+      font-size: clamp(32px, 3.6vw, 52px);
+      font-weight: 800;
+      color: #ffffff;
+      line-height: 1.15;
+      letter-spacing: -.5px;
+      margin: 0 0 24px;
+      max-width: 520px;
+    }
+    .ep-headline em {
+      font-style: italic;
+      color: #818cf8;
+    }
+    .ep-desc {
+      font-size: 15px;
+      line-height: 1.7;
+      color: rgba(255,255,255,.5);
+      max-width: 420px;
+      margin: 0 0 48px;
+    }
+
+    /* Statistik kecil */
+    .ep-stats {
+      display: flex;
+      gap: 36px;
+    }
+    .ep-stat-num {
+      font-family: 'Playfair Display', serif;
+      font-size: 28px;
+      font-weight: 700;
+      color: #fff;
+      display: block;
+      line-height: 1;
+      margin-bottom: 4px;
+    }
+    .ep-stat-label {
+      font-size: 11px;
+      color: rgba(255,255,255,.35);
+      text-transform: uppercase;
+      letter-spacing: .1em;
+    }
+
+    /* Bottom editorial panel */
+    .ep-footer {
+      position: relative;
+      z-index: 1;
+    }
+    .ep-footer-links {
+      display: flex;
+      gap: 24px;
+      list-style: none;
+      margin: 0;
+      padding: 0;
+    }
+    .ep-footer-links a {
+      font-size: 12px;
+      color: rgba(255,255,255,.28);
+      text-decoration: none;
+      transition: color .15s;
+    }
+    .ep-footer-links a:hover { color: rgba(255,255,255,.65); }
+
+    /* ─── Panel kanan: form login ──────────────────────────────── */
+    .form-panel {
+      background: #f8f9fc;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      padding: 56px 48px;
+      position: relative;
+    }
+
+    /* Header form */
+    .fp-header {
+      margin-bottom: 36px;
+    }
+    .fp-eyebrow {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: .18em;
+      text-transform: uppercase;
+      color: #6366f1;
+      margin-bottom: 10px;
+    }
+    .fp-title {
+      font-family: 'Playfair Display', Georgia, serif;
+      font-size: 28px;
+      font-weight: 800;
+      color: #0b1220;
+      margin: 0 0 6px;
+      line-height: 1.2;
+    }
+    .fp-subtitle {
+      font-size: 14px;
+      color: #64748b;
+      margin: 0;
+    }
+
+    /* Alert error */
+    .alert-error {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      background: #fef2f2;
+      border: 1px solid #fecaca;
+      border-left: 3px solid #ef4444;
+      border-radius: 8px;
+      padding: 12px 14px;
+      font-size: 13.5px;
+      color: #b91c1c;
+      font-weight: 500;
+      margin-bottom: 24px;
+      line-height: 1.4;
+    }
+    .alert-error svg { flex-shrink: 0; margin-top: 1px; }
+
+    /* Form groups */
+    .form-group {
+      margin-bottom: 20px;
+    }
+    .form-label {
+      display: block;
+      font-size: 13px;
+      font-weight: 600;
+      color: #374151;
+      margin-bottom: 7px;
+      letter-spacing: .01em;
+    }
+    .input-wrap {
+      position: relative;
+    }
+    .input-icon {
+      position: absolute;
+      left: 14px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: #94a3b8;
+      pointer-events: none;
+      transition: color .15s;
+    }
+    .form-input {
+      width: 100%;
+      height: 48px;
+      padding: 0 44px 0 42px;
+      font: inherit;
+      font-size: 14px;
+      font-weight: 500;
+      color: #0b1220;
+      background: #ffffff;
+      border: 1.5px solid #e2e8f0;
+      border-radius: 10px;
+      outline: none;
+      transition: border-color .15s, box-shadow .15s;
+      -webkit-appearance: none;
+    }
+    .form-input::placeholder { color: #a0aec0; font-weight: 400; }
+    .form-input:focus {
+      border-color: #6366f1;
+      box-shadow: 0 0 0 3px rgba(99,102,241,.12);
+    }
+    .form-input:focus ~ .input-icon,
+    .input-wrap:focus-within .input-icon { color: #6366f1; }
+    .form-input.input-error { border-color: #ef4444; }
+    .form-input.input-error:focus { box-shadow: 0 0 0 3px rgba(239,68,68,.12); }
+
+    /* Password toggle button */
+    .pw-toggle {
+      position: absolute;
+      right: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+      background: none;
+      border: 0;
+      cursor: pointer;
+      color: #94a3b8;
+      padding: 6px;
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      transition: color .15s, background .15s;
+    }
+    .pw-toggle:hover { color: #6366f1; background: rgba(99,102,241,.06); }
+    .pw-toggle:focus-visible { outline: 2px solid #6366f1; }
+    #pw-toggle-icon-hide { display: none; }
+
+    /* Field error message */
+    .field-error {
+      display: none;
+      font-size: 12px;
+      color: #ef4444;
+      font-weight: 500;
+      margin-top: 5px;
+    }
+    .has-error .field-error { display: block; }
+    .has-error .form-input { border-color: #ef4444; }
+
+    /* Remember + forgot row */
+    .form-options {
       display: flex;
       align-items: center;
       justify-content: space-between;
-      gap: 40px;
+      margin-bottom: 24px;
     }
-
-    .welcome h1 {
-      margin: 0;
-      font-size: clamp(34px, 5vw, 56px);
-      font-weight: 800;
-      letter-spacing: .12em;
-      line-height: 1.15;
-      text-shadow: 0 4px 24px rgba(50, 10, 100, .35);
-    }
-    .welcome p {
-      margin: 10px 0 0;
-      font-size: clamp(14px, 1.7vw, 18px);
+    .remember-label {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      cursor: pointer;
+      font-size: 13.5px;
       font-weight: 500;
-      letter-spacing: .14em;
-      color: var(--text-soft);
+      color: #4b5563;
+      user-select: none;
     }
-    .brand {
-      display: inline-block;
-      margin-bottom: 22px;
-      font-size: 13px; font-weight: 700; letter-spacing: .2em;
-      text-transform: uppercase;
-      color: rgba(255, 255, 255, .85);
-      text-decoration: none;
-    }
-
-    /* ---------- Kartu login ---------- */
-    .panel {
+    .remember-checkbox {
+      width: 17px;
+      height: 17px;
+      border: 1.5px solid #cbd5e0;
+      border-radius: 5px;
+      appearance: none;
+      -webkit-appearance: none;
+      background: #fff;
+      cursor: pointer;
+      flex-shrink: 0;
+      transition: background .12s, border-color .12s;
       position: relative;
-      overflow: hidden;
-      flex: 0 0 auto;
-      width: 320px;
-      min-height: 420px;
-      padding: 56px 34px 30px;
-      background: linear-gradient(180deg, var(--card-top), var(--card-bottom));
-      -webkit-backdrop-filter: blur(8px);
-      backdrop-filter: blur(8px);
-      box-shadow: 0 24px 60px rgba(30, 0, 70, .5);
     }
-    .pines {
-      position: absolute; left: 0; bottom: 0;
-      width: 100%; height: 190px;
-      opacity: .28;
-      pointer-events: none;
-      -webkit-mask-image: linear-gradient(to top, #000 10%, transparent);
-      mask-image: linear-gradient(to top, #000 10%, transparent);
+    .remember-checkbox:checked {
+      background: #6366f1;
+      border-color: #6366f1;
     }
-    .panel form { position: relative; z-index: 1; }
+    .remember-checkbox:checked::after {
+      content: '';
+      position: absolute;
+      left: 4px; top: 2px;
+      width: 5px; height: 8px;
+      border: 2px solid #fff;
+      border-top: 0; border-left: 0;
+      transform: rotate(40deg);
+    }
+    .remember-checkbox:focus-visible { outline: 2px solid #6366f1; outline-offset: 1px; }
+    .forgot-link {
+      font-size: 13px;
+      font-weight: 600;
+      color: #6366f1;
+      text-decoration: none;
+      transition: color .15s;
+    }
+    .forgot-link:hover { color: #4f46e5; text-decoration: underline; }
 
-    .field { margin-bottom: 16px; }
-    label.lbl {
-      display: block;
-      margin: 0 0 6px 4px;
-      font-size: 13px; font-weight: 700;
-    }
-    .input-wrap { position: relative; }
-    input[type="email"],
-    input[type="password"],
-    input[type="text"] {
+    /* Submit button */
+    .btn-submit {
       width: 100%;
-      height: 40px;
-      padding: 0 18px;
-      font: inherit; font-size: 13.5px; font-weight: 500;
-      color: var(--text);
-      background: var(--field);
-      border: 1px solid transparent;
-      border-radius: 999px;
-      outline: none;
-      transition: background .15s, border-color .15s, box-shadow .15s;
-    }
-    input::placeholder { color: rgba(255, 255, 255, .6); }
-    input:focus {
-      background: var(--field-focus);
-      border-color: rgba(255, 255, 255, .65);
-      box-shadow: 0 0 0 4px rgba(255, 255, 255, .14);
-    }
-    input.invalid { border-color: #ff9db1; }
-    #password { padding-right: 68px; }
-
-    .toggle-pw {
-      position: absolute; top: 50%; right: 8px;
-      transform: translateY(-50%);
-      padding: 5px 10px;
-      font: inherit; font-size: 12px; font-weight: 700;
-      color: rgba(255, 255, 255, .9);
-      background: none; border: 0; border-radius: 999px;
+      height: 50px;
+      font: inherit;
+      font-size: 14px;
+      font-weight: 700;
+      letter-spacing: .04em;
+      color: #ffffff;
+      background: #6366f1;
+      border: 0;
+      border-radius: 10px;
       cursor: pointer;
+      transition: background .15s, transform .05s, box-shadow .15s;
+      box-shadow: 0 2px 12px rgba(99,102,241,.3);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
     }
-    .toggle-pw:hover { background: rgba(255, 255, 255, .14); }
-    .toggle-pw:focus-visible { outline: 2px solid #fff; }
+    .btn-submit:hover:not(:disabled) {
+      background: #4f46e5;
+      box-shadow: 0 4px 18px rgba(99,102,241,.4);
+    }
+    .btn-submit:active:not(:disabled) { transform: translateY(1px); }
+    .btn-submit:focus-visible { outline: 3px solid rgba(99,102,241,.5); outline-offset: 2px; }
+    .btn-submit:disabled { opacity: .7; cursor: not-allowed; }
 
-    .error-msg {
+    /* Loading spinner inside button */
+    .btn-spinner {
       display: none;
-      margin: 6px 0 0 6px;
-      font-size: 12px; color: var(--error-text);
+      width: 18px; height: 18px;
+      border: 2px solid rgba(255,255,255,.35);
+      border-top-color: #fff;
+      border-radius: 50%;
+      animation: spin .65s linear infinite;
     }
-    .field.has-error .error-msg { display: block; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .btn-submit.loading .btn-text  { display: none; }
+    .btn-submit.loading .btn-spinner { display: block; }
 
-    .form-status {
-      margin-bottom: 16px;
-      padding: 10px 14px;
-      font-size: 12.5px; line-height: 1.45;
-      color: var(--error-text);
-      background: var(--error-bg);
-      border-radius: 14px;
+    /* Divider */
+    .form-divider {
+      text-align: center;
+      margin: 22px 0;
+      position: relative;
+      font-size: 12px;
+      color: #a0aec0;
+      font-weight: 500;
     }
-
-    .remember {
-      display: flex; align-items: center; gap: 9px;
-      margin: 4px 0 18px 6px;
-      font-size: 12px; font-weight: 500;
-      cursor: pointer; width: fit-content;
+    .form-divider::before, .form-divider::after {
+      content: '';
+      position: absolute;
+      top: 50%;
+      width: calc(50% - 32px);
+      height: 1px;
+      background: #e2e8f0;
     }
-    .remember input { width: 15px; height: 15px; margin: 0; accent-color: #b85fe0; }
+    .form-divider::before { left: 0; }
+    .form-divider::after  { right: 0; }
 
-    .btn {
-      width: 100%; height: 40px;
-      font: inherit; font-size: 12px; font-weight: 800; letter-spacing: .08em;
-      text-transform: uppercase;
-      color: #fff;
-      background: linear-gradient(90deg, #9548d8, #55179c);
-      border: 0; border-radius: 999px;
-      box-shadow: 0 8px 18px rgba(30, 0, 80, .35);
-      cursor: pointer;
-      transition: filter .15s, transform .05s;
+    /* Register link */
+    .form-register {
+      text-align: center;
+      font-size: 13.5px;
+      color: #64748b;
     }
-    .btn:hover { filter: brightness(1.12); }
-    .btn:active { transform: translateY(1px); }
-    .btn:focus-visible { outline: 3px solid rgba(255, 255, 255, .6); outline-offset: 2px; }
-    .btn[disabled] { opacity: .7; cursor: progress; }
+    .form-register a {
+      color: #6366f1;
+      font-weight: 700;
+      text-decoration: none;
+      transition: color .15s;
+    }
+    .form-register a:hover { color: #4f46e5; text-decoration: underline; }
 
-    .links { margin-top: 44px; font-size: 12px; }
-    .links p { margin: 0 0 8px; color: rgba(255, 255, 255, .85); }
-    .links a { color: #fff; font-weight: 700; text-decoration: underline; }
-    .links .forgot { color: rgba(255, 255, 255, .55); font-weight: 500; text-decoration: none; }
-    .links .forgot:hover { color: #fff; }
-
-    /* ---------- Responsif ---------- */
-    @media (max-width: 820px) {
-      .wrap {
-        flex-direction: column; justify-content: center;
-        align-items: stretch; gap: 28px;
-        padding: 36px 20px 48px;
+    /* ─── Responsif ─────────────────────────────────────────────── */
+    @media (max-width: 960px) {
+      .login-page {
+        grid-template-columns: 1fr;
+        grid-template-rows: auto 1fr;
       }
-      .welcome { text-align: center; }
-      .panel { width: 100%; max-width: 360px; margin: 0 auto; min-height: 0; padding-top: 40px; }
-      .ring.r2, .ring.r3 { display: none; }
-      .scene { height: 30%; }
+      .editorial-panel {
+        padding: 32px 28px;
+        min-height: auto;
+      }
+      .editorial-panel::after { display: none; }
+      .ep-body { padding: 32px 0; }
+      .ep-headline { font-size: 28px; }
+      .ep-desc, .ep-stats { display: none; }
+      .form-panel { padding: 40px 28px 56px; }
     }
-
+    @media (max-width: 480px) {
+      .form-panel { padding: 32px 20px 48px; }
+      .editorial-panel { padding: 24px 20px; }
+      .ep-headline { font-size: 24px; }
+    }
     @media (prefers-reduced-motion: reduce) {
-      * { transition: none !important; }
+      *, *::before, *::after { animation: none !important; transition: none !important; }
     }
   </style>
 </head>
 <body>
+<div class="login-page">
 
-  <div class="stage">
-    <div class="sky"></div>
+  {{-- ===== PANEL KIRI: EDITORIAL ===== --}}
+  <div class="editorial-panel" aria-hidden="false">
 
-    <span class="ring r1"></span>
-    <span class="ring r2"></span>
-    <span class="ring r3"></span>
-    <span class="ring r4"></span>
-    <span class="tri"></span>
+    {{-- Logo --}}
+    <div class="ep-logo">
+      <a href="{{ route('articles.index') }}" style="text-decoration:none">
+        <div class="ep-logo-wordmark">
+          <span class="ep-logo-text">News<span class="x-accent">X</span>Paper</span>
+        </div>
+        <span class="ep-logo-tagline">The Art of Publishing</span>
+      </a>
+    </div>
 
-    {{-- Siluet gurun --}}
-    <svg class="scene" viewBox="0 0 1440 360" preserveAspectRatio="xMidYMax slice" aria-hidden="true">
-      <defs>
-        <linearGradient id="gnd" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0" stop-color="#e460ae"/>
-          <stop offset="1" stop-color="#b53ea4"/>
-        </linearGradient>
-      </defs>
-      <path d="M0 262 Q 260 236 560 258 T 1100 250 T 1440 256 V360 H0Z" fill="#c9509f" opacity=".55"/>
-      <path d="M0 292 Q 320 262 700 286 T 1440 276 V360 H0Z" fill="url(#gnd)"/>
-      <path d="M0 292 L10 256 L22 244 L52 240 L74 250 L82 292Z" fill="#a137a2"/>
-      <path d="M318 296 L330 214 L346 204 L392 206 L410 216 L424 296Z" fill="#a137a2"/>
-      <path d="M318 296 L330 214 L346 204 L362 206 L362 296Z" fill="#8a2c98"/>
-      <path d="M470 296 L482 248 L500 240 L534 242 L548 254 L556 296Z" fill="#a137a2"/>
-      <path d="M470 296 L482 248 L500 240 L512 242 L512 296Z" fill="#8a2c98"/>
-      <path d="M1320 292 L1332 244 L1352 236 L1388 240 L1404 252 L1412 292Z" fill="#a137a2"/>
-    </svg>
-    <span class="moon"></span>
+    {{-- Konten editorial --}}
+    <div class="ep-body">
+      <p class="ep-overline">Portal Berita Premium</p>
+      <h1 class="ep-headline">Kabar Terkini, <em>Terpercaya,</em> Setiap Saat.</h1>
+      <p class="ep-desc">
+        Akses ribuan artikel dari berbagai kategori — nasional, internasional,
+        ekonomi, teknologi, olahraga, dan lebih banyak lagi.
+        Selalu terdepan dalam informasi.
+      </p>
+      <div class="ep-stats">
+        <div>
+          <span class="ep-stat-num">12+</span>
+          <span class="ep-stat-label">Kategori</span>
+        </div>
+        <div>
+          <span class="ep-stat-num">455+</span>
+          <span class="ep-stat-label">Artikel</span>
+        </div>
+        <div>
+          <span class="ep-stat-num">3</span>
+          <span class="ep-stat-label">Sumber Media</span>
+        </div>
+      </div>
+    </div>
 
-    <main class="wrap">
-      <section class="welcome">
-        <a class="brand" href="{{ route('articles.index') }}">News X Paper</a>
-        <h1>Selamat Datang</h1>
-        <p>Masuk untuk mengelola berita…</p>
-      </section>
-
-      <section class="panel">
-        {{-- Siluet pohon pinus --}}
-        <svg class="pines" viewBox="0 0 320 190" preserveAspectRatio="none" aria-hidden="true">
-          <defs>
-            <pattern id="pine" width="46" height="90" patternUnits="userSpaceOnUse">
-              <path d="M23 4 L38 40 L30 40 L42 68 L4 68 L16 40 L8 40Z" fill="#1c0644"/>
-            </pattern>
-          </defs>
-          <rect width="100%" height="100%" fill="url(#pine)"/>
-        </svg>
-
-        <form id="login-form" method="POST" action="{{ route('login') }}" novalidate>
-          @csrf
-
-          @if ($errors->any())
-            <div class="form-status" role="alert">{{ $errors->first() }}</div>
-          @endif
-
-          <div class="field" id="field-email">
-            <label class="lbl" for="email">Email</label>
-            <input type="email" id="email" name="email" value="{{ old('email') }}" placeholder="admin@contoh.com" autocomplete="email" required>
-            <p class="error-msg">Masukkan alamat email yang valid.</p>
-          </div>
-
-          <div class="field" id="field-password">
-            <label class="lbl" for="password">Kata sandi</label>
-            <div class="input-wrap">
-              <input type="password" id="password" name="password" autocomplete="current-password" required>
-              <button type="button" class="toggle-pw" id="toggle-pw" aria-label="Tampilkan kata sandi">Lihat</button>
-            </div>
-            <p class="error-msg">Kata sandi wajib diisi.</p>
-          </div>
-
-          <label class="remember">
-            <input type="checkbox" name="remember" id="remember" value="1">
-            <span>Ingat saya</span>
-          </label>
-
-          <button type="submit" class="btn" id="submit-btn">Masuk</button>
-
-          <div class="links">
-            <p>Belum punya akun? <a href="{{ route('register') }}">Daftar</a></p>
-            <a class="forgot" href="#">Lupa kata sandi</a>
-          </div>
-        </form>
-      </section>
-    </main>
+    {{-- Footer editorial --}}
+    <div class="ep-footer">
+      <ul class="ep-footer-links">
+        <li><a href="#">Kebijakan Privasi</a></li>
+        <li><a href="#">Syarat &amp; Ketentuan</a></li>
+        <li><a href="{{ route('articles.index') }}">Kembali ke Beranda</a></li>
+      </ul>
+    </div>
   </div>
 
-  <script>
-    const form = document.getElementById('login-form');
-    const emailEl = document.getElementById('email');
-    const pwEl = document.getElementById('password');
-    const btn = document.getElementById('submit-btn');
+  {{-- ===== PANEL KANAN: FORM LOGIN ===== --}}
+  <div class="form-panel">
 
-    // Tampilkan / sembunyikan kata sandi
-    const toggle = document.getElementById('toggle-pw');
-    toggle.addEventListener('click', () => {
-      const show = pwEl.type === 'password';
-      pwEl.type = show ? 'text' : 'password';
-      toggle.textContent = show ? 'Sembunyi' : 'Lihat';
-      toggle.setAttribute('aria-label', show ? 'Sembunyikan kata sandi' : 'Tampilkan kata sandi');
-    });
+    <div class="fp-header">
+      <p class="fp-eyebrow">Akses Redaksi</p>
+      <h2 class="fp-title">Selamat Datang</h2>
+      <p class="fp-subtitle">Masuk dengan akun NEWS X PAPER Anda.</p>
+    </div>
 
-    function setError(input, fieldId, hasError) {
-      document.getElementById(fieldId).classList.toggle('has-error', hasError);
-      input.classList.toggle('invalid', hasError);
-      input.setAttribute('aria-invalid', hasError ? 'true' : 'false');
-    }
+    {{-- Error global --}}
+    @if($errors->any())
+      <div class="alert-error" role="alert">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true">
+          <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
+        </svg>
+        {{ $errors->first() }}
+      </div>
+    @endif
 
-    function validate() {
-      const emailOk = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailEl.value.trim());
-      const pwOk = pwEl.value.length > 0;
-      setError(emailEl, 'field-email', !emailOk);
-      setError(pwEl, 'field-password', !pwOk);
-      return emailOk && pwOk;
-    }
+    <form id="login-form" method="POST" action="{{ route('login') }}" novalidate>
+      @csrf
 
-    [emailEl, pwEl].forEach(el => el.addEventListener('input', () => {
-      if (el.classList.contains('invalid')) validate();
-    }));
+      {{-- Email --}}
+      <div class="form-group {{ $errors->has('email') ? 'has-error' : '' }}" id="grp-email">
+        <label class="form-label" for="email">Alamat Email</label>
+        <div class="input-wrap">
+          <svg class="input-icon" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+            <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/>
+          </svg>
+          <input
+            type="email"
+            id="email"
+            name="email"
+            value="{{ old('email') }}"
+            placeholder="nama@email.com"
+            class="form-input {{ $errors->has('email') ? 'input-error' : '' }}"
+            autocomplete="email"
+            required
+            aria-describedby="email-error">
+        </div>
+        <span class="field-error" id="email-error">
+          @error('email') {{ $message }} @else Masukkan alamat email yang valid. @enderror
+        </span>
+      </div>
 
-    // Cek form di browser dulu, lalu kirim ke Laravel
-    form.addEventListener('submit', (e) => {
-      if (!validate()) {
-        e.preventDefault();
-        return;
-      }
-      btn.disabled = true;
-      btn.textContent = 'Memproses…';
-    });
-  </script>
+      {{-- Kata Sandi --}}
+      <div class="form-group {{ $errors->has('password') ? 'has-error' : '' }}" id="grp-password">
+        <label class="form-label" for="password">Kata Sandi</label>
+        <div class="input-wrap">
+          <svg class="input-icon" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+            <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+          </svg>
+          <input
+            type="password"
+            id="password"
+            name="password"
+            placeholder="Kata sandi Anda"
+            class="form-input {{ $errors->has('password') ? 'input-error' : '' }}"
+            autocomplete="current-password"
+            required
+            aria-describedby="password-error">
+          <button type="button" class="pw-toggle" id="pw-toggle" aria-label="Tampilkan kata sandi" aria-pressed="false">
+            {{-- Ikon mata: show --}}
+            <svg id="pw-toggle-icon-show" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+              <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>
+            </svg>
+            {{-- Ikon mata: hide --}}
+            <svg id="pw-toggle-icon-hide" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+              <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/>
+              <line x1="1" y1="1" x2="23" y2="23"/>
+            </svg>
+          </button>
+        </div>
+        <span class="field-error" id="password-error">
+          @error('password') {{ $message }} @else Kata sandi wajib diisi. @enderror
+        </span>
+      </div>
+
+      {{-- Remember + Forgot --}}
+      <div class="form-options">
+        <label class="remember-label">
+          <input type="checkbox" name="remember" id="remember" class="remember-checkbox"
+            {{ old('remember') ? 'checked' : '' }} value="1">
+          Ingat Saya
+        </label>
+        <a href="#" class="forgot-link">Lupa Kata Sandi?</a>
+      </div>
+
+      {{-- Submit --}}
+      <button type="submit" class="btn-submit" id="btn-submit">
+        <span class="btn-text">
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true" style="margin-right:4px;vertical-align:middle">
+            <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/>
+          </svg>
+          Masuk
+        </span>
+        <span class="btn-spinner" aria-hidden="true"></span>
+      </button>
+
+      {{-- Divider + register --}}
+      <div class="form-divider">atau</div>
+      <p class="form-register">
+        Belum punya akun?
+        <a href="{{ route('register') }}">Daftar Sekarang</a>
+      </p>
+    </form>
+
+    {{-- Copyright kecil --}}
+    <p style="margin:32px 0 0;font-size:11px;color:#b0bec5;text-align:center;letter-spacing:.04em">
+      &copy; {{ date('Y') }} News X Paper &middot; All rights reserved
+    </p>
+  </div>
+
+</div>
+
+<script>
+// ── Toggle tampilkan/sembunyikan kata sandi ──────────────────────
+(function() {
+  const btn    = document.getElementById('pw-toggle');
+  const input  = document.getElementById('password');
+  const iconShow = document.getElementById('pw-toggle-icon-show');
+  const iconHide = document.getElementById('pw-toggle-icon-hide');
+  if (!btn || !input) return;
+  btn.addEventListener('click', () => {
+    const isHidden = input.type === 'password';
+    input.type     = isHidden ? 'text' : 'password';
+    iconShow.style.display = isHidden ? 'none'  : 'block';
+    iconHide.style.display = isHidden ? 'block' : 'none';
+    btn.setAttribute('aria-pressed', isHidden ? 'true' : 'false');
+    btn.setAttribute('aria-label', isHidden ? 'Sembunyikan kata sandi' : 'Tampilkan kata sandi');
+  });
+})();
+
+// ── Validasi client-side + loading state ────────────────────────
+(function() {
+  const form   = document.getElementById('login-form');
+  const emailEl = document.getElementById('email');
+  const pwEl    = document.getElementById('password');
+  const btnEl   = document.getElementById('btn-submit');
+
+  function setError(fieldId, inputEl, hasError) {
+    const grp = document.getElementById(fieldId);
+    if (!grp) return;
+    grp.classList.toggle('has-error', hasError);
+    inputEl.classList.toggle('input-error', hasError);
+    inputEl.setAttribute('aria-invalid', hasError ? 'true' : 'false');
+  }
+
+  // Live: bersihkan error saat user mengetik
+  emailEl.addEventListener('input', () => {
+    if (emailEl.value.trim()) setError('grp-email', emailEl, false);
+  });
+  pwEl.addEventListener('input', () => {
+    if (pwEl.value) setError('grp-password', pwEl, false);
+  });
+
+  form.addEventListener('submit', (e) => {
+    let valid = true;
+    const emailOk = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailEl.value.trim());
+    const pwOk    = pwEl.value.length >= 1;
+
+    if (!emailOk) { setError('grp-email', emailEl, true); valid = false; }
+    if (!pwOk)    { setError('grp-password', pwEl, true); valid = false; }
+
+    if (!valid) { e.preventDefault(); return; }
+
+    // Loading state
+    btnEl.classList.add('loading');
+    btnEl.disabled = true;
+  });
+})();
+</script>
 </body>
 </html>

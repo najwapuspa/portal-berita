@@ -343,46 +343,121 @@ class RssNewsService
     }
 
     /**
-     * Ekstrak URL gambar dari berbagai format RSS:
-     * - <enclosure url="..."> (CNN Indonesia)
-     * - <media:content url="..."> (Republika, ANTARA)
-     * - <img src="..."> di dalam description
+     * Ekstrak URL gambar dari berbagai format RSS + Open Graph fallback.
+     * Urutan prioritas:
+     * 1. <enclosure> (CNN Indonesia)
+     * 2. <media:content> (Republika, ANTARA)
+     * 3. <media:thumbnail>
+     * 4. <img src="..."> di dalam description
+     * 5. Open Graph og:image dari URL sumber (hanya jika semua gagal, dengan timeout pendek)
+     *
+     * TIDAK membuat HTTP request tambahan kecuali semua opsi RSS gagal.
      */
     private function extractImage(SimpleXMLElement $item): ?string
     {
-        // Coba enclosure (CNN)
+        // 1. enclosure (CNN Indonesia)
         if (isset($item->enclosure)) {
-            $url = (string) $item->enclosure['url'];
+            $url = trim((string) $item->enclosure['url']);
             if ($this->isValidImageUrl($url)) return $url;
         }
 
-        // Coba media:content (Republika, ANTARA)
+        // 2 & 3. media:content / media:thumbnail (Republika, ANTARA)
         $namespaces = $item->getNamespaces(true);
         if (isset($namespaces['media'])) {
             $mediaNs = $item->children($namespaces['media']);
+
+            // media:content
             if (isset($mediaNs->content)) {
-                $url = (string) $mediaNs->content['url'];
+                $url = trim((string) $mediaNs->content['url']);
+                if ($this->isValidImageUrl($url)) return $url;
+            }
+
+            // media:thumbnail
+            if (isset($mediaNs->thumbnail)) {
+                $url = trim((string) $mediaNs->thumbnail['url']);
                 if ($this->isValidImageUrl($url)) return $url;
             }
         }
 
-        // Coba ambil dari <img> dalam description
+        // 4. <img> dalam description
         $desc = (string) ($item->description ?? '');
-        if (preg_match('/<img[^>]+src=["\']([^"\']+)["\'][^>]*>/i', $desc, $m)) {
-            $url = $m[1];
-            if ($this->isValidImageUrl($url)) return $url;
+        if ($desc !== '') {
+            // Coba extractEncoded jika content:encoded ada juga
+            if (isset($namespaces['content'])) {
+                $contentNs = $item->children($namespaces['content']);
+                $encoded   = (string) ($contentNs->encoded ?? '');
+                if ($encoded !== '' && preg_match('/<img[^>]+src=["\']([^"\']+)["\'][^>]*>/i', $encoded, $m)) {
+                    if ($this->isValidImageUrl($m[1])) return $m[1];
+                }
+            }
+            if (preg_match('/<img[^>]+src=["\']([^"\']+)["\'][^>]*>/i', $desc, $m)) {
+                if ($this->isValidImageUrl($m[1])) return $m[1];
+            }
+        }
+
+        // 5. Open Graph dari halaman sumber — hanya jika semua di atas gagal
+        //    Timeout sangat pendek (4 detik) agar tidak memperlambat batch RSS
+        $sourceUrl = trim((string) ($item->link ?? $item->guid ?? ''));
+        if ($sourceUrl !== '' && filter_var($sourceUrl, FILTER_VALIDATE_URL)) {
+            $ogImage = $this->fetchOpenGraphImage($sourceUrl);
+            if ($ogImage) return $ogImage;
         }
 
         return null;
     }
 
     /**
-     * Validasi URL gambar: harus http/https, bukan placeholder kecil.
+     * Ambil og:image dari halaman sumber dengan timeout pendek.
+     * Mengembalikan URL gambar atau null jika gagal/timeout.
+     */
+    private function fetchOpenGraphImage(string $pageUrl): ?string
+    {
+        try {
+            $response = Http::timeout(4)
+                ->withHeaders([
+                    'User-Agent' => 'NewsXpaper RSS Aggregator/1.0',
+                    'Accept'     => 'text/html',
+                ])
+                ->get($pageUrl);
+
+            if (! $response->successful()) return null;
+
+            $html = $response->body();
+
+            // og:image
+            if (preg_match('/<meta[^>]+property=["\']og:image["\'][^>]+content=["\']([^"\']+)["\'][^>]*>/i', $html, $m)) {
+                if ($this->isValidImageUrl($m[1])) return $m[1];
+            }
+            // og:image dengan order terbalik
+            if (preg_match('/<meta[^>]+content=["\']([^"\']+)["\'][^>]+property=["\']og:image["\'][^>]*>/i', $html, $m)) {
+                if ($this->isValidImageUrl($m[1])) return $m[1];
+            }
+            // twitter:image
+            if (preg_match('/<meta[^>]+name=["\']twitter:image["\'][^>]+content=["\']([^"\']+)["\'][^>]*>/i', $html, $m)) {
+                if ($this->isValidImageUrl($m[1])) return $m[1];
+            }
+
+        } catch (\Throwable $e) {
+            // Gagal OG fetch — lanjutkan tanpa gambar, tidak menghentikan proses
+            Log::debug('RssNewsService: OG fetch gagal', [
+                'url'   => $pageUrl,
+                'error' => $e->getMessage(),
+            ]);
+        }
+
+        return null;
+    }
+
+    /**
+     * Validasi URL gambar: harus https (keamanan), format valid, panjang wajar.
      */
     private function isValidImageUrl(?string $url): bool
     {
-        if (! $url || strlen($url) < 10) return false;
-        if (! Str::startsWith($url, ['http://', 'https://'])) return false;
+        if (! $url || strlen($url) < 12) return false;
+        // Wajib https atau http
+        if (! \Illuminate\Support\Str::startsWith($url, ['http://', 'https://'])) return false;
+        // Cegah SSRF ke IP privat — hanya izinkan domain publik
+        if (preg_match('/https?:\/\/(localhost|127\.|10\.|192\.168\.|172\.(1[6-9]|2\d|3[01])\.)/i', $url)) return false;
         if (! filter_var($url, FILTER_VALIDATE_URL)) return false;
         return true;
     }

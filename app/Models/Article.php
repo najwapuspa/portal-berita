@@ -55,15 +55,46 @@ class Article extends Model
 
     /**
      * Ambil URL gambar yang sudah dinormalisasi.
-     * Mengembalikan URL absolut (http/https), path storage, atau null.
+     * Jika tidak ada gambar, gunakan placeholder per kategori.
      */
-    public function getImageUrlAttribute(): ?string
+    public function getImageUrlAttribute(): string
     {
-        if (! $this->image) return null;
-        if (Str::startsWith($this->image, ['http://', 'https://'])) {
-            return $this->image;
+        // Coba ambil gambar dari kolom image
+        if ($this->image && trim($this->image) !== '') {
+            $img = $this->image;
+            if (\Illuminate\Support\Str::startsWith($img, ['http://', 'https://'])) {
+                return $img;
+            }
+            // Path relatif → storage URL
+            return asset('storage/' . $img);
         }
-        return asset('storage/' . $this->image);
+
+        // Fallback: placeholder per kategori
+        return $this->getCategoryPlaceholder();
+    }
+
+    /**
+     * Placeholder per kategori — selalu URL lokal yang stabil.
+     */
+    public function getCategoryPlaceholder(): string
+    {
+        $slug = optional($this->category)->slug ?? '';
+        $map  = [
+            'nasional'      => 'placeholder-nasional.svg',
+            'internasional' => 'placeholder-internasional.svg',
+            'politik'       => 'placeholder-politik.svg',
+            'ekonomi'       => 'placeholder-ekonomi.svg',
+            'teknologi'     => 'placeholder-teknologi.svg',
+            'pendidikan'    => 'placeholder-pendidikan.svg',
+            'kesehatan'     => 'placeholder-kesehatan.svg',
+            'olahraga'      => 'placeholder-olahraga.svg',
+            'hiburan'       => 'placeholder-hiburan.svg',
+            'gaya-hidup'    => 'placeholder-gaya-hidup.svg',
+            'lingkungan'    => 'placeholder-lingkungan.svg',
+            'opini'         => 'placeholder-opini.svg',
+        ];
+        $file = $map[$slug] ?? 'placeholder-news.svg';
+        return asset('images/' . $file);
     }
 
     /**

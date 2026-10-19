@@ -137,6 +137,65 @@
     </div>
   </div>
 
+  {{-- ===== NAVIGASI KATEGORI (PILL) ===== --}}
+  @php
+    $activeKat  = request('kategori', '');
+    $configCats = config('categories', []);
+  @endphp
+  <nav class="cat-pill-nav" aria-label="Filter kategori">
+    <div class="cat-pill-scroll" id="cat-pill-scroll">
+
+      {{-- Semua Berita --}}
+      <a href="{{ route('articles.index') }}"
+         class="cat-pill {{ $activeKat === '' ? 'cat-pill-active' : '' }}">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h16"/></svg>
+        Semua
+      </a>
+
+      {{-- Kategori dari DB — tampilkan yg punya berita --}}
+      @if(isset($allCategories))
+        @php
+          $primaryCats = $allCategories->filter(fn($c) => $c->articles_count > 0)->take(8);
+          $moreCats    = $allCategories->filter(fn($c) => $c->articles_count > 0)->skip(8);
+        @endphp
+        @foreach($primaryCats as $cat)
+          @php
+            $catColor = $configCats[$cat->slug]['color'] ?? '#1e8fd6';
+          @endphp
+          <a href="{{ route('categories.show', $cat->slug) }}"
+             class="cat-pill {{ $activeKat === $cat->slug ? 'cat-pill-active' : '' }}"
+             style="{{ $activeKat === $cat->slug ? '--pill-color:' . $catColor : '' }}">
+            {{ $cat->name }}
+          </a>
+        @endforeach
+
+        {{-- Dropdown "Lainnya" jika lebih dari 8 --}}
+        @if($moreCats->isNotEmpty())
+          <div class="cat-pill-more-wrap">
+            <button class="cat-pill cat-pill-more" id="cat-pill-more-btn"
+                    aria-expanded="false" aria-haspopup="true">
+              Lainnya
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true" id="cat-pill-arrow"><polyline points="6 9 12 15 18 9"/></svg>
+            </button>
+            <div class="cat-pill-dropdown" id="cat-pill-dropdown" hidden>
+              @foreach($moreCats as $cat)
+                @php $catColor = $configCats[$cat->slug]['color'] ?? '#1e8fd6'; @endphp
+                <a href="{{ route('categories.show', $cat->slug) }}"
+                   class="cpd-item {{ $activeKat === $cat->slug ? 'cpd-item-active' : '' }}"
+                   style="--dot-color: {{ $catColor }}">
+                  <span class="cpd-dot"></span>
+                  {{ $cat->name }}
+                  <span class="cpd-count">{{ $cat->articles_count }}</span>
+                </a>
+              @endforeach
+            </div>
+          </div>
+        @endif
+      @endif
+
+    </div>
+  </nav>
+
   {{-- ===== HERO GRID ===== --}}
   <section class="hero" aria-label="Berita utama">
     @foreach([0, 1, 2, 3] as $k)
@@ -408,10 +467,15 @@
               </a>
             </div>
             <div class="kat-row">
-              @php $katBig = $katGroup['items']->first(); $katBigImg = $katBig->image ? (\Illuminate\Support\Str::startsWith($katBig->image, ['http://', 'https://']) ? $katBig->image : asset('storage/' . $katBig->image)) : $placeholder; @endphp
+              @php
+                $katBig    = $katGroup['items']->first();
+                $katBigImg = $katBig->image_url;
+              @endphp
               <article class="kat-big">
                 <a href="{{ route('articles.show', $katBig->slug) }}" class="card-thumb g0"
                    style="background-image: url('{{ $katBigImg }}')" aria-label="{{ $katBig->title }}">
+                  <img src="{{ $katBigImg }}" alt="" loading="lazy" style="display:none"
+                       onerror="this.parentElement.style.backgroundImage='url({{ asset('images/placeholder-news.svg') }})'">
                   <span class="tag" style="background: {{ $katGroup['color'] }}">{{ $katGroup['name'] }}</span>
                 </a>
                 <h3 class="card-title" style="font-size:17px">
@@ -419,19 +483,24 @@
                 </h3>
                 <div class="card-meta">
                   <b>{{ optional($katBig->user)->name ?? 'Admin' }}</b>
-                  <span>–</span><span>{{ $katBig->created_at->translatedFormat('j M Y') }}</span>
+                  <span>–</span>
+                  <span>{{ $katBig->display_date->setTimezone('Asia/Jakarta')->translatedFormat('j M Y') }}</span>
                   <span>👁 {{ number_format($katBig->views, 0, ',', '.') }}</span>
                 </div>
                 <p class="excerpt">{{ \Illuminate\Support\Str::limit(strip_tags($katBig->content), 120) }}</p>
               </article>
               <div class="kat-list">
                 @foreach($katGroup['items']->skip(1) as $katItem)
-                  @php $katImg = $katItem->image ? (\Illuminate\Support\Str::startsWith($katItem->image, ['http://', 'https://']) ? $katItem->image : asset('storage/' . $katItem->image)) : $placeholder; @endphp
+                  @php $katImg = $katItem->image_url; @endphp
                   <a href="{{ route('articles.show', $katItem->slug) }}" class="list-item">
-                    <span class="list-thumb g{{ $loop->index % 5 }}" style="background-image: url('{{ $katImg }}')"></span>
+                    <span class="list-thumb g{{ $loop->index % 5 }}" style="background-image: url('{{ $katImg }}')">
+                    </span>
                     <div>
                       <h4 class="list-title">{{ \Illuminate\Support\Str::limit($katItem->title, 65) }}</h4>
-                      <span class="card-meta">{{ $katItem->created_at->translatedFormat('j M Y') }} · 👁 {{ number_format($katItem->views, 0, ',', '.') }}</span>
+                      <span class="card-meta">
+                        {{ $katItem->display_date->setTimezone('Asia/Jakarta')->translatedFormat('j M Y') }}
+                        · 👁 {{ number_format($katItem->views, 0, ',', '.') }}
+                      </span>
                     </div>
                   </a>
                 @endforeach
@@ -454,12 +523,12 @@
               </div>
               <div class="kat-mini-list">
                 @foreach($katGroup['items']->take(3) as $km)
-                  @php $kmImg = $km->image ? (\Illuminate\Support\Str::startsWith($km->image, ['http://', 'https://']) ? $km->image : asset('storage/' . $km->image)) : $placeholder; @endphp
+                  @php $kmImg = $km->image_url; @endphp
                   <a href="{{ route('articles.show', $km->slug) }}" class="kat-mini-item">
                     <span class="kat-mini-thumb" style="background-image: url('{{ $kmImg }}')" aria-hidden="true"></span>
                     <div class="kat-mini-info">
                       <span class="kat-mini-title">{{ \Illuminate\Support\Str::limit($km->title, 70) }}</span>
-                      <span class="kat-mini-meta">{{ $km->created_at->translatedFormat('j M Y') }}</span>
+                      <span class="kat-mini-meta">{{ $km->display_date->setTimezone('Asia/Jakarta')->translatedFormat('j M Y') }}</span>
                     </div>
                   </a>
                 @endforeach
@@ -574,5 +643,31 @@ document.querySelectorAll('.block-tabs').forEach(tabGroup => {
     });
   });
 });
+
+// ── Pill nav dropdown ─────────────────────────────────────────
+(function() {
+  const btn      = document.getElementById('cat-pill-more-btn');
+  const dropdown = document.getElementById('cat-pill-dropdown');
+  const arrow    = document.getElementById('cat-pill-arrow');
+  if (!btn || !dropdown) return;
+
+  function close() {
+    dropdown.hidden = true;
+    btn.setAttribute('aria-expanded', 'false');
+    if (arrow) arrow.style.transform = 'rotate(0deg)';
+  }
+  function open() {
+    dropdown.hidden = false;
+    btn.setAttribute('aria-expanded', 'true');
+    if (arrow) arrow.style.transform = 'rotate(180deg)';
+  }
+
+  btn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    dropdown.hidden ? open() : close();
+  });
+  document.addEventListener('click', close);
+  document.addEventListener('keydown', (e) => { if(e.key === 'Escape') close(); });
+})();
 </script>
 @endpush

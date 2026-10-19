@@ -89,9 +89,14 @@ class ArticleController extends Controller
             ->take(8)
             ->get();
 
+        // Semua kategori dari DB untuk pill navigasi
+        $allCategories = Category::withCount([
+            'articles' => fn ($q) => $q->where('status', 'published'),
+        ])->orderBy('name')->get();
+
         return view('articles.index', compact(
             'articles', 'categories', 'artikelPopuler', 'trending',
-            'beritaPerKategori', 'pilihanEditor', 'beritaRss'
+            'beritaPerKategori', 'pilihanEditor', 'beritaRss', 'allCategories'
         ));
     }
 
