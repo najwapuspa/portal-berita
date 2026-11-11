@@ -101,15 +101,17 @@
     <div class="container">
       <ul class="menu" id="main-menu">
         <li><a href="{{ route('articles.index') }}"
-               class="{{ request()->routeIs('articles.index') ? 'active' : '' }}">Berita</a></li>
-        {{-- Kategori utama tampil langsung (8 pertama) --}}
-        @php $catArray = array_slice(config('categories'), 0, 8, true); @endphp
+               class="{{ request()->routeIs('articles.index') ? 'active' : '' }}">Beranda</a></li>
+        <li><a href="{{ route('news.index') }}"
+               class="{{ request()->routeIs('news.index') ? 'active' : '' }}">Berita</a></li>
+        {{-- Kategori utama tampil langsung (7 pertama) --}}
+        @php $catArray = array_slice(config('categories'), 0, 7, true); @endphp
         @foreach($catArray as $slug => $cat)
           <li><a href="{{ route('categories.show', $slug) }}"
                  class="{{ request()->is('kategori/' . $slug) ? 'active' : '' }}">{{ $cat['name'] }}</a></li>
         @endforeach
         {{-- Sisa kategori dalam dropdown "Lainnya" --}}
-        @php $moreArray = array_slice(config('categories'), 8, null, true); @endphp
+        @php $moreArray = array_slice(config('categories'), 7, null, true); @endphp
         @if(count($moreArray) > 0)
           <li class="menu-more">
             <button class="menu-more-btn" id="menu-more-btn" aria-expanded="false" aria-haspopup="true">
@@ -123,6 +125,8 @@
             </ul>
           </li>
         @endif
+        <li><a href="{{ route('about') }}"
+               class="{{ request()->routeIs('about') ? 'active' : '' }}">Tentang Kami</a></li>
       </ul>
     </div>
   </nav>
@@ -162,7 +166,7 @@
       <div class="f-col">
         <h4 class="f-title">Perusahaan</h4>
         <ul class="f-links">
-          <li><a href="#">Tentang kami</a></li>
+          <li><a href="{{ route('about') }}">Tentang kami</a></li>
           <li><a href="#">Redaksi</a></li>
           <li><a href="#">Pedoman media siber</a></li>
           <li><a href="#">Pasang iklan</a></li>

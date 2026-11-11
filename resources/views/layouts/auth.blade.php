@@ -227,6 +227,44 @@
       margin-top: 4px;
     }
 
+    /* Password wrap with show/hide toggle */
+    .haus-password-wrap {
+      position: relative;
+      display: flex;
+      align-items: center;
+      width: 100%;
+    }
+    .haus-password-wrap .haus-input {
+      padding-right: 32px;
+    }
+    .haus-pw-toggle {
+      position: absolute;
+      right: 0;
+      bottom: 4px;
+      background: transparent;
+      border: none;
+      padding: 4px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      color: var(--text-secondary);
+      border-radius: 2px;
+      line-height: 1;
+      transition: color 0.15s ease;
+    }
+    .haus-pw-toggle:hover,
+    .haus-pw-toggle:focus-visible {
+      color: var(--text-primary);
+      outline: none;
+    }
+    .haus-pw-toggle svg {
+      width: 17px;
+      height: 17px;
+      display: block;
+      pointer-events: none;
+    }
+
     /* Sub-field links (Forgot password, Remember me) */
     .haus-field-sub {
       display: flex;
@@ -442,8 +480,8 @@
           <nav class="haus-nav" aria-label="Navigasi Utama">
             <ul class="haus-nav-links">
               <li><a href="{{ route('articles.index') }}">BERANDA</a></li>
-              <li><a href="{{ route('articles.index') }}">BERITA</a></li>
-              <li><a href="{{ url('/#tentang') }}">TENTANG KAMI</a></li>
+              <li><a href="{{ route('news.index') }}">BERITA</a></li>
+              <li><a href="{{ route('about') }}">TENTANG KAMI</a></li>
             </ul>
           </nav>
         </header>
@@ -480,6 +518,35 @@
 
 </div>
 
+<script>
+  /**
+   * Fitur Show/Hide Password untuk form autentikasi.
+   * Mengubah type input password <-> text tanpa reload atau reset nilai input.
+   */
+  function togglePasswordVisibility(inputId, btn) {
+    var input = document.getElementById(inputId);
+    if (!input) return;
+
+    var isPassword = input.type === 'password';
+    input.type = isPassword ? 'text' : 'password';
+
+    btn.setAttribute('aria-pressed', isPassword ? 'true' : 'false');
+    btn.setAttribute('aria-label', isPassword ? 'Sembunyikan password' : 'Lihat password');
+
+    var eyeOpen = btn.querySelector('.icon-eye');
+    var eyeClosed = btn.querySelector('.icon-eye-slash');
+
+    if (eyeOpen && eyeClosed) {
+      if (isPassword) {
+        eyeOpen.style.display = 'block';
+        eyeClosed.style.display = 'none';
+      } else {
+        eyeOpen.style.display = 'none';
+        eyeClosed.style.display = 'block';
+      }
+    }
+  }
+</script>
 @stack('scripts')
 </body>
 </html>

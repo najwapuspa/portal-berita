@@ -100,6 +100,37 @@ class ArticleController extends Controller
         ));
     }
 
+    /**
+     * Halaman khusus daftar semua berita publik dengan filter kategori dan pagination.
+     */
+    public function allNews(Request $request)
+    {
+        $categories = Category::withCount([
+            'articles' => fn ($q) => $q->where('status', 'published'),
+        ])->orderBy('name')->get();
+
+        $query = Article::with(['category', 'user'])
+            ->withCount('comments')
+            ->where('status', 'published');
+
+        $activeCategory = null;
+        if ($request->filled('kategori')) {
+            $query->whereHas('category', fn ($q) => $q->where('slug', $request->kategori));
+            $activeCategory = $categories->firstWhere('slug', $request->kategori);
+        }
+
+        // Tampilkan berita terbaru berdasarkan published_at desc, lalu id desc
+        $articles = $query->latest('published_at')->latest('id')->paginate(12)->withQueryString();
+
+        // Terpopuler untuk referensi samping jika dibutuhkan
+        $populer = Article::where('status', 'published')
+            ->orderByDesc('views')
+            ->take(5)
+            ->get();
+
+        return view('articles.all', compact('articles', 'categories', 'activeCategory', 'populer'));
+    }
+
     /** Detail berita — views counter dengan session throttle */
     public function show(Request $request, string $slug)
     {

@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\AboutController;
 use App\Http\Controllers\ArticleController;
 use App\Http\Controllers\AdminUserController;
 use App\Http\Controllers\AuthController;
@@ -14,6 +15,8 @@ use Illuminate\Support\Facades\Route;
 
 // ── Publik ───────────────────────────────────────────────────────────────────
 Route::get('/',               [ArticleController::class, 'index'])->name('articles.index');
+Route::get('/berita',         [ArticleController::class, 'allNews'])->name('news.index');
+Route::get('/tentang-kami',   [AboutController::class, 'index'])->name('about');
 Route::post('/newsletter/subscribe', [NewsletterController::class, 'subscribe'])->name('newsletter.subscribe');
 Route::get('/berita/{slug}',  [ArticleController::class, 'show'])->name('articles.show');
 Route::get('/kategori/{slug}',[CategoryController::class, 'show'])->name('categories.show');
