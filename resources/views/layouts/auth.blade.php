@@ -329,7 +329,7 @@
     /* ─── RIGHT PANEL (EXACT HAUS DRINK PHOTOGRAPH) ───────────── */
     .haus-right {
       position: relative;
-      background-image: url('{{ asset('images/haus-drink.jpg') }}');
+      background-image: url('{{ asset('images/city-metropolitan.jpg') }}');
       background-size: cover;
       background-position: center center;
       background-repeat: no-repeat;
