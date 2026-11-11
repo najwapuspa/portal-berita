@@ -27,6 +27,11 @@ Route::get('/daftar',   [AuthController::class, 'showRegister'])->name('register
 Route::post('/daftar',  [AuthController::class, 'register']);
 Route::post('/logout',  [AuthController::class, 'logout'])->name('logout')->middleware('auth');
 
+Route::get('/forgot-password',        [AuthController::class, 'showForgotPassword'])->name('password.request');
+Route::post('/forgot-password',       [AuthController::class, 'sendResetLinkEmail'])->name('password.email');
+Route::get('/reset-password/{token}', [AuthController::class, 'showResetPassword'])->name('password.reset');
+Route::post('/reset-password',        [AuthController::class, 'resetPassword'])->name('password.update');
+
 // ── Auth required ────────────────────────────────────────────────────────────
 Route::middleware('auth')->group(function () {
     // Redirect /dashboard ke dashboard yang sesuai role
