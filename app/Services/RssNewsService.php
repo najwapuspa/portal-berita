@@ -128,6 +128,39 @@ class RssNewsService
                 'source_name'  => 'ANTARA',
                 'slug_kategori'=> 'lingkungan',
             ],
+            // ── CNBC Indonesia ────────────────────────────────────
+            [
+                'url'          => 'https://www.cnbcindonesia.com/news/rss',
+                'source_name'  => 'CNBC Indonesia',
+                'slug_kategori'=> 'nasional',
+            ],
+            [
+                'url'          => 'https://www.cnbcindonesia.com/market/rss',
+                'source_name'  => 'CNBC Indonesia',
+                'slug_kategori'=> 'ekonomi',
+            ],
+            [
+                'url'          => 'https://www.cnbcindonesia.com/tech/rss',
+                'source_name'  => 'CNBC Indonesia',
+                'slug_kategori'=> 'teknologi',
+            ],
+            // ── Tempo ─────────────────────────────────────────────
+            [
+                'url'          => 'https://rss.tempo.co/nasional',
+                'source_name'  => 'Tempo',
+                'slug_kategori'=> 'nasional',
+            ],
+            [
+                'url'          => 'https://rss.tempo.co/bisnis',
+                'source_name'  => 'Tempo',
+                'slug_kategori'=> 'ekonomi',
+            ],
+            // ── Sindonews ─────────────────────────────────────────
+            [
+                'url'          => 'https://www.sindonews.com/feed',
+                'source_name'  => 'Sindonews',
+                'slug_kategori'=> 'nasional',
+            ],
         ];
     }
 
@@ -185,9 +218,16 @@ class RssNewsService
             return ['inserted' => 0, 'skipped' => 0];
         }
 
-        // HTTP GET dengan timeout
+        // HTTP GET dengan timeout dan opsi protokol kompatibel
         $response = Http::timeout(self::HTTP_TIMEOUT)
-            ->withHeaders(['User-Agent' => 'NewsXpaper RSS Aggregator/1.0'])
+            ->withOptions([
+                'version' => 1.1,
+                'verify'  => false,
+            ])
+            ->withHeaders([
+                'User-Agent' => 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+                'Accept'     => 'application/rss+xml, application/xml, text/xml, */*',
+            ])
             ->get($url);
 
         if (! $response->successful()) {
@@ -479,9 +519,9 @@ class RssNewsService
     }
 
     /**
-     * Buat konten HTML artikel:
-     * Ringkasan + link menuju artikel asli di media sumber.
-     * Ini memastikan pengguna membaca artikel lengkap di sumber aslinya.
+     * Buat konten HTML artikel berita mandiri:
+     * Disusun dalam paragraf editorial yang rapi dan nyaman dibaca langsung
+     * di website sendiri tanpa pengalihan ke situs luar.
      */
     private function buildContentHtml(
         string $title,
@@ -489,24 +529,21 @@ class RssNewsService
         string $sourceUrl,
         string $sourceName
     ): string {
-        $safeExcerpt    = htmlspecialchars($excerpt, ENT_QUOTES | ENT_HTML5, 'UTF-8');
-        $safeSourceName = htmlspecialchars($sourceName, ENT_QUOTES | ENT_HTML5, 'UTF-8');
-        $safeSourceUrl  = htmlspecialchars($sourceUrl, ENT_QUOTES | ENT_HTML5, 'UTF-8');
+        $cleanExcerpt = trim($excerpt);
+        if ($cleanExcerpt === '') {
+            $cleanExcerpt = $title;
+        }
 
-        return <<<HTML
-<p>{$safeExcerpt}</p>
+        // Pecah teks menjadi paragraf-paragraf alami agar mudah dan nyaman dibaca
+        $sentences = preg_split('/(?<=[.!?])\s+(?=[A-Z0-9])/u', $cleanExcerpt);
+        if (count($sentences) >= 2) {
+            $half = (int) ceil(count($sentences) / 2);
+            $p1 = htmlspecialchars(implode(' ', array_slice($sentences, 0, $half)), ENT_QUOTES | ENT_HTML5, 'UTF-8');
+            $p2 = htmlspecialchars(implode(' ', array_slice($sentences, $half)), ENT_QUOTES | ENT_HTML5, 'UTF-8');
+            return "<p>{$p1}</p>\n<p>{$p2}</p>";
+        }
 
-<div class="source-notice" style="margin-top:24px;padding:16px;background:#f5f8fb;border-left:4px solid #4db2ec;border-radius:2px">
-  <p style="margin:0 0 8px;font-size:13px;color:#666;font-weight:600">Sumber Berita</p>
-  <p style="margin:0;font-size:14px">
-    Artikel ini bersumber dari <strong>{$safeSourceName}</strong>.
-    Untuk membaca berita lengkap, silakan kunjungi:
-  </p>
-  <a href="{$safeSourceUrl}" target="_blank" rel="noopener noreferrer"
-     style="display:inline-block;margin-top:10px;padding:9px 18px;background:#4db2ec;color:#fff;border-radius:4px;font-weight:700;font-size:13px;text-decoration:none">
-    Baca Selengkapnya di {$safeSourceName} →
-  </a>
-</div>
-HTML;
+        $safe = htmlspecialchars($cleanExcerpt, ENT_QUOTES | ENT_HTML5, 'UTF-8');
+        return "<p>{$safe}</p>";
     }
 }

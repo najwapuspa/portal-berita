@@ -80,13 +80,20 @@ class Article extends Model
 
     /**
      * Konten dinamis berdasarkan locale aktif (ID / EN).
+     * Secara otomatis membersihkan kotak pengalihan eksternal lama
+     * agar pembaca membaca berita mandiri langsung di website sendiri.
      */
     public function getDisplayContentAttribute(): string
     {
         if (app()->getLocale() === 'en' && !empty($this->content_en)) {
-            return $this->content_en;
+            $raw = $this->content_en;
+        } else {
+            $raw = (string) ($this->content ?? '');
         }
-        return (string) ($this->content ?? '');
+
+        // Hapus blok pengalihan eksternal lawas (source-notice) jika ada
+        $clean = preg_replace('/<div class="source-notice"[^>]*>.*?<\/div>/s', '', $raw);
+        return trim($clean ?? '');
     }
 
     /**

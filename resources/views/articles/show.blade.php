@@ -26,7 +26,14 @@
 @section('content')
 <div class="container">
 
-  {{-- Breadcrumb --}}
+  {{-- Navigasi Atas: Kembali & Breadcrumb --}}
+  <div class="article-back-bar">
+    <a href="{{ route('news.index') }}" class="article-back-link">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
+      {{ __('Kembali ke Semua Berita') }}
+    </a>
+  </div>
+
   <nav class="breadcrumb" aria-label="Breadcrumb">
     <a href="{{ route('articles.index') }}">{{ __('Beranda') }}</a>
     <span aria-hidden="true">›</span>
@@ -39,10 +46,10 @@
 
   <div class="article-layout">
 
-    {{-- ===== KONTEN ARTIKEL ===== --}}
+    {{-- ===== KONTEN UTAMA ARTIKEL ===== --}}
     <article class="article-main">
 
-      {{-- Badge kategori + label sumber RSS --}}
+      {{-- Badge Kategori & Label Sumber Redaksi --}}
       <div class="article-cats">
         <a href="{{ route('categories.show', optional($article->category)->slug ?? 'nasional') }}"
            class="article-cat-badge"
@@ -50,22 +57,30 @@
           {{ $catName }}
         </a>
         @if($isRssArticle)
-          <span class="article-source-badge">
-            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+          <span class="article-source-pill">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true"><path d="M4 22h16a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2H8a2 2 0 0 0-2 2v16a2 2 0 0 1-2 2Zm0 0a2 2 0 0 1-2-2v-9c0-1.1.9-2 2-2h2"/><path d="M18 14h-8"/><path d="M15 18h-5"/><path d="M10 6h8v4h-8V6Z"/></svg>
             {{ $article->source_name }}
           </span>
         @endif
       </div>
 
+      {{-- Judul Utama Berita --}}
       <h1 class="article-title">{{ $article->display_title }}</h1>
 
-      {{-- Meta: penulis / tanggal WIB / waktu baca / views --}}
+      {{-- Subjudul / Editorial Lead Deck --}}
+      @if(!empty($excerpt) && $excerpt !== $article->display_title)
+        <div class="article-lead">
+          {{ $excerpt }}
+        </div>
+      @endif
+
+      {{-- Meta: Penulis / Sumber, Waktu Publikasi, Waktu Baca, Views --}}
       <div class="article-meta">
         <span class="am-avatar" aria-hidden="true">
-          {{ mb_strtoupper(mb_substr(optional($article->user)->name ?? 'A', 0, 1)) }}
+          {{ mb_strtoupper(mb_substr($isRssArticle ? $article->source_name : (optional($article->user)->name ?? 'A'), 0, 1)) }}
         </span>
         <div class="am-info">
-          <strong>{{ $isRssArticle ? $article->source_name : (optional($article->user)->name ?? 'Redaksi') }}</strong>
+          <strong>{{ $isRssArticle ? $article->source_name : (optional($article->user)->name ?? 'Redaksi NEWS X PAPER') }}</strong>
           <div class="am-sub">
             <time datetime="{{ $displayDate->toIso8601String() }}">
               {{ $displayDate->setTimezone('Asia/Jakarta')->locale(app()->getLocale())->translatedFormat('j F Y, H:i') }} WIB
@@ -78,7 +93,7 @@
         </div>
       </div>
 
-      {{-- Gambar utama --}}
+      {{-- Foto Utama Berita --}}
       <figure class="article-figure">
         <img src="{{ $ogImage }}"
              alt="{{ $article->display_title }}"
@@ -86,30 +101,49 @@
              class="article-img"
              onerror="this.src='{{ asset('images/placeholder-news.svg') }}'">
         <figcaption>
-          {{ $catName }}
-          — {{ $displayDate->setTimezone('Asia/Jakarta')->locale(app()->getLocale())->translatedFormat('j M Y') }}
-          @if($isRssArticle) · {{ __('Sumber Berita') }}: {{ $article->source_name }} @endif
+          {{ $catName }} — {{ $displayDate->setTimezone('Asia/Jakarta')->locale(app()->getLocale())->translatedFormat('j M Y') }}
+          @if($isRssArticle) · Foto & Laporan: {{ $article->source_name }} @endif
         </figcaption>
       </figure>
 
-      {{-- Isi artikel --}}
+      {{-- Pemberitahuan Liputan Jika Berita Bersumber dari RSS --}}
+      @if($isRssArticle)
+        <div class="article-summary-badge" role="note">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+          <span>{{ __('Ringkasan Liputan') }}: {{ __('Laporan berita ini disajikan berdasarkan rangkuman fakta jurnalistik terpercaya dari :source.', ['source' => $article->source_name]) }}</span>
+        </div>
+      @endif
+
+      {{-- Isi Bersih Artikel Berita (Dibaca Mandiri di Website Sendiri) --}}
       <div class="article-body">
         {!! $article->display_content !!}
       </div>
 
-      {{-- Link ke sumber asli jika artikel RSS --}}
+      {{-- Kotak Atribusi Sumber & Hak Cipta (Elegan & Sesuai Etika Jurnalistik) --}}
       @if($isRssArticle)
-        <div class="article-source-link" style="margin:24px 0;padding:16px;background:#f5f8fb;border-left:4px solid #4db2ec;border-radius:2px">
-          <p style="margin:0 0 6px;font-size:12px;color:#666;font-weight:600;text-transform:uppercase;letter-spacing:.04em">{{ __('Sumber Berita Asli') }}</p>
-          <a href="{{ $article->source_url }}" target="_blank" rel="noopener noreferrer"
-             style="font-size:14px;font-weight:600;color:#1e8fd6;word-break:break-all">
-            {{ $article->source_url }}
-          </a>
-          <p style="margin:8px 0 0;font-size:12px;color:#888">{{ __('Artikel ini bersumber dari :source. Hak cipta milik penerbit asli.', ['source' => $article->source_name]) }}</p>
-        </div>
+        <aside class="article-attribution-card" aria-label="{{ __('Atribusi Sumber Berita') }}">
+          <div class="aac-header">
+            <span class="aac-badge">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+              {{ __('Keterangan Sumber & Hak Cipta') }}
+            </span>
+            <span class="aac-source">{{ $article->source_name }}</span>
+          </div>
+          <p class="aac-text">
+            {{ __('Laporan berita ini dikurasi dan disadur dari kanal resmi :source untuk menghadirkan cakupan informasi yang aktual, berimbang, dan tepercaya bagi pembaca NEWS X PAPER.', ['source' => $article->source_name]) }}
+          </p>
+          <div class="aac-footer">
+            <span class="aac-copyright">
+              © {{ optional($displayDate)->format('Y') ?? date('Y') }} {{ $article->source_name }}. {{ __('Hak cipta materi berita sepenuhnya milik penerbit asli.') }}
+            </span>
+            <a href="{{ $article->source_url }}" target="_blank" rel="noopener noreferrer" class="aac-link" title="{{ __('Kunjungi publikasi asli di tab baru') }}">
+              {{ __('Tautan Artikel Asli') }} ↗
+            </a>
+          </div>
+        </aside>
       @endif
 
-      {{-- Tombol share --}}
+      {{-- Tombol Bagikan Berita --}}
       @php
         $shareUrl   = urlencode(url()->current());
         $shareTitle = urlencode($article->display_title);
@@ -118,26 +152,37 @@
         <span>{{ __('Bagikan:') }}</span>
         <a href="https://www.facebook.com/sharer/sharer.php?u={{ $shareUrl }}"
            target="_blank" rel="noopener noreferrer" class="share-btn share-fb" aria-label="Facebook">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"/></svg>
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"/></svg>
           Facebook
         </a>
         <a href="https://twitter.com/intent/tweet?text={{ $shareTitle }}&url={{ $shareUrl }}"
            target="_blank" rel="noopener noreferrer" class="share-btn share-tw" aria-label="X">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M23 3a10.9 10.9 0 0 1-3.14 1.53 4.48 4.48 0 0 0-7.86 3v1A10.66 10.66 0 0 1 3 4s-4 9 5 13a11.64 11.64 0 0 1-7 2c9 5 20 0 20-11.5a4.5 4.5 0 0 0-.08-.83A7.72 7.72 0 0 0 23 3z"/></svg>
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M23 3a10.9 10.9 0 0 1-3.14 1.53 4.48 4.48 0 0 0-7.86 3v1A10.66 10.66 0 0 1 3 4s-4 9 5 13a11.64 11.64 0 0 1-7 2c9 5 20 0 20-11.5a4.5 4.5 0 0 0-.08-.83A7.72 7.72 0 0 0 23 3z"/></svg>
           X
         </a>
         <a href="https://api.whatsapp.com/send?text={{ $shareTitle }}%20{{ $shareUrl }}"
            target="_blank" rel="noopener noreferrer" class="share-btn share-wa" aria-label="WhatsApp">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>
           WhatsApp
         </a>
         <button class="share-btn share-copy" id="btn-copy-link" aria-label="{{ __('Salin Tautan') }}">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
           <span id="copy-label">{{ __('Salin Tautan') }}</span>
         </button>
       </div>
 
-      {{-- ===== NAVIGASI PREV / NEXT ===== --}}
+      {{-- Bar Navigasi Bawah: Kembali ke Daftar Berita & Kategori --}}
+      <div class="article-bottom-actions">
+        <a href="{{ route('news.index') }}" class="article-back-btn">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
+          {{ __('Kembali ke Semua Berita') }}
+        </a>
+        <a href="{{ route('categories.show', optional($article->category)->slug ?? 'nasional') }}" class="article-cat-btn">
+          {{ __('Lihat Kategori :name', ['name' => $catName]) }} →
+        </a>
+      </div>
+
+      {{-- Navigasi Artikel Sebelumnya & Berikutnya --}}
       @if($prevArticle || $nextArticle)
         <nav class="article-nav" aria-label="Navigasi artikel">
           <div class="an-prev">
@@ -165,7 +210,7 @@
         </nav>
       @endif
 
-      {{-- ===== KOMENTAR ===== --}}
+      {{-- ===== SEKSI KOMENTAR ===== --}}
       <section class="comments" id="komentar">
         <h2 class="comments-title">{{ __('Komentar (:count)', ['count' => $article->comments->count()]) }}</h2>
 
@@ -241,9 +286,10 @@
 
     </article>
 
-    {{-- ===== SIDEBAR ===== --}}
+    {{-- ===== SIDEBAR: BERITA TERKAIT & KATEGORI ===== --}}
     <aside class="article-sidebar">
 
+      {{-- Berita Terkait --}}
       <section class="side-block block b-dark">
         <div class="block-head"><span class="block-title">{{ __('Artikel Terkait') }}</span></div>
         @forelse($terkait as $t)
@@ -272,6 +318,7 @@
         @endforelse
       </section>
 
+      {{-- Daftar Kategori --}}
       <section class="side-block block b-dark" style="margin-top:28px">
         <div class="block-head"><span class="block-title">{{ __('Kategori') }}</span></div>
         <ul class="cat-list">
@@ -287,6 +334,11 @@
           @endforeach
         </ul>
       </section>
+
+      {{-- Ruang Iklan Editorial --}}
+      <div class="side-block" style="margin-top:28px">
+        <div class="ad-box">{{ __('Ruang Iklan') }}<br>300 × 250</div>
+      </div>
 
     </aside>
   </div>
