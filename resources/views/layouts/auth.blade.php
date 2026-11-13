@@ -132,6 +132,29 @@
     .haus-nav-links a:hover {
       color: var(--accent-champagne);
     }
+    .haus-lang-item {
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      color: var(--text-secondary);
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      margin-left: 6px;
+      padding-left: 8px;
+      border-left: 1px solid var(--border-line);
+    }
+    .haus-lang-item a {
+      color: var(--text-secondary);
+      text-decoration: none;
+      font-size: 10px;
+    }
+    .haus-lang-item a.active {
+      color: var(--text-primary);
+      text-decoration: underline;
+      text-underline-offset: 2px;
+      font-weight: 800;
+    }
 
     /* Form Container Middle */
     .haus-main {
@@ -479,9 +502,14 @@
 
           <nav class="haus-nav" aria-label="Navigasi Utama">
             <ul class="haus-nav-links">
-              <li><a href="{{ route('articles.index') }}">BERANDA</a></li>
-              <li><a href="{{ route('news.index') }}">BERITA</a></li>
-              <li><a href="{{ route('about') }}">TENTANG KAMI</a></li>
+              <li><a href="{{ route('articles.index') }}">{{ mb_strtoupper(__('Beranda')) }}</a></li>
+              <li><a href="{{ route('news.index') }}">{{ mb_strtoupper(__('Berita')) }}</a></li>
+              <li><a href="{{ route('about') }}">{{ mb_strtoupper(__('Tentang Kami')) }}</a></li>
+              <li class="haus-lang-item">
+                <a href="{{ route('lang.switch', 'id') }}" class="{{ app()->getLocale() === 'id' ? 'active' : '' }}" title="Bahasa Indonesia">ID</a>
+                <span aria-hidden="true">/</span>
+                <a href="{{ route('lang.switch', 'en') }}" class="{{ app()->getLocale() === 'en' ? 'active' : '' }}" title="English">EN</a>
+              </li>
             </ul>
           </nav>
         </header>

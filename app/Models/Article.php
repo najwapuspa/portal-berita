@@ -20,6 +20,9 @@ class Article extends Model
         'source_name',
         'source_url',
         'excerpt',
+        'excerpt_en',
+        'title_en',
+        'content_en',
         'read_time',
         'published_at',
     ];
@@ -52,6 +55,64 @@ class Article extends Model
     }
 
     // ─── Accessor ──────────────────────────────────────────────
+
+    /**
+     * Judul dinamis berdasarkan locale aktif (ID / EN).
+     */
+    public function getDisplayTitleAttribute(): string
+    {
+        if (app()->getLocale() === 'en' && !empty($this->title_en)) {
+            return $this->title_en;
+        }
+        return (string) ($this->title ?? '');
+    }
+
+    /**
+     * Ringkasan dinamis berdasarkan locale aktif (ID / EN).
+     */
+    public function getDisplayExcerptAttribute(): string
+    {
+        if (app()->getLocale() === 'en' && !empty($this->excerpt_en)) {
+            return $this->excerpt_en;
+        }
+        return $this->getExcerptShortAttribute();
+    }
+
+    /**
+     * Konten dinamis berdasarkan locale aktif (ID / EN).
+     */
+    public function getDisplayContentAttribute(): string
+    {
+        if (app()->getLocale() === 'en' && !empty($this->content_en)) {
+            return $this->content_en;
+        }
+        return (string) ($this->content ?? '');
+    }
+
+    /**
+     * Teks waktu baca mengikuti bahasa aktif (ID: "X menit baca", EN: "X min read").
+     */
+    public function getReadTimeFormattedAttribute(): string
+    {
+        $mins = $this->getReadTimeMinutesAttribute();
+        if (app()->getLocale() === 'en') {
+            return $mins . ' min read';
+        }
+        return $mins . ' menit baca';
+    }
+
+    /**
+     * Format tanggal publikasi mengikuti bahasa aktif.
+     */
+    public function getFormattedDateAttribute(): string
+    {
+        $date = $this->getDisplayDateAttribute();
+        $locale = app()->getLocale();
+        if ($locale === 'en') {
+            return $date->locale('en')->isoFormat('MMMM D, YYYY');
+        }
+        return $date->locale('id')->translatedFormat('j F Y');
+    }
 
     /**
      * Ambil URL gambar yang sudah dinormalisasi.

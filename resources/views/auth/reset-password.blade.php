@@ -1,10 +1,10 @@
 @extends('layouts.auth')
 
-@section('title', 'Atur Ulang Kata Sandi – News X Paper')
-@section('heading', 'Reset Password')
+@section('title', __('Reset Password') . ' – News X Paper')
+@section('heading', __('Reset Password'))
 
 @section('top_right_nav')
-  <a href="{{ route('login') }}">LOGIN</a>
+  <a href="{{ route('login') }}">{{ __('LOGIN') }}</a>
 @endsection
 
 @section('content')
@@ -22,7 +22,7 @@
 
     {{-- Email Address --}}
     <div class="haus-field">
-      <label for="email" class="haus-label">EMAIL ADDRESS</label>
+      <label for="email" class="haus-label">{{ __('EMAIL ADDRESS') }}</label>
       <input id="email"
              type="email"
              name="email"
@@ -38,7 +38,7 @@
 
     {{-- New Password --}}
     <div class="haus-field">
-      <label for="password" class="haus-label">NEW PASSWORD</label>
+      <label for="password" class="haus-label">{{ __('NEW PASSWORD') }}</label>
       <div class="haus-password-wrap">
         <input id="password"
                type="password"
@@ -49,7 +49,7 @@
         <button type="button"
                 class="haus-pw-toggle"
                 onclick="togglePasswordVisibility('password', this)"
-                aria-label="Lihat kata sandi baru"
+                aria-label="{{ __('Lihat password') }}"
                 aria-pressed="false"
                 tabindex="0">
           <svg class="icon-eye-slash" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
@@ -69,7 +69,7 @@
 
     {{-- Confirm Password --}}
     <div class="haus-field">
-      <label for="password_confirmation" class="haus-label">CONFIRM PASSWORD</label>
+      <label for="password_confirmation" class="haus-label">{{ __('CONFIRM PASSWORD') }}</label>
       <div class="haus-password-wrap">
         <input id="password_confirmation"
                type="password"
@@ -80,7 +80,7 @@
         <button type="button"
                 class="haus-pw-toggle"
                 onclick="togglePasswordVisibility('password_confirmation', this)"
-                aria-label="Lihat konfirmasi kata sandi baru"
+                aria-label="{{ __('Lihat password') }}"
                 aria-pressed="false"
                 tabindex="0">
           <svg class="icon-eye-slash" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
@@ -98,7 +98,7 @@
     {{-- Submit Button --}}
     <div class="haus-btn-wrap">
       <button type="submit" class="haus-btn">
-        RESET PASSWORD
+        {{ __('RESET PASSWORD') }}
       </button>
     </div>
   </form>
@@ -106,6 +106,5 @@
 @endsection
 
 @section('footer_text')
-  <a href="{{ route('login') }}">BACK TO LOGIN.</a>
+  <a href="{{ route('login') }}">{{ __('BACK TO LOGIN.') }}</a>
 @endsection
-

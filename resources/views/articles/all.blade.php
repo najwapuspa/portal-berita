@@ -1,9 +1,10 @@
 @extends('layouts.app')
 
 @php
-  $pageTitle = $activeCategory
-    ? 'Berita ' . $activeCategory->name . ' – News X Paper'
-    : 'Semua Berita – News X Paper';
+  $catTitle = $activeCategory ? $activeCategory->display_name : null;
+  $pageTitle = $catTitle
+    ? __('Berita Kategori: :name', ['name' => $catTitle]) . ' – News X Paper'
+    : __('Semua Berita') . ' – News X Paper';
 @endphp
 
 @section('title', $pageTitle)
@@ -300,20 +301,20 @@
   {{-- ===== PAGE HEADER ===== --}}
   <header class="news-header">
     <div class="news-header-left">
-      <span class="news-page-tag">Katalog Informasi</span>
+      <span class="news-page-tag">{{ __('Katalog Informasi') }}</span>
       <h1 class="news-page-title">
         @if($activeCategory)
-          Berita Kategori: {{ $activeCategory->name }}
+          {{ __('Berita Kategori: :name', ['name' => $activeCategory->display_name]) }}
         @else
-          Semua Berita
+          {{ __('Semua Berita') }}
         @endif
       </h1>
       <p class="news-page-desc">
-        Menghadirkan liputan jurnalistik terpercaya, tajam, dan berimbang dari berbagai rubrik kehidupan.
+        {{ __('Menghadirkan liputan jurnalistik terpercaya, tajam, dan berimbang dari berbagai rubrik kehidupan.') }}
       </p>
     </div>
     <div class="news-header-badge">
-      Total: {{ $articles->total() }} Berita
+      {{ __('Total: :count Berita', ['count' => $articles->total()]) }}
     </div>
   </header>
 
@@ -323,7 +324,7 @@
       <li>
         <a href="{{ route('news.index') }}"
            class="news-filter-pill {{ empty(request('kategori')) ? 'active' : '' }}">
-          Semua
+          {{ __('Semua') }}
         </a>
       </li>
       @foreach($categories as $cat)
@@ -333,7 +334,7 @@
         <li>
           <a href="{{ route('news.index', ['kategori' => $cat->slug]) }}"
              class="news-filter-pill {{ $isActive ? 'active' : '' }}">
-            {{ $cat->name }}
+            {{ $cat->display_name }}
             <span class="news-filter-count">({{ $cat->articles_count }})</span>
           </a>
         </li>
@@ -351,17 +352,17 @@
           <line x1="12" y1="16" x2="12.01" y2="16"/>
         </svg>
       </div>
-      <h2 class="news-empty-title">Belum ada berita ditemukan</h2>
-      <p class="news-empty-text">Tidak ada artikel yang dipublikasikan pada kategori ini.</p>
+      <h2 class="news-empty-title">{{ __('Belum ada berita ditemukan') }}</h2>
+      <p class="news-empty-text">{{ __('Tidak ada artikel yang dipublikasikan pada kategori ini.') }}</p>
       <a href="{{ route('news.index') }}" class="about-btn about-btn-primary" style="display:inline-flex;">
-        Lihat Semua Berita
+        {{ __('Lihat Semua Berita') }}
       </a>
     </div>
   @else
     <div class="news-grid">
       @foreach($articles as $a)
         @php
-          $catName  = $a->category->name ?? 'Berita';
+          $catName  = $a->category->display_name ?? 'Berita';
           $catSlug  = $a->category->slug ?? '';
           $catColor = config('categories.' . $catSlug . '.color', '#111111');
           
@@ -375,25 +376,15 @@
           }
           $placeholder = asset('images/placeholder-news.svg');
           $finalThumb = $imgUrl ?: $placeholder;
-
-          $dateString = $a->published_at
-            ? $a->published_at->locale('id')->translatedFormat('j M Y')
-            : ($a->created_at ? $a->created_at->locale('id')->translatedFormat('j M Y') : now()->locale('id')->translatedFormat('j M Y'));
-
-          if (!empty($a->excerpt)) {
-            $excerpt = $a->excerpt;
-          } else {
-            $cleaned = html_entity_decode(strip_tags($a->content), ENT_QUOTES | ENT_HTML5, 'UTF-8');
-            $cleaned = preg_replace('/\s+/', ' ', trim(str_replace(["\xc2\xa0", '&nbsp;'], ' ', $cleaned)));
-            $excerpt = \Illuminate\Support\Str::limit($cleaned, 130);
-          }
+          $dateString = $a->formatted_date;
+          $excerpt = $a->display_excerpt;
         @endphp
 
         <article class="news-card">
           <div class="news-card-thumb-wrap">
             <a href="{{ route('articles.show', $a->slug) }}" tabindex="-1" aria-hidden="true">
               <img src="{{ $finalThumb }}"
-                   alt="{{ $a->title }}"
+                   alt="{{ $a->display_title }}"
                    class="news-card-thumb"
                    loading="lazy"
                    onerror="this.src='{{ $placeholder }}'">
@@ -412,7 +403,7 @@
           <div class="news-card-body">
             <h2 class="news-card-title">
               <a href="{{ route('articles.show', $a->slug) }}">
-                {{ $a->title }}
+                {{ $a->display_title }}
               </a>
             </h2>
 
@@ -420,9 +411,9 @@
               <span class="news-card-author">{{ $a->user->name ?? 'Redaksi' }}</span>
               <span aria-hidden="true">–</span>
               <time datetime="{{ $a->published_at ? $a->published_at->toIso8601String() : '' }}">{{ $dateString }}</time>
-              @if(!empty($a->read_time))
+              @if(!empty($a->read_time_formatted))
                 <span aria-hidden="true">·</span>
-                <span>{{ $a->read_time }} menit</span>
+                <span>{{ $a->read_time_formatted }}</span>
               @endif
             </div>
 
@@ -432,9 +423,9 @@
 
             <div class="news-card-footer">
               <a href="{{ route('articles.show', $a->slug) }}" class="news-read-more">
-                Baca Selengkapnya →
+                {{ __('Baca Selengkapnya') }} →
               </a>
-              <span class="news-comments-count" title="{{ $a->comments_count }} komentar">
+              <span class="news-comments-count" title="{{ $a->comments_count }} {{ __('komentar') }}">
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
                   <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
                 </svg>
@@ -450,17 +441,17 @@
     @if($articles->hasPages())
       <nav class="pager" aria-label="Navigasi Halaman Berita">
         @if($articles->onFirstPage())
-          <span class="off">‹ Sebelumnya</span>
+          <span class="off">‹ {{ __('Sebelumnya') }}</span>
         @else
-          <a href="{{ $articles->previousPageUrl() }}">‹ Sebelumnya</a>
+          <a href="{{ $articles->previousPageUrl() }}">‹ {{ __('Sebelumnya') }}</a>
         @endif
 
-        <span class="pager-info">Halaman {{ $articles->currentPage() }} dari {{ $articles->lastPage() }}</span>
+        <span class="pager-info">{{ __('Halaman :current dari :total', ['current' => $articles->currentPage(), 'total' => $articles->lastPage()]) }}</span>
 
         @if($articles->hasMorePages())
-          <a href="{{ $articles->nextPageUrl() }}">Berikutnya ›</a>
+          <a href="{{ $articles->nextPageUrl() }}">{{ __('Berikutnya') }} ›</a>
         @else
-          <span class="off">Berikutnya ›</span>
+          <span class="off">{{ __('Berikutnya') }} ›</span>
         @endif
       </nav>
     @endif

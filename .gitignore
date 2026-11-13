@@ -29,3 +29,6 @@ Thumbs.db
 # Backup database — jangan commit ke repository
 *.sql
 backup_*.sql
+
+# File test/scratch sementara — tidak perlu di-commit
+/scratch/

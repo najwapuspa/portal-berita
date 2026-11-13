@@ -12,4 +12,15 @@ class Category extends Model
     {
         return $this->hasMany(Article::class);
     }
+
+    /**
+     * Nama kategori dinamis berdasarkan locale aktif (ID / EN).
+     */
+    public function getDisplayNameAttribute(): string
+    {
+        if (app()->getLocale() === 'en') {
+            return config('categories.' . $this->slug . '.name_en', $this->name);
+        }
+        return $this->name;
+    }
 }

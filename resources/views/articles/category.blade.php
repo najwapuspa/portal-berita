@@ -1,7 +1,11 @@
 @extends('layouts.app')
 
-@section('title', $cfg['name'] . ' – News X Paper')
-@section('description', 'Berita terbaru kategori ' . $cfg['name'] . ' dari News X Paper.')
+@php
+  $catTitle = $cfg['display_name'] ?? $cfg['name'];
+@endphp
+
+@section('title', $catTitle . ' – News X Paper')
+@section('description', 'Berita terbaru kategori ' . $catTitle . ' dari News X Paper.')
 
 @section('content')
 @php
@@ -19,8 +23,8 @@
 <div class="container">
 
   <div class="cat-head" style="--accent: {{ $cfg['color'] }}">
-    <h1 class="cat-title">{{ $cfg['name'] }}</h1>
-    <span class="cat-count">{{ $total }} berita</span>
+    <h1 class="cat-title">{{ $catTitle }}</h1>
+    <span class="cat-count">{{ $total }} {{ __('berita') }}</span>
   </div>
 
   <div class="layout">
@@ -30,9 +34,9 @@
       @if(!$first)
         <div class="cat-empty">
           <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#ccc" stroke-width="1.5" style="margin-bottom:16px" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
-          <h2>Belum ada berita di kategori {{ $cfg['name'] }}</h2>
-          <p>Berita akan muncul di sini setelah dipublikasikan.</p>
-          <a href="{{ route('articles.index') }}" class="cat-back">Kembali ke Beranda</a>
+          <h2>{{ __('Belum ada berita di kategori :name', ['name' => $catTitle]) }}</h2>
+          <p>{{ __('Berita akan muncul di sini setelah dipublikasikan.') }}</p>
+          <a href="{{ route('articles.index') }}" class="cat-back">{{ __('Kembali ke Beranda') }}</a>
         </div>
       @else
 
@@ -55,7 +59,7 @@
               <span>–</span>
               <span>{{ $first['date'] }}</span>
               @if(!empty($first['read_time']))
-                <span>· {{ $first['read_time'] }} menit baca</span>
+                <span>· {{ $first['read_time'] }} {{ __('menit baca') }}</span>
               @endif
               <span class="badge-count">{{ $first['comments'] }}</span>
             </div>
@@ -66,7 +70,7 @@
             @endif
             <p class="excerpt">{{ $first['excerpt'] }}</p>
             <a href="{{ $first['url'] }}" class="fa-read-btn" style="margin-top:14px;font-size:12px;padding:8px 18px">
-              Baca Selengkapnya →
+              {{ __('Baca Selengkapnya') }} →
             </a>
           </div>
         </article>
@@ -88,7 +92,7 @@
                 <div class="card-meta">
                   <b>{{ $a['author'] }}</b><span>–</span><span>{{ $a['date'] }}</span>
                   @if(!empty($a['read_time']))
-                    <span>· {{ $a['read_time'] }} mnt</span>
+                    <span>· {{ $a['read_time'] }} {{ __('mnt') }}</span>
                   @endif
                   <span class="badge-count">{{ $a['comments'] }}</span>
                 </div>
@@ -105,15 +109,15 @@
         @if($paginator->lastPage() > 1)
           <nav class="pager" aria-label="Halaman">
             @if($paginator->previousPageUrl())
-              <a href="{{ $paginator->previousPageUrl() }}">‹ Sebelumnya</a>
+              <a href="{{ $paginator->previousPageUrl() }}">‹ {{ __('Sebelumnya') }}</a>
             @else
-              <span class="off">‹ Sebelumnya</span>
+              <span class="off">‹ {{ __('Sebelumnya') }}</span>
             @endif
-            <span class="pager-info">Halaman {{ $paginator->currentPage() }} dari {{ $paginator->lastPage() }}</span>
+            <span class="pager-info">{{ __('Halaman :current dari :total', ['current' => $paginator->currentPage(), 'total' => $paginator->lastPage()]) }}</span>
             @if($paginator->nextPageUrl())
-              <a href="{{ $paginator->nextPageUrl() }}">Berikutnya ›</a>
+              <a href="{{ $paginator->nextPageUrl() }}">{{ __('Berikutnya') }} ›</a>
             @else
-              <span class="off">Berikutnya ›</span>
+              <span class="off">{{ __('Berikutnya') }} ›</span>
             @endif
           </nav>
         @endif
@@ -124,21 +128,24 @@
     {{-- ===== Sidebar ===== --}}
     <aside>
       <section class="side-block block b-dark" style="margin-bottom:32px">
-        <div class="block-head"><span class="block-title">Kategori Lainnya</span></div>
+        <div class="block-head"><span class="block-title">{{ __('Kategori Lainnya') }}</span></div>
         <ul class="cat-list">
           @foreach(config('categories') as $s => $c)
             @if($s !== $slug)
+              @php
+                $catSidebarName = app()->getLocale() === 'en' ? ($c['name_en'] ?? $c['name']) : $c['name'];
+              @endphp
               <li>
                 <a href="{{ route('categories.show', $s) }}"
                    style="{{ request()->is('kategori/' . $s) ? 'color:' . $c['color'] . ';font-weight:700' : '' }}">
-                  <i style="background: {{ $c['color'] }}"></i>{{ $c['name'] }}
+                  <i style="background: {{ $c['color'] }}"></i>{{ $catSidebarName }}
                 </a>
               </li>
             @endif
           @endforeach
         </ul>
       </section>
-      <div class="side-block"><div class="ad-box">Ruang Iklan<br>300 × 250</div></div>
+      <div class="side-block"><div class="ad-box">{{ __('Ruang Iklan') }}<br>300 × 250</div></div>
     </aside>
   </div>
 </div>

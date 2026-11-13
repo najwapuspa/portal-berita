@@ -1,10 +1,10 @@
 @extends('layouts.auth')
 
-@section('title', 'Daftar Akun – News X Paper')
-@section('heading', 'Create Account')
+@section('title', __('Daftar') . ' – News X Paper')
+@section('heading', __('CREATE ACCOUNT'))
 
 @section('top_right_nav')
-  <a href="{{ route('login') }}">LOGIN</a>
+  <a href="{{ route('login') }}">{{ mb_strtoupper(__('LOGIN')) }}</a>
 @endsection
 
 @section('content')
@@ -20,7 +20,7 @@
 
     {{-- Full Name --}}
     <div class="haus-field">
-      <label for="name" class="haus-label">FULL NAME</label>
+      <label for="name" class="haus-label">{{ __('FULL NAME') }}</label>
       <input id="name"
              type="text"
              name="name"
@@ -36,7 +36,7 @@
 
     {{-- Email --}}
     <div class="haus-field">
-      <label for="email" class="haus-label">EMAIL</label>
+      <label for="email" class="haus-label">{{ __('EMAIL') }}</label>
       <input id="email"
              type="email"
              name="email"
@@ -51,7 +51,7 @@
 
     {{-- Password --}}
     <div class="haus-field">
-      <label for="password" class="haus-label">PASSWORD</label>
+      <label for="password" class="haus-label">{{ __('PASSWORD') }}</label>
       <div class="haus-password-wrap">
         <input id="password"
                type="password"
@@ -62,7 +62,7 @@
         <button type="button"
                 class="haus-pw-toggle"
                 onclick="togglePasswordVisibility('password', this)"
-                aria-label="Lihat password"
+                aria-label="{{ __('Lihat password') }}"
                 aria-pressed="false"
                 tabindex="0">
           <svg class="icon-eye-slash" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
@@ -82,7 +82,7 @@
 
     {{-- Confirm Password --}}
     <div class="haus-field">
-      <label for="password_confirmation" class="haus-label">CONFIRM PASSWORD</label>
+      <label for="password_confirmation" class="haus-label">{{ __('CONFIRM PASSWORD') }}</label>
       <div class="haus-password-wrap">
         <input id="password_confirmation"
                type="password"
@@ -93,7 +93,7 @@
         <button type="button"
                 class="haus-pw-toggle"
                 onclick="togglePasswordVisibility('password_confirmation', this)"
-                aria-label="Lihat konfirmasi password"
+                aria-label="{{ __('Lihat password') }}"
                 aria-pressed="false"
                 tabindex="0">
           <svg class="icon-eye-slash" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
@@ -111,7 +111,7 @@
     {{-- Submit Button --}}
     <div class="haus-btn-wrap">
       <button type="submit" class="haus-btn">
-        CREATE ACCOUNT
+        {{ __('CREATE ACCOUNT') }}
       </button>
     </div>
   </form>
@@ -119,5 +119,5 @@
 @endsection
 
 @section('footer_text')
-  ALREADY HAVE AN ACCOUNT? <a href="{{ route('login') }}">LOGIN.</a>
+  {{ __('ALREADY HAVE AN ACCOUNT?') }} <a href="{{ route('login') }}">{{ __('LOGIN.') }}</a>
 @endsection

@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="id">
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -37,6 +37,40 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700;900&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="{{ asset('css/newspaper.css') }}">
+  <style>
+    /* Language Switcher in Header */
+    .hd-lang-switcher {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: #202020;
+      border: 1px solid #383838;
+      border-radius: 4px;
+      padding: 5px 9px;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      line-height: 1;
+    }
+    .hd-lang-btn {
+      color: #888888;
+      text-decoration: none;
+      transition: color 0.15s ease;
+    }
+    .hd-lang-btn:hover {
+      color: #ffffff;
+    }
+    .hd-lang-btn.active {
+      color: #ffffff;
+      font-weight: 800;
+      text-decoration: underline;
+      text-underline-offset: 3px;
+    }
+    .hd-lang-divider {
+      color: #444444;
+      font-size: 10px;
+    }
+  </style>
   @stack('head')
 </head>
 <body>
@@ -55,12 +89,12 @@
       <form class="search" id="search-form" action="{{ route('search') }}" method="GET">
         <input type="search" name="q" id="search-input"
                value="{{ request('q') }}"
-               placeholder="Cari berita, misalnya: politik"
-               aria-label="Cari berita"
+               placeholder="{{ __('Cari berita, misalnya: politik') }}"
+               aria-label="{{ __('Cari berita') }}"
                autocomplete="off"
                aria-expanded="false"
                aria-haspopup="listbox">
-        <button type="submit" aria-label="Cari">
+        <button type="submit" aria-label="{{ __('Cari') }}">
           <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true">
             <circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/>
           </svg>
@@ -71,62 +105,75 @@
 
     {{-- Aksi header --}}
     <div class="hd-actions">
+      {{-- Language Switcher ID | EN --}}
+      <div class="hd-lang-switcher" aria-label="{{ __('Pilihan Bahasa') }}">
+        <a href="{{ route('lang.switch', 'id') }}"
+           class="hd-lang-btn {{ app()->getLocale() === 'id' ? 'active' : '' }}"
+           title="Bahasa Indonesia">ID</a>
+        <span class="hd-lang-divider">|</span>
+        <a href="{{ route('lang.switch', 'en') }}"
+           class="hd-lang-btn {{ app()->getLocale() === 'en' ? 'active' : '' }}"
+           title="English">EN</a>
+      </div>
+
       @auth
         <div class="hd-user">
           <span class="hd-avatar" aria-hidden="true">{{ mb_strtoupper(mb_substr(auth()->user()->name, 0, 1)) }}</span>
           <span class="hd-name">{{ \Illuminate\Support\Str::words(auth()->user()->name, 1, '') }}</span>
         </div>
-        <a href="{{ route('dashboard') }}" class="hd-btn ghost">Dashboard</a>
+        <a href="{{ route('dashboard') }}" class="hd-btn ghost">{{ __('Dashboard') }}</a>
         <form method="POST" action="{{ route('logout') }}">
           @csrf
-          <button type="submit" class="hd-btn ghost">Keluar</button>
+          <button type="submit" class="hd-btn ghost">{{ __('Keluar') }}</button>
         </form>
       @else
         <a href="{{ route('login') }}" class="hd-btn primary">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true">
             <circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.4 3.6-8 8-8s8 3.6 8 8"/>
           </svg>
-          Masuk
+          {{ __('Masuk') }}
         </a>
-        <a href="{{ route('register') }}" class="hd-btn ghost hide-sm">Daftar</a>
+        <a href="{{ route('register') }}" class="hd-btn ghost hide-sm">{{ __('Daftar') }}</a>
       @endauth
     </div>
 
-    <button class="hamburger-nav" id="hamburger-nav" aria-label="Buka navigasi" aria-expanded="false">
+    <button class="hamburger-nav" id="hamburger-nav" aria-label="{{ __('Buka navigasi') }}" aria-expanded="false">
       <span></span><span></span><span></span>
     </button>
   </div>
 
-  <nav class="mainnav" id="mainnav" aria-label="Kategori berita">
+  <nav class="mainnav" id="mainnav" aria-label="{{ __('Kategori') }}">
     <div class="container">
       <ul class="menu" id="main-menu">
         <li><a href="{{ route('articles.index') }}"
-               class="{{ request()->routeIs('articles.index') ? 'active' : '' }}">Beranda</a></li>
+               class="{{ request()->routeIs('articles.index') ? 'active' : '' }}">{{ __('Beranda') }}</a></li>
         <li><a href="{{ route('news.index') }}"
-               class="{{ request()->routeIs('news.index') ? 'active' : '' }}">Berita</a></li>
+               class="{{ request()->routeIs('news.index') ? 'active' : '' }}">{{ __('Berita') }}</a></li>
         {{-- Kategori utama tampil langsung (7 pertama) --}}
         @php $catArray = array_slice(config('categories'), 0, 7, true); @endphp
         @foreach($catArray as $slug => $cat)
+          @php $catName = app()->getLocale() === 'en' && !empty($cat['name_en']) ? $cat['name_en'] : $cat['name']; @endphp
           <li><a href="{{ route('categories.show', $slug) }}"
-                 class="{{ request()->is('kategori/' . $slug) ? 'active' : '' }}">{{ $cat['name'] }}</a></li>
+                 class="{{ request()->is('kategori/' . $slug) ? 'active' : '' }}">{{ $catName }}</a></li>
         @endforeach
         {{-- Sisa kategori dalam dropdown "Lainnya" --}}
         @php $moreArray = array_slice(config('categories'), 7, null, true); @endphp
         @if(count($moreArray) > 0)
           <li class="menu-more">
             <button class="menu-more-btn" id="menu-more-btn" aria-expanded="false" aria-haspopup="true">
-              Lainnya <span class="menu-more-arrow">▾</span>
+              {{ __('Lainnya') }} <span class="menu-more-arrow">▾</span>
             </button>
             <ul class="menu-dropdown" id="menu-dropdown" role="menu">
               @foreach($moreArray as $slug => $cat)
+                @php $catName = app()->getLocale() === 'en' && !empty($cat['name_en']) ? $cat['name_en'] : $cat['name']; @endphp
                 <li role="none"><a href="{{ route('categories.show', $slug) }}" role="menuitem"
-                   class="{{ request()->is('kategori/' . $slug) ? 'active' : '' }}">{{ $cat['name'] }}</a></li>
+                   class="{{ request()->is('kategori/' . $slug) ? 'active' : '' }}">{{ $catName }}</a></li>
               @endforeach
             </ul>
           </li>
         @endif
         <li><a href="{{ route('about') }}"
-               class="{{ request()->routeIs('about') ? 'active' : '' }}">Tentang Kami</a></li>
+               class="{{ request()->routeIs('about') ? 'active' : '' }}">{{ __('Tentang Kami') }}</a></li>
       </ul>
     </div>
   </nav>
@@ -143,9 +190,9 @@
       <div class="f-col f-about">
         <a href="{{ route('articles.index') }}" class="f-logo">
           <span class="logo-word">News<span class="x">X</span>Paper</span>
-          <span class="f-tag">the art of publishing</span>
+          <span class="f-tag">{{ __('the art of publishing') }}</span>
         </a>
-        <p>News X Paper menghadirkan kabar terkini seputar politik, ekonomi, olahraga, dan teknologi — cepat, akurat, mudah dibaca.</p>
+        <p>{{ __('News X Paper menghadirkan kabar terkini seputar politik, ekonomi, olahraga, dan teknologi — cepat, akurat, mudah dibaca.') }}</p>
         <div class="f-social">
           <a href="#" aria-label="Facebook">f</a>
           <a href="#" aria-label="Instagram">in</a>
@@ -155,28 +202,29 @@
       </div>
 
       <div class="f-col">
-        <h4 class="f-title">Kategori</h4>
+        <h4 class="f-title">{{ __('Kategori') }}</h4>
         <ul class="f-links">
           @foreach(config('categories') as $slug => $cat)
-            <li><a href="{{ route('categories.show', $slug) }}">{{ $cat['name'] }}</a></li>
+            @php $catName = app()->getLocale() === 'en' && !empty($cat['name_en']) ? $cat['name_en'] : $cat['name']; @endphp
+            <li><a href="{{ route('categories.show', $slug) }}">{{ $catName }}</a></li>
           @endforeach
         </ul>
       </div>
 
       <div class="f-col">
-        <h4 class="f-title">Perusahaan</h4>
+        <h4 class="f-title">{{ __('Perusahaan') }}</h4>
         <ul class="f-links">
-          <li><a href="{{ route('about') }}">Tentang kami</a></li>
-          <li><a href="#">Redaksi</a></li>
-          <li><a href="#">Pedoman media siber</a></li>
-          <li><a href="#">Pasang iklan</a></li>
-          <li><a href="#">Hubungi kami</a></li>
+          <li><a href="{{ route('about') }}">{{ __('Tentang kami') }}</a></li>
+          <li><a href="#">{{ __('Redaksi') }}</a></li>
+          <li><a href="#">{{ __('Pedoman media siber') }}</a></li>
+          <li><a href="#">{{ __('Pasang iklan') }}</a></li>
+          <li><a href="#">{{ __('Hubungi kami') }}</a></li>
         </ul>
       </div>
 
       <div class="f-col f-news">
-        <h4 class="f-title">Buletin</h4>
-        <p>Dapatkan ringkasan berita pilihan langsung di email kamu.</p>
+        <h4 class="f-title">{{ __('Buletin') }}</h4>
+        <p>{{ __('Dapatkan ringkasan berita pilihan langsung di email kamu.') }}</p>
 
         @if(session('newsletter_success'))
           <div class="nl-alert nl-success" role="alert">
@@ -194,10 +242,10 @@
           @csrf
           <div class="f-form-group">
             <input type="email" name="email" value="{{ old('email') }}"
-                   placeholder="Alamat email" aria-label="Alamat email untuk newsletter"
+                   placeholder="{{ __('Alamat email kamu') }}" aria-label="{{ __('Alamat email kamu') }}"
                    autocomplete="email"
                    class="{{ $errors->has('email') ? 'f-input-error' : '' }}">
-            <button type="submit">Langganan</button>
+            <button type="submit">{{ __('Langganan') }}</button>
           </div>
           @error('email')
             <p class="nl-error">{{ $message }}</p>
@@ -216,11 +264,11 @@
 
   <div class="footer-bottom">
     <div class="container">
-      <span>&copy; {{ date('Y') }} News X Paper. Semua hak dilindungi.</span>
+      <span>&copy; {{ date('Y') }} News X Paper. {{ __('Hak cipta dilindungi undang-undang.') }}</span>
       <div class="fb-links">
-        <a href="#">Kebijakan privasi</a>
-        <a href="#">Syarat &amp; ketentuan</a>
-        <a href="#">Peta situs</a>
+      <a href="#">{{ __('Kebijakan privasi') }}</a>
+        <a href="#">{{ __('Syarat &amp; ketentuan') }}</a>
+        <a href="#">{{ __('Peta situs') }}</a>
       </div>
     </div>
   </div>

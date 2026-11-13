@@ -1,7 +1,7 @@
 @extends('layouts.app')
 
-@section('title', 'Tentang Kami | NEWS X PAPER')
-@section('description', 'Kenali NEWS X PAPER, portal berita digital yang menyajikan informasi aktual, informatif, dan beragam untuk memperluas wawasan pembaca.')
+@section('title', __('Tentang Kami') . ' | NEWS X PAPER')
+@section('description', app()->getLocale() === 'en' ? 'Get to know NEWS X PAPER, a digital news portal providing accurate, insightful, and diverse journalism to expand readers\' perspectives.' : 'Kenali NEWS X PAPER, portal berita digital yang menyajikan informasi aktual, informatif, dan beragam untuk memperluas wawasan pembaca.')
 
 @push('head')
 <style>
@@ -424,18 +424,20 @@
   {{-- BAGIAN 1 — HERO / INTRODUCTION                          --}}
   {{-- ======================================================== --}}
   <header class="about-hero">
-    <span class="about-hero-tag">Profil Resmi Media</span>
+    <span class="about-hero-tag">{{ __('Profil Resmi Media') }}</span>
     <h1 class="about-hero-title">Tentang NEWS X PAPER</h1>
-    <p class="about-hero-subtitle">Informasi Aktual, Wawasan Luas, dan Berita untuk Semua.</p>
+    <p class="about-hero-subtitle">{{ __('Informasi Aktual, Wawasan Luas, dan Berita untuk Semua.') }}</p>
     <p class="about-hero-desc">
-      NEWS X PAPER merupakan portal berita digital yang hadir untuk memberikan akses informasi kepada masyarakat secara praktis, informatif, dan mudah dipahami. Kami menghadirkan berbagai informasi dari beragam bidang kehidupan agar pembaca dapat mengikuti perkembangan peristiwa dan memperoleh wawasan yang lebih luas.
+      {{ app()->getLocale() === 'en'
+        ? 'NEWS X PAPER is a digital news portal committed to providing accessible, informative, and engaging journalism for the public. We curate stories spanning vital sectors of life, empowering readers to stay informed and broaden their horizons.'
+        : 'NEWS X PAPER merupakan portal berita digital yang hadir untuk memberikan akses informasi kepada masyarakat secara praktis, informatif, dan mudah dipahami. Kami menghadirkan berbagai informasi dari beragam bidang kehidupan agar pembaca dapat mengikuti perkembangan peristiwa dan memperoleh wawasan yang lebih luas.' }}
     </p>
     <div class="about-hero-actions">
       <a href="{{ route('news.index') }}" class="about-btn about-btn-primary">
-        Jelajahi Berita →
+        {{ __('Jelajahi Berita →') }}
       </a>
       <a href="{{ route('articles.index') }}" class="about-btn about-btn-outline">
-        Kembali ke Beranda
+        {{ __('Kembali ke Beranda') }}
       </a>
     </div>
   </header>
@@ -445,14 +447,18 @@
   {{-- ======================================================== --}}
   <section class="about-section" aria-labelledby="sec-siapa-kami">
     <div class="about-sec-head">
-      <h2 id="sec-siapa-kami" class="about-sec-title">Siapa Kami?</h2>
+      <h2 id="sec-siapa-kami" class="about-sec-title">{{ __('Siapa Kami?') }}</h2>
     </div>
     <div class="about-intro-card">
       <p class="about-intro-text">
-        NEWS X PAPER adalah platform portal berita digital yang menyajikan beragam informasi dari berbagai kategori, mulai dari nasional, internasional, politik, ekonomi, teknologi, pendidikan, kesehatan, olahraga, hiburan, hingga gaya hidup.
+        {{ app()->getLocale() === 'en'
+          ? 'NEWS X PAPER is a digital news portal platform presenting diverse information across a wide spectrum of categories, ranging from national, international, politics, economy, technology, education, health, sports, entertainment, to lifestyle.'
+          : 'NEWS X PAPER adalah platform portal berita digital yang menyajikan beragam informasi dari berbagai kategori, mulai dari nasional, internasional, politik, ekonomi, teknologi, pendidikan, kesehatan, olahraga, hiburan, hingga gaya hidup.' }}
       </p>
       <p class="about-intro-text">
-        Kami hadir untuk memudahkan pembaca menemukan informasi yang relevan melalui tampilan website yang nyaman, terstruktur, dan mudah diakses.
+        {{ app()->getLocale() === 'en'
+          ? 'We are here to facilitate readers in finding relevant information through a comfortable, structured, and accessible digital news experience.'
+          : 'Kami hadir untuk memudahkan pembaca menemukan informasi yang relevan melalui tampilan website yang nyaman, terstruktur, dan mudah diakses.' }}
       </p>
     </div>
   </section>
@@ -466,11 +472,13 @@
       {{-- Bagian 3: Visi Kami --}}
       <div>
         <div class="about-sec-head">
-          <h2 class="about-sec-title">Visi Kami</h2>
+          <h2 class="about-sec-title">{{ __('Visi Kami') }}</h2>
         </div>
         <div class="about-visi-card">
           <blockquote class="about-visi-quote">
-            "Menjadi portal berita digital yang informatif, terpercaya, dan mudah diakses oleh masyarakat serta mampu memberikan wawasan yang bermanfaat bagi kehidupan sehari-hari."
+            {{ app()->getLocale() === 'en'
+              ? '"To become an informative, trusted, and universally accessible digital news portal that provides meaningful insights for everyday life."'
+              : '"Menjadi portal berita digital yang informatif, terpercaya, dan mudah diakses oleh masyarakat serta mampu memberikan wawasan yang bermanfaat bagi kehidupan sehari-hari."' }}
           </blockquote>
         </div>
       </div>
@@ -478,28 +486,38 @@
       {{-- Bagian 4: Misi Kami --}}
       <div>
         <div class="about-sec-head">
-          <h2 class="about-sec-title">Misi Kami</h2>
+          <h2 class="about-sec-title">{{ __('Misi Kami') }}</h2>
         </div>
         <div class="about-misi-list">
           <div class="about-misi-card">
             <span class="about-misi-num" aria-hidden="true">1</span>
-            <p class="about-misi-text">Menyajikan informasi yang aktual, informatif, dan mudah dipahami.</p>
+            <p class="about-misi-text">
+              {{ app()->getLocale() === 'en' ? 'Delivering information that is up-to-date, informative, and easily understood.' : 'Menyajikan informasi yang aktual, informatif, dan mudah dipahami.' }}
+            </p>
           </div>
           <div class="about-misi-card">
             <span class="about-misi-num" aria-hidden="true">2</span>
-            <p class="about-misi-text">Mempermudah masyarakat dalam mengakses berbagai informasi melalui platform digital.</p>
+            <p class="about-misi-text">
+              {{ app()->getLocale() === 'en' ? 'Facilitating public access to diverse information through modern digital platforms.' : 'Mempermudah masyarakat dalam mengakses berbagai informasi melalui platform digital.' }}
+            </p>
           </div>
           <div class="about-misi-card">
             <span class="about-misi-num" aria-hidden="true">3</span>
-            <p class="about-misi-text">Menghadirkan berita dari beragam kategori untuk memperluas wawasan pembaca.</p>
+            <p class="about-misi-text">
+              {{ app()->getLocale() === 'en' ? 'Presenting news from diverse categories to expand readers\' perspectives.' : 'Menghadirkan berita dari beragam kategori untuk memperluas wawasan pembaca.' }}
+            </p>
           </div>
           <div class="about-misi-card">
             <span class="about-misi-num" aria-hidden="true">4</span>
-            <p class="about-misi-text">Mengutamakan penyajian informasi yang bertanggung jawab.</p>
+            <p class="about-misi-text">
+              {{ app()->getLocale() === 'en' ? 'Prioritizing responsible and verified journalism.' : 'Mengutamakan penyajian informasi yang bertanggung jawab.' }}
+            </p>
           </div>
           <div class="about-misi-card">
             <span class="about-misi-num" aria-hidden="true">5</span>
-            <p class="about-misi-text">Menciptakan pengalaman membaca berita yang nyaman dan responsif di berbagai perangkat.</p>
+            <p class="about-misi-text">
+              {{ app()->getLocale() === 'en' ? 'Creating a comfortable and responsive reading experience across all devices.' : 'Menciptakan pengalaman membaca berita yang nyaman dan responsif di berbagai perangkat.' }}
+            </p>
           </div>
         </div>
       </div>
@@ -512,7 +530,7 @@
   {{-- ======================================================== --}}
   <section class="about-section" aria-labelledby="sec-nilai">
     <div class="about-sec-head">
-      <h2 id="sec-nilai" class="about-sec-title">Nilai yang Kami Junjung</h2>
+      <h2 id="sec-nilai" class="about-sec-title">{{ __('Nilai yang Kami Junjung') }}</h2>
     </div>
     <div class="about-values-grid">
 
@@ -524,8 +542,10 @@
             <polyline points="9 12 11 14 15 10"/>
           </svg>
         </div>
-        <h3 class="about-val-title">Keakuratan</h3>
-        <p class="about-val-desc">Mengutamakan informasi yang jelas dan dapat dipertanggungjawabkan.</p>
+        <h3 class="about-val-title">{{ __('Keakuratan') }}</h3>
+        <p class="about-val-desc">
+          {{ app()->getLocale() === 'en' ? 'Prioritizing verified, transparent, and accountable reporting.' : 'Mengutamakan informasi yang jelas dan dapat dipertanggungjawabkan.' }}
+        </p>
       </article>
 
       {{-- Nilai 2: Objektivitas --}}
@@ -536,8 +556,10 @@
             <line x1="12" y1="2" x2="12" y2="22"/>
           </svg>
         </div>
-        <h3 class="about-val-title">Objektivitas</h3>
-        <p class="about-val-desc">Menyajikan informasi secara berimbang.</p>
+        <h3 class="about-val-title">{{ __('Objektivitas') }}</h3>
+        <p class="about-val-desc">
+          {{ app()->getLocale() === 'en' ? 'Delivering balanced perspectives without partiality.' : 'Menyajikan informasi secara berimbang.' }}
+        </p>
       </article>
 
       {{-- Nilai 3: Profesionalisme --}}
@@ -548,8 +570,10 @@
             <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/>
           </svg>
         </div>
-        <h3 class="about-val-title">Profesionalisme</h3>
-        <p class="about-val-desc">Menjaga kualitas penyajian dan pengalaman membaca.</p>
+        <h3 class="about-val-title">{{ __('Profesionalisme') }}</h3>
+        <p class="about-val-desc">
+          {{ app()->getLocale() === 'en' ? 'Upholding uncompromising editorial quality and reader experience.' : 'Menjaga kualitas penyajian dan pengalaman membaca.' }}
+        </p>
       </article>
 
       {{-- Nilai 4: Aksesibilitas --}}
@@ -561,8 +585,10 @@
             <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>
           </svg>
         </div>
-        <h3 class="about-val-title">Aksesibilitas</h3>
-        <p class="about-val-desc">Memudahkan pembaca mengakses informasi kapan saja.</p>
+        <h3 class="about-val-title">{{ __('Aksesibilitas') }}</h3>
+        <p class="about-val-desc">
+          {{ app()->getLocale() === 'en' ? 'Ensuring fast, round-the-clock news accessibility for all readers.' : 'Memudahkan pembaca mengakses informasi kapan saja.' }}
+        </p>
       </article>
 
       {{-- Nilai 5: Inovasi --}}
@@ -572,8 +598,10 @@
             <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>
           </svg>
         </div>
-        <h3 class="about-val-title">Inovasi</h3>
-        <p class="about-val-desc">Terus mengembangkan pengalaman membaca melalui teknologi digital.</p>
+        <h3 class="about-val-title">{{ __('Inovasi') }}</h3>
+        <p class="about-val-desc">
+          {{ app()->getLocale() === 'en' ? 'Continuously enhancing the digital reading journey through modern technology.' : 'Terus mengembangkan pengalaman membaca melalui teknologi digital.' }}
+        </p>
       </article>
 
     </div>
@@ -584,19 +612,20 @@
   {{-- ======================================================== --}}
   <section class="about-section" aria-labelledby="sec-kategori">
     <div class="about-sec-head">
-      <h2 id="sec-kategori" class="about-sec-title">Informasi dalam Berbagai Kategori</h2>
+      <h2 id="sec-kategori" class="about-sec-title">{{ __('Informasi dalam Berbagai Kategori') }}</h2>
     </div>
     <div class="about-categories-grid">
       @foreach($categories as $cat)
         @php
           $catColor = config('categories.' . $cat->slug . '.color', '#222222');
           $articleCount = $cat->articles_count ?? 0;
+          $catDisplayName = $cat->display_name;
         @endphp
-        <a href="{{ route('categories.show', $cat->slug) }}" class="about-cat-card" title="Lihat berita kategori {{ $cat->name }}">
+        <a href="{{ route('categories.show', $cat->slug) }}" class="about-cat-card" title="{{ __('Lihat berita kategori') }} {{ $catDisplayName }}">
           <span class="about-cat-indicator" style="background: {{ $catColor }}"></span>
           <div class="about-cat-info">
-            <div class="about-cat-name">{{ $cat->name }}</div>
-            <div class="about-cat-count">{{ $articleCount }} artikel terbit</div>
+            <div class="about-cat-name">{{ $catDisplayName }}</div>
+            <div class="about-cat-count">{{ $articleCount }} {{ __('artikel terbit') }}</div>
           </div>
           <span class="about-cat-arrow" aria-hidden="true">→</span>
         </a>
@@ -608,12 +637,14 @@
   {{-- BAGIAN 7 — PENUTUP & CALL TO ACTION                     --}}
   {{-- ======================================================== --}}
   <section class="about-cta" aria-labelledby="sec-penutup">
-    <h2 id="sec-penutup" class="about-cta-title">Temukan Informasi yang Anda Butuhkan</h2>
+    <h2 id="sec-penutup" class="about-cta-title">{{ __('Temukan Informasi yang Anda Butuhkan') }}</h2>
     <p class="about-cta-desc">
-      Terus ikuti perkembangan informasi dan temukan berbagai wawasan baru bersama NEWS X PAPER. Kami hadir untuk memberikan pengalaman membaca berita yang lebih mudah, nyaman, dan informatif.
+      {{ app()->getLocale() === 'en'
+        ? 'Stay abreast of breaking developments and discover new perspectives with NEWS X PAPER. We are dedicated to providing a seamless, enjoyable, and enlightening reading experience.'
+        : 'Terus ikuti perkembangan informasi dan temukan berbagai wawasan baru bersama NEWS X PAPER. Kami hadir untuk memberikan pengalaman membaca berita yang lebih mudah, nyaman, dan informatif.' }}
     </p>
     <a href="{{ route('news.index') }}" class="about-cta-btn">
-      Jelajahi Berita →
+      {{ __('Jelajahi Berita →') }}
     </a>
   </section>
 

@@ -25,6 +25,9 @@ class CategoryController extends Controller
             'name'  => $category->name,
             'color' => '#1e8fd6',
         ];
+        $cfg['display_name'] = app()->getLocale() === 'en'
+            ? ($cfg['name_en'] ?? $category->display_name)
+            : $category->name;
 
         // 3. Query artikel — langsung ke DB, efisien, support pagination
         $paginator = Article::with(['category', 'user'])
@@ -34,17 +37,17 @@ class CategoryController extends Controller
             ->latest('published_at')
             ->latest()
             ->paginate(9)
-            ->through(function ($a) use ($slug) {
+            ->through(function ($a) use ($slug, $cfg) {
                 return [
-                    'title'     => $a->title,
+                    'title'     => $a->display_title,
                     'url'       => route('articles.show', $a->slug),
-                    'cat'       => optional($a->category)->name ?? 'Berita',
+                    'cat'       => optional($a->category)->display_name ?? $cfg['display_name'],
                     'catSlug'   => optional($a->category)->slug ?? $slug,
                     'author'    => optional($a->user)->name ?? 'Admin',
                     'img'       => $a->image_url,          // accessor — selalu ada fallback
-                    'date'      => $a->display_date->setTimezone('Asia/Jakarta')->locale('id')->translatedFormat('j M Y'),
+                    'date'      => $a->formatted_date,
                     'comments'  => $a->comments_count,
-                    'excerpt'   => $a->excerpt_short,
+                    'excerpt'   => $a->display_excerpt,
                     'read_time' => $a->read_time_minutes,
                     'source'    => $a->source_name,
                 ];

@@ -1,10 +1,10 @@
 @extends('layouts.auth')
 
-@section('title', 'Masuk – News X Paper')
-@section('heading', 'Login')
+@section('title', __('Masuk') . ' – News X Paper')
+@section('heading', __('LOGIN'))
 
 @section('top_right_nav')
-  <a href="{{ route('register') }}">DAFTAR</a>
+  <a href="{{ route('register') }}">{{ mb_strtoupper(__('Daftar')) }}</a>
 @endsection
 
 @section('content')
@@ -26,7 +26,7 @@
 
     {{-- Field Email --}}
     <div class="haus-field">
-      <label for="email" class="haus-label">EMAIL</label>
+      <label for="email" class="haus-label">{{ __('EMAIL') }}</label>
       <input id="email"
              type="email"
              name="email"
@@ -39,7 +39,7 @@
 
     {{-- Field Password --}}
     <div class="haus-field">
-      <label for="password" class="haus-label">PASSWORD</label>
+      <label for="password" class="haus-label">{{ __('PASSWORD') }}</label>
       <div class="haus-password-wrap">
         <input id="password"
                type="password"
@@ -50,7 +50,7 @@
         <button type="button"
                 class="haus-pw-toggle"
                 onclick="togglePasswordVisibility('password', this)"
-                aria-label="Lihat password"
+                aria-label="{{ __('Lihat password') }}"
                 aria-pressed="false"
                 tabindex="0">
           <svg class="icon-eye-slash" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
@@ -67,7 +67,7 @@
       {{-- Forgot Password Link --}}
       <div class="haus-field-sub">
         <a href="{{ route('password.request') }}" class="haus-forgot-link">
-          FORGOT PASSWORD?
+          {{ __('FORGOT PASSWORD?') }}
         </a>
       </div>
     </div>
@@ -75,13 +75,13 @@
     {{-- Remember Me --}}
     <label class="haus-remember-wrap">
       <input type="checkbox" name="remember" id="remember" {{ old('remember') ? 'checked' : '' }}>
-      <span>Ingat sesi saya di perangkat ini</span>
+      <span>{{ __('Ingat sesi saya di perangkat ini') }}</span>
     </label>
 
     {{-- Submit Button --}}
     <div class="haus-btn-wrap">
       <button type="submit" class="haus-btn">
-        LOGIN
+        {{ __('LOGIN') }}
       </button>
     </div>
   </form>
@@ -89,5 +89,5 @@
 @endsection
 
 @section('footer_text')
-  DON'T HAVE AN ACCOUNT? <a href="{{ route('register') }}">CREATE ONE.</a>
+  {{ __("DON'T HAVE AN ACCOUNT?") }} <a href="{{ route('register') }}">{{ __('CREATE ONE.') }}</a>
 @endsection

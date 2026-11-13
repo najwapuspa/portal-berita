@@ -69,7 +69,7 @@ class ArticleController extends Controller
         $beritaPerKategori = collect(config('categories'))->map(function ($cfg, $slug) {
             return [
                 'slug'   => $slug,
-                'name'   => $cfg['name'],
+                'name'   => app()->getLocale() === 'en' ? ($cfg['name_en'] ?? $cfg['name']) : $cfg['name'],
                 'color'  => $cfg['color'],
                 'items'  => Article::with(['category', 'user'])
                     ->whereHas('category', fn ($q) => $q->where('slug', $slug))
@@ -169,12 +169,12 @@ class ArticleController extends Controller
         $prevArticle = Article::where('status', 'published')
             ->where($dateCol, '<', $articleDate)
             ->orderByDesc($dateCol)
-            ->first(['id', 'title', 'slug']);
+            ->first(['id', 'title', 'title_en', 'slug']);
 
         $nextArticle = Article::where('status', 'published')
             ->where($dateCol, '>', $articleDate)
             ->orderBy($dateCol)
-            ->first(['id', 'title', 'slug']);
+            ->first(['id', 'title', 'title_en', 'slug']);
 
         return view('articles.show', compact(
             'article', 'terkait', 'prevArticle', 'nextArticle'

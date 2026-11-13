@@ -1,7 +1,7 @@
 @extends('layouts.app')
 
-@section('title', 'News X Paper – the art of publishing')
-@section('description', 'Kabar terkini seputar politik, ekonomi, olahraga, teknologi, dan opini dari News X Paper.')
+@section('title', 'NEWS X PAPER – the art of publishing')
+@section('description', 'Kabar terkini seputar politik, ekonomi, olahraga, teknologi, dan opini dari NEWS X PAPER.')
 
 @section('content')
 @php
@@ -18,23 +18,23 @@
 
   // $articles adalah LengthAwarePaginator dari controller
   $items = collect($articles->items())->values()->map(function ($a) use ($str, $imgUrl) {
-    $cat     = $str(data_get($a, 'category.name')) ?? 'Berita';
     $catSlug = $str(data_get($a, 'category.slug')) ?? '';
     $catColor= config('categories.' . $catSlug . '.color', '#222');
+    $cat     = data_get($a, 'category.display_name') ?? ($str(data_get($a, 'category.name')) ?? 'Berita');
     $body    = $str(data_get($a, 'content')) ?? '';
     $slug    = data_get($a, 'slug');
     return [
-      'title'    => $str(data_get($a, 'title')) ?? 'Tanpa judul',
+      'title'    => data_get($a, 'display_title') ?? ($str(data_get($a, 'title')) ?? 'Tanpa judul'),
       'url'      => $slug ? route('articles.show', $slug) : '#',
       'cat'      => $cat,
       'catSlug'  => $catSlug,
       'catColor' => $catColor,
       'author'   => $str(data_get($a, 'user.name')) ?? 'Admin',
       'img'      => $imgUrl(data_get($a, 'image')),
-      'date'     => \Illuminate\Support\Carbon::parse(data_get($a, 'created_at') ?? now())->locale('id')->translatedFormat('j M Y'),
+      'date'     => data_get($a, 'formatted_date') ?? \Illuminate\Support\Carbon::parse(data_get($a, 'created_at') ?? now())->locale(app()->getLocale())->translatedFormat('j M Y'),
       'comments' => (int) data_get($a, 'comments_count', 0),
       'views'    => (int) data_get($a, 'views', 0),
-      'excerpt'  => \Illuminate\Support\Str::limit(strip_tags($body), 160),
+      'excerpt'  => data_get($a, 'display_excerpt') ?? \Illuminate\Support\Str::limit(strip_tags($body), 160),
     ];
   });
 
@@ -50,7 +50,7 @@
     ])->map(fn($s) => $s + [
       'url'=>'#','author'=>'Admin','img'=>null,'comments'=>0,'views'=>0,
       'catColor'=>'#222',
-      'date'=>now()->locale('id')->translatedFormat('j M Y'),
+      'date'=>now()->locale(app()->getLocale())->translatedFormat('j M Y'),
       'excerpt'=>'Ringkasan berita akan tampil setelah artikel pertama dipublikasikan.',
     ]);
   }
@@ -78,7 +78,7 @@
 <div class="container">
 
   {{-- ===== FEATURED ARTICLE ===== --}}
-  <section class="featured-article" aria-label="Artikel utama">
+  <section class="featured-article" aria-label="{{ __('Artikel Utama') }}">
     <div class="fa-img-wrap">
       <img src="{{ $featured['img'] ?? $placeholder }}"
            alt="{{ $featured['title'] }}"
@@ -108,32 +108,32 @@
         @if($featured['views'] > 0)
           <span class="fa-views">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
-            {{ number_format($featured['views'], 0, ',', '.') }} dilihat
+            {{ number_format($featured['views'], 0, ',', '.') }} {{ __('dilihat') }}
           </span>
         @endif
       </div>
       <a href="{{ $featured['url'] }}" class="fa-read-btn">
-        Baca Selengkapnya
+        {{ __('Baca Selengkapnya') }}
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
       </a>
     </div>
   </section>
 
   {{-- ===== TRENDING TICKER ===== --}}
-  <div class="trending" aria-label="Berita trending">
-    <span class="trending-label">Sedang Tren</span>
+  <div class="trending" aria-label="{{ __('Trending') }}">
+    <span class="trending-label">{{ __('Sedang Tren') }}</span>
     <div class="trending-ticker" id="trending-ticker">
       @if($trendingList->isNotEmpty())
         @foreach($trendingList as $t)
-          <a href="{{ route('articles.show', $t->slug) }}" class="ticker-item">{{ $t->title }}</a>
+          <a href="{{ route('articles.show', $t->slug) }}" class="ticker-item">{{ $t->display_title }}</a>
         @endforeach
       @else
         <span class="ticker-item">{{ $pick(0)['title'] }}</span>
       @endif
     </div>
     <div class="arrows" aria-hidden="true">
-      <button class="arrow" id="tick-prev" aria-label="Sebelumnya">‹</button>
-      <button class="arrow" id="tick-next" aria-label="Berikutnya">›</button>
+      <button class="arrow" id="tick-prev" aria-label="{{ __('Sebelumnya') }}">‹</button>
+      <button class="arrow" id="tick-next" aria-label="{{ __('Berikutnya') }}">›</button>
     </div>
   </div>
 
@@ -149,7 +149,7 @@
       <a href="{{ route('articles.index') }}"
          class="cat-pill {{ $activeKat === '' ? 'cat-pill-active' : '' }}">
         <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h16"/></svg>
-        Semua
+        {{ __('Semua') }}
       </a>
 
       {{-- Kategori dari DB — tampilkan yg punya berita --}}
@@ -165,7 +165,7 @@
           <a href="{{ route('categories.show', $cat->slug) }}"
              class="cat-pill {{ $activeKat === $cat->slug ? 'cat-pill-active' : '' }}"
              style="{{ $activeKat === $cat->slug ? '--pill-color:' . $catColor : '' }}">
-            {{ $cat->name }}
+            {{ $cat->display_name }}
           </a>
         @endforeach
 
@@ -174,7 +174,7 @@
           <div class="cat-pill-more-wrap">
             <button class="cat-pill cat-pill-more" id="cat-pill-more-btn"
                     aria-expanded="false" aria-haspopup="true">
-              Lainnya
+              {{ __('Lainnya') }}
               <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true" id="cat-pill-arrow"><polyline points="6 9 12 15 18 9"/></svg>
             </button>
             <div class="cat-pill-dropdown" id="cat-pill-dropdown" hidden>
@@ -184,7 +184,7 @@
                    class="cpd-item {{ $activeKat === $cat->slug ? 'cpd-item-active' : '' }}"
                    style="--dot-color: {{ $catColor }}">
                   <span class="cpd-dot"></span>
-                  {{ $cat->name }}
+                  {{ $cat->display_name }}
                   <span class="cpd-count">{{ $cat->articles_count }}</span>
                 </a>
               @endforeach
@@ -224,11 +224,11 @@
       {{-- Jangan Lewatkan --}}
       <section class="block b-yellow">
         <div class="block-head">
-          <span class="block-title">Jangan Lewatkan</span>
+          <span class="block-title">{{ __('Jangan Lewatkan') }}</span>
           <div class="block-tabs" id="tabs-jl">
-            <span class="tab on" data-tab="jl-semua">Semua</span>
-            <span class="tab" data-tab="jl-politik">Politik</span>
-            <span class="tab" data-tab="jl-ekonomi">Ekonomi</span>
+            <span class="tab on" data-tab="jl-semua">{{ __('Semua') }}</span>
+            <span class="tab" data-tab="jl-politik">{{ config('categories.politik.' . (app()->getLocale() === 'en' ? 'name_en' : 'name'), 'Politik') }}</span>
+            <span class="tab" data-tab="jl-ekonomi">{{ config('categories.ekonomi.' . (app()->getLocale() === 'en' ? 'name_en' : 'name'), 'Ekonomi') }}</span>
           </div>
         </div>
 
@@ -305,9 +305,9 @@
       {{-- Ekonomi --}}
       <section class="block b-green">
         <div class="block-head">
-          <span class="block-title">Ekonomi</span>
+          <span class="block-title">{{ config('categories.ekonomi.' . (app()->getLocale() === 'en' ? 'name_en' : 'name'), 'Ekonomi') }}</span>
           <div class="block-tabs" id="tabs-ek">
-            <span class="tab on" data-tab="ek-semua">Semua</span>
+            <span class="tab on" data-tab="ek-semua">{{ __('Semua') }}</span>
             <span class="tab" data-tab="ek-bisnis">Bisnis</span>
             <span class="tab" data-tab="ek-pasar">Pasar</span>
           </div>
@@ -361,37 +361,37 @@
       @if(isset($pilihanEditor) && $pilihanEditor->isNotEmpty())
       <section class="block b-dark" style="margin-top:8px">
         <div class="block-head">
-          <span class="block-title">Pilihan Editor</span>
-          <a href="{{ route('articles.index') }}" style="font-size:12px;color:var(--muted)">Lihat semua</a>
+          <span class="block-title">{{ __('Pilihan Editor') }}</span>
+          <a href="{{ route('articles.index') }}" style="font-size:12px;color:var(--muted)">{{ __('Lihat Semua') }}</a>
         </div>
         <div class="editor-grid">
           @foreach($pilihanEditor->take(6) as $ep)
             @php
               $epImg = $ep->image_url ?? $placeholder;
               $epColor = config('categories.' . optional($ep->category)->slug . '.color', '#222');
-              $epReadTime = $ep->read_time_minutes;
-              $epDate = $ep->display_date;
+              $epReadTime = $ep->read_time_formatted;
+              $epDate = $ep->formatted_date;
             @endphp
             <article class="eg-card">
               <a href="{{ route('articles.show', $ep->slug) }}" class="eg-img"
                  style="background-image: url('{{ $epImg }}')"
-                 aria-label="{{ $ep->title }}">
+                 aria-label="{{ $ep->display_title }}">
                 <img src="{{ $epImg }}" alt="" loading="lazy"
                      style="position:absolute;width:0;height:0;opacity:0"
                      onerror="this.closest('.eg-img').style.backgroundImage='url({{ $placeholder }})'">
                 <span class="tag" style="{{ $epColor !== '#222' ? 'background:' . $epColor : '' }}">
-                  {{ optional($ep->category)->name ?? 'Berita' }}
+                  {{ optional($ep->category)->display_name ?? 'Berita' }}
                 </span>
               </a>
               <div class="eg-body">
                 <h4 class="eg-title">
-                  <a href="{{ route('articles.show', $ep->slug) }}">{{ $ep->title }}</a>
+                  <a href="{{ route('articles.show', $ep->slug) }}">{{ $ep->display_title }}</a>
                 </h4>
                 <div class="eg-meta">
-                  <span class="card-pub-date">{{ $epDate->setTimezone('Asia/Jakarta')->translatedFormat('j M Y') }}</span>
+                  <span class="card-pub-date">{{ $epDate }}</span>
                   <span class="card-readtime">
                     <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-                    {{ $epReadTime }} menit
+                    {{ $epReadTime }}
                   </span>
                   @if($ep->source_name)
                     <span class="card-source">{{ $ep->source_name }}</span>
@@ -408,10 +408,10 @@
       @if(isset($beritaRss) && $beritaRss->isNotEmpty())
       <section class="block" style="margin-top:8px">
         <div class="block-head" style="border-bottom: 2px solid #1e8fd6">
-          <span class="block-title" style="background:#1e8fd6">Berita Terkini</span>
+          <span class="block-title" style="background:#1e8fd6">{{ __('Berita Terbaru') }}</span>
           <span style="font-size:12px;color:#888;display:flex;align-items:center;gap:5px">
             <span style="width:7px;height:7px;border-radius:50%;background:#e74c3c;animation:rss-pulse 2s infinite;display:inline-block"></span>
-            Diperbarui otomatis
+            {{ __('Diperbarui otomatis') }}
           </span>
         </div>
         <div class="rss-list">
@@ -419,31 +419,31 @@
             @php
               $rImg   = $rItem->image_url ?? $placeholder;
               $rDate  = $rItem->display_date->setTimezone('Asia/Jakarta');
-              $rRead  = $rItem->read_time_minutes;
+              $rRead  = $rItem->read_time_formatted;
               $rColor = config('categories.' . optional($rItem->category)->slug . '.color', '#1e8fd6');
             @endphp
             <a href="{{ route('articles.show', $rItem->slug) }}" class="rss-item">
               <span class="rss-thumb"
                     style="background-image: url('{{ $rImg }}')"
-                    role="img" aria-label="{{ $rItem->title }}"></span>
+                    role="img" aria-label="{{ $rItem->display_title }}"></span>
               <div class="rss-item-body">
                 <div class="rss-item-meta">
                   @if($rItem->source_name)
                     <span class="rss-source-tag">{{ $rItem->source_name }}</span>
                   @endif
                   <span style="background:{{ $rColor }};color:#fff;padding:1px 6px;border-radius:3px;font-size:10px;font-weight:700">
-                    {{ optional($rItem->category)->name ?? 'Berita' }}
+                    {{ optional($rItem->category)->display_name ?? 'Berita' }}
                   </span>
-                  <span>{{ $rDate->translatedFormat('j M Y, H:i') }} WIB</span>
+                  <span>{{ $rDate->locale(app()->getLocale())->translatedFormat('j M Y, H:i') }} WIB</span>
                   <span class="rss-read-time">
                     <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-                    {{ $rRead }} menit
+                    {{ $rRead }}
                   </span>
                 </div>
-                <h4 class="rss-item-title">{{ $rItem->title }}</h4>
-                @if($rItem->excerpt)
+                <h4 class="rss-item-title">{{ $rItem->display_title }}</h4>
+                @if($rItem->display_excerpt)
                   <p style="margin:3px 0 0;font-size:12px;color:#888;line-height:1.45">
-                    {{ \Illuminate\Support\Str::limit($rItem->excerpt, 100) }}
+                    {{ \Illuminate\Support\Str::limit($rItem->display_excerpt, 100) }}
                   </p>
                 @endif
               </div>
@@ -463,7 +463,7 @@
               <span class="block-title" style="background: {{ $katGroup['color'] }}">{{ $katGroup['name'] }}</span>
               <a href="{{ route('categories.show', $katGroup['slug']) }}"
                  style="font-size:12px;color:{{ $katGroup['color'] }};font-weight:700">
-                Selengkapnya →
+                {{ __('Selengkapnya') }} →
               </a>
             </div>
             <div class="kat-row">
@@ -473,21 +473,21 @@
               @endphp
               <article class="kat-big">
                 <a href="{{ route('articles.show', $katBig->slug) }}" class="card-thumb g0"
-                   style="background-image: url('{{ $katBigImg }}')" aria-label="{{ $katBig->title }}">
+                   style="background-image: url('{{ $katBigImg }}')" aria-label="{{ $katBig->display_title }}">
                   <img src="{{ $katBigImg }}" alt="" loading="lazy" style="display:none"
                        onerror="this.parentElement.style.backgroundImage='url({{ asset('images/placeholder-news.svg') }})'">
                   <span class="tag" style="background: {{ $katGroup['color'] }}">{{ $katGroup['name'] }}</span>
                 </a>
                 <h3 class="card-title" style="font-size:17px">
-                  <a href="{{ route('articles.show', $katBig->slug) }}">{{ $katBig->title }}</a>
+                  <a href="{{ route('articles.show', $katBig->slug) }}">{{ $katBig->display_title }}</a>
                 </h3>
                 <div class="card-meta">
                   <b>{{ optional($katBig->user)->name ?? 'Admin' }}</b>
                   <span>–</span>
-                  <span>{{ $katBig->display_date->setTimezone('Asia/Jakarta')->translatedFormat('j M Y') }}</span>
+                  <span>{{ $katBig->formatted_date }}</span>
                   <span>👁 {{ number_format($katBig->views, 0, ',', '.') }}</span>
                 </div>
-                <p class="excerpt">{{ \Illuminate\Support\Str::limit(strip_tags($katBig->content), 120) }}</p>
+                <p class="excerpt">{{ \Illuminate\Support\Str::limit($katBig->display_excerpt, 120) }}</p>
               </article>
               <div class="kat-list">
                 @foreach($katGroup['items']->skip(1) as $katItem)
@@ -496,9 +496,9 @@
                     <span class="list-thumb g{{ $loop->index % 5 }}" style="background-image: url('{{ $katImg }}')">
                     </span>
                     <div>
-                      <h4 class="list-title">{{ \Illuminate\Support\Str::limit($katItem->title, 65) }}</h4>
+                      <h4 class="list-title">{{ \Illuminate\Support\Str::limit($katItem->display_title, 65) }}</h4>
                       <span class="card-meta">
-                        {{ $katItem->display_date->setTimezone('Asia/Jakarta')->translatedFormat('j M Y') }}
+                        {{ $katItem->formatted_date }}
                         · 👁 {{ number_format($katItem->views, 0, ',', '.') }}
                       </span>
                     </div>
@@ -519,7 +519,7 @@
             <div class="kat-section-block">
               <div class="block-head" style="border-bottom: 2px solid {{ $katGroup['color'] }}; margin-bottom:12px">
                 <span class="block-title" style="background: {{ $katGroup['color'] }}; font-size:11px">{{ $katGroup['name'] }}</span>
-                <a href="{{ route('categories.show', $katGroup['slug']) }}" style="font-size:11px;color:{{ $katGroup['color'] }};font-weight:700">Selengkapnya →</a>
+                <a href="{{ route('categories.show', $katGroup['slug']) }}" style="font-size:11px;color:{{ $katGroup['color'] }};font-weight:700">{{ __('Selengkapnya') }} →</a>
               </div>
               <div class="kat-mini-list">
                 @foreach($katGroup['items']->take(3) as $km)
@@ -527,8 +527,8 @@
                   <a href="{{ route('articles.show', $km->slug) }}" class="kat-mini-item">
                     <span class="kat-mini-thumb" style="background-image: url('{{ $kmImg }}')" aria-hidden="true"></span>
                     <div class="kat-mini-info">
-                      <span class="kat-mini-title">{{ \Illuminate\Support\Str::limit($km->title, 70) }}</span>
-                      <span class="kat-mini-meta">{{ $km->display_date->setTimezone('Asia/Jakarta')->translatedFormat('j M Y') }}</span>
+                      <span class="kat-mini-title">{{ \Illuminate\Support\Str::limit($km->display_title, 70) }}</span>
+                      <span class="kat-mini-meta">{{ $km->formatted_date }}</span>
                     </div>
                   </a>
                 @endforeach
@@ -545,9 +545,9 @@
         <nav class="homepage-pager" aria-label="Navigasi halaman berita">
           {{-- Prev --}}
           @if($articles->onFirstPage())
-            <span class="hp-btn hp-btn-off">‹ Sebelumnya</span>
+            <span class="hp-btn hp-btn-off">‹ {{ __('Sebelumnya') }}</span>
           @else
-            <a href="{{ $articles->previousPageUrl() }}" class="hp-btn">‹ Sebelumnya</a>
+            <a href="{{ $articles->previousPageUrl() }}" class="hp-btn">‹ {{ __('Sebelumnya') }}</a>
           @endif
 
           {{-- Nomor halaman --}}
@@ -563,9 +563,9 @@
 
           {{-- Next --}}
           @if($articles->hasMorePages())
-            <a href="{{ $articles->nextPageUrl() }}" class="hp-btn">Berikutnya ›</a>
+            <a href="{{ $articles->nextPageUrl() }}" class="hp-btn">{{ __('Berikutnya') }} ›</a>
           @else
-            <span class="hp-btn hp-btn-off">Berikutnya ›</span>
+            <span class="hp-btn hp-btn-off">{{ __('Berikutnya') }} ›</span>
           @endif
         </nav>
       @endif
@@ -575,18 +575,18 @@
     {{-- ===== SIDEBAR ===== --}}
     <aside>
       <section class="side-block block b-dark" style="margin-bottom:32px">
-        <div class="block-head"><span class="block-title">Tetap Terhubung</span></div>
+        <div class="block-head"><span class="block-title">{{ __('Tetap Terhubung') }}</span></div>
         <div class="social-list">
-          <div class="social-row"><span class="social-ico s-fb">f</span><span>Suka di Facebook</span></div>
-          <div class="social-row"><span class="social-ico s-tw">X</span><span>Ikuti di X</span></div>
-          <div class="social-row"><span class="social-ico s-yt">▶</span><span>Langganan YouTube</span></div>
+          <div class="social-row"><span class="social-ico s-fb">f</span><span>{{ __('Suka di Facebook') }}</span></div>
+          <div class="social-row"><span class="social-ico s-tw">X</span><span>{{ __('Ikuti di X') }}</span></div>
+          <div class="social-row"><span class="social-ico s-yt">▶</span><span>{{ __('Langganan YouTube') }}</span></div>
         </div>
       </section>
 
-      <div class="side-block"><div class="ad-box">Ruang Iklan<br>300 × 250</div></div>
+      <div class="side-block"><div class="ad-box">{{ __('Ruang Iklan') }}<br>300 × 250</div></div>
 
       <section class="side-block block b-dark" style="margin-top:32px">
-        <div class="block-head"><span class="block-title">Terpopuler</span></div>
+        <div class="block-head"><span class="block-title">{{ __('Terpopuler') }}</span></div>
         <div class="pop-grid">
           @if($popItems->isNotEmpty())
             @foreach($popItems->take(4) as $i => $pop)
@@ -595,9 +595,9 @@
                   ? (\Illuminate\Support\Str::startsWith($pop->image, ['http://', 'https://']) ? $pop->image : asset('storage/' . $pop->image))
                   : $placeholder;
               @endphp
-              <a href="{{ route('articles.show', $pop->slug) }}" aria-label="{{ $pop->title }}">
+              <a href="{{ route('articles.show', $pop->slug) }}" aria-label="{{ $pop->display_title }}">
                 <span class="pop-thumb g{{ $i % 5 }}" style="background-image: url('{{ $popImg }}')"></span>
-                <div class="pop-title">{{ \Illuminate\Support\Str::limit($pop->title, 55) }}</div>
+                <div class="pop-title">{{ \Illuminate\Support\Str::limit($pop->display_title, 55) }}</div>
               </a>
             @endforeach
           @else

@@ -81,9 +81,11 @@ class AuthController extends Controller
 
     public function logout(Request $request)
     {
+        $locale = $request->session()->get('locale', $request->cookie('app_locale', config('app.locale', 'id')));
         Auth::logout();
         $request->session()->invalidate();
         $request->session()->regenerateToken();
+        $request->session()->put('locale', $locale);
         return redirect()->route('login');
     }
 

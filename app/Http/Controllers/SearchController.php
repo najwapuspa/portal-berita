@@ -125,9 +125,9 @@ class SearchController extends Controller
     {
         $str = fn ($v) => is_string($v) && $v !== '' ? $v : null;
 
-        $cat    = $str(data_get($a, 'category.name')) ?? 'Berita';
+        $cat    = data_get($a, 'category.display_name') ?? ($str(data_get($a, 'category.name')) ?? 'Berita');
         $author = $str(data_get($a, 'user.name')) ?? 'Admin';
-        $img    = $str(data_get($a, 'image'));
+        $img    = $a->image_url ?? $str(data_get($a, 'image'));
         if ($img && ! Str::startsWith($img, ['http://', 'https://', '/'])) {
             $img = asset('storage/' . $img);
         }
@@ -136,16 +136,16 @@ class SearchController extends Controller
         $dt    = data_get($a, 'created_at') ?? now();
 
         return [
-            'title'    => $str(data_get($a, 'title')) ?? 'Tanpa judul',
+            'title'    => data_get($a, 'display_title') ?? ($str(data_get($a, 'title')) ?? 'Tanpa judul'),
             'url'      => $slug ? route('articles.show', $slug) : '#',
             'cat'      => $cat,
             'author'   => $author,
             'img'      => $img,
-            'date'     => Carbon::parse($dt)->locale('id')->translatedFormat('j M Y'),
+            'date'     => data_get($a, 'formatted_date') ?? Carbon::parse($dt)->locale(app()->getLocale())->translatedFormat('j M Y'),
             'date_raw' => Carbon::parse($dt)->timestamp,
             'views'    => (int) data_get($a, 'views', 0),
             'comments' => (int) data_get($a, 'comments_count', 0),
-            'excerpt'  => Str::limit($body, 160),
+            'excerpt'  => data_get($a, 'display_excerpt') ?? Str::limit($body, 160),
             'search'   => Str::lower(data_get($a, 'title') . ' ' . $cat . ' ' . $author . ' ' . $body),
         ];
     }

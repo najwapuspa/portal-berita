@@ -413,10 +413,10 @@ class RssNewsService
     private function fetchOpenGraphImage(string $pageUrl): ?string
     {
         try {
-            $response = Http::timeout(4)
+            $response = Http::timeout(6)
                 ->withHeaders([
-                    'User-Agent' => 'NewsXpaper RSS Aggregator/1.0',
-                    'Accept'     => 'text/html',
+                    'User-Agent' => 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+                    'Accept'     => 'text/html,application/xhtml+xml',
                 ])
                 ->get($pageUrl);
 
@@ -425,15 +425,15 @@ class RssNewsService
             $html = $response->body();
 
             // og:image
-            if (preg_match('/<meta[^>]+property=["\']og:image["\'][^>]+content=["\']([^"\']+)["\'][^>]*>/i', $html, $m)) {
+            if (preg_match('/<meta[^>]+property=["\']og:image["\'][^>]+content=["\']([^"\']+)["\']/i', $html, $m)) {
                 if ($this->isValidImageUrl($m[1])) return $m[1];
             }
             // og:image dengan order terbalik
-            if (preg_match('/<meta[^>]+content=["\']([^"\']+)["\'][^>]+property=["\']og:image["\'][^>]*>/i', $html, $m)) {
+            if (preg_match('/<meta[^>]+content=["\']([^"\']+)["\'][^>]+property=["\']og:image["\']/i', $html, $m)) {
                 if ($this->isValidImageUrl($m[1])) return $m[1];
             }
             // twitter:image
-            if (preg_match('/<meta[^>]+name=["\']twitter:image["\'][^>]+content=["\']([^"\']+)["\'][^>]*>/i', $html, $m)) {
+            if (preg_match('/<meta[^>]+name=["\']twitter:image["\'][^>]+content=["\']([^"\']+)["\']/i', $html, $m)) {
                 if ($this->isValidImageUrl($m[1])) return $m[1];
             }
 
@@ -449,13 +449,16 @@ class RssNewsService
     }
 
     /**
-     * Validasi URL gambar: harus https (keamanan), format valid, panjang wajar.
+     * Validasi URL gambar: harus https (keamanan), format valid, panjang wajar,
+     * dan hindari logo/favicon website.
      */
     private function isValidImageUrl(?string $url): bool
     {
         if (! $url || strlen($url) < 12) return false;
         // Wajib https atau http
         if (! \Illuminate\Support\Str::startsWith($url, ['http://', 'https://'])) return false;
+        // Hindari favicon / logo situs yang tidak relevan
+        if (preg_match('/(favicon|logo-icon|site-logo|rol-logo)/i', $url)) return false;
         // Cegah SSRF ke IP privat — hanya izinkan domain publik
         if (preg_match('/https?:\/\/(localhost|127\.|10\.|192\.168\.|172\.(1[6-9]|2\d|3[01])\.)/i', $url)) return false;
         if (! filter_var($url, FILTER_VALIDATE_URL)) return false;
