@@ -37,40 +37,6 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700;900&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="{{ asset('css/newspaper.css') }}">
-  <style>
-    /* Language Switcher in Header */
-    .hd-lang-switcher {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      background: #202020;
-      border: 1px solid #383838;
-      border-radius: 4px;
-      padding: 5px 9px;
-      font-size: 11px;
-      font-weight: 700;
-      letter-spacing: 0.06em;
-      line-height: 1;
-    }
-    .hd-lang-btn {
-      color: #888888;
-      text-decoration: none;
-      transition: color 0.15s ease;
-    }
-    .hd-lang-btn:hover {
-      color: #ffffff;
-    }
-    .hd-lang-btn.active {
-      color: #ffffff;
-      font-weight: 800;
-      text-decoration: underline;
-      text-underline-offset: 3px;
-    }
-    .hd-lang-divider {
-      color: #444444;
-      font-size: 10px;
-    }
-  </style>
   @stack('head')
 </head>
 <body>
@@ -105,16 +71,8 @@
 
     {{-- Aksi header --}}
     <div class="hd-actions">
-      {{-- Language Switcher ID | EN --}}
-      <div class="hd-lang-switcher" aria-label="{{ __('Pilihan Bahasa') }}">
-        <a href="{{ route('lang.switch', 'id') }}"
-           class="hd-lang-btn {{ app()->getLocale() === 'id' ? 'active' : '' }}"
-           title="Bahasa Indonesia">ID</a>
-        <span class="hd-lang-divider">|</span>
-        <a href="{{ route('lang.switch', 'en') }}"
-           class="hd-lang-btn {{ app()->getLocale() === 'en' ? 'active' : '' }}"
-           title="English">EN</a>
-      </div>
+      {{-- Language Switcher: tersembunyi dari UI, route tetap aktif untuk pengembangan masa depan --}}
+      {{-- Bahasa terdeteksi otomatis dari browser (Accept-Language header) --}}
 
       @auth
         <div class="hd-user">

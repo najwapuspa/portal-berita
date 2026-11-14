@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="id">
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -7,7 +7,7 @@
   <meta name="robots" content="noindex, nofollow">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,600;0,700;0,800;1,400&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,600;0,700;0,800;1,400&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   <style>
     /* ─── RESET & ROOT VARIABLES ──────────────────────────────── */
     *, *::before, *::after {
@@ -16,466 +16,542 @@
       padding: 0;
     }
     :root {
-      --bg-outer: #292929;
-      --bg-frame: #FDFDFC;
-      --bg-ivory: #EAE9E5;
-      --text-primary: #202020;
-      --text-secondary: #777570;
-      --border-line: #B7B4AE;
-      --btn-bg: #202020;
-      --btn-hover: #383838;
-      --accent-champagne: #B69B69;
-      --error-color: #a82727;
-      --success-color: #276738;
+      --bg-viewport: radial-gradient(circle at 50% 0%, #1e293b 0%, #0b1329 65%, #060b17 100%);
+      --card-bg: #ffffff;
+      --navy-950: #060b17;
+      --navy-900: #0b1329;
+      --navy-850: #0f172a;
+      --navy-800: #1e293b;
+      --navy-700: #334155;
+      --slate-500: #64748b;
+      --slate-400: #94a3b8;
+      --border-soft: #e2e8f0;
+      --border-input: #cbd5e1;
+      --input-bg: #f8fafc;
+      --accent-blue: #1e8fd6;
+      --accent-blue-hover: #1677b5;
+      --accent-blue-soft: rgba(30, 143, 214, 0.12);
+      --error-color: #dc2626;
+      --error-bg: #fef2f2;
+      --error-border: #fecaca;
+      --success-color: #16a34a;
+      --success-bg: #f0fdf4;
+      --success-border: #bbf7d0;
       --font-serif: 'Playfair Display', Georgia, serif;
-      --font-sans: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+      --font-sans: 'Plus Jakarta Sans', 'Inter', system-ui, -apple-system, sans-serif;
     }
 
     html, body {
       min-height: 100vh;
-      background: var(--bg-outer);
+      background: var(--navy-900);
+      background-image: var(--bg-viewport);
+      background-attachment: fixed;
       font-family: var(--font-sans);
-      color: var(--text-primary);
+      color: var(--navy-850);
       -webkit-font-smoothing: antialiased;
       -moz-osx-font-smoothing: grayscale;
     }
 
     /* ─── VIEWPORT WRAPPER ────────────────────────────────────── */
-    .haus-viewport {
+    .auth-viewport, .haus-viewport {
       min-height: 100vh;
       display: flex;
       align-items: center;
       justify-content: center;
-      padding: 36px 24px;
+      padding: 32px 20px;
     }
 
-    /* ─── WINDOW FRAME (WHITE BEZEL LIKE HAUS REFERENCE) ──────── */
-    .haus-frame {
+    /* ─── AUTH CARD CONTAINER ─────────────────────────────────── */
+    .auth-card, .haus-frame {
       position: relative;
       width: 100%;
-      max-width: 1060px;
-      height: 640px;
-      background: var(--bg-frame);
-      border-radius: 10px;
+      max-width: 1040px;
+      min-height: 630px;
+      background: var(--card-bg);
+      border-radius: 12px;
       overflow: hidden;
-      box-shadow: 0 25px 70px rgba(0, 0, 0, 0.45), 0 4px 15px rgba(0, 0, 0, 0.25);
-    }
-
-    /* Camera aperture / dot in the top-left white bezel */
-    .haus-frame-dot {
-      position: absolute;
-      top: 10px;
-      left: 14px;
-      width: 6px;
-      height: 6px;
-      border-radius: 50%;
-      background: var(--text-primary);
-      z-index: 25;
-      opacity: 0.85;
-      pointer-events: none;
+      box-shadow: 0 25px 60px -12px rgba(2, 6, 23, 0.45), 0 0 0 1px rgba(255, 255, 255, 0.08);
+      display: flex;
     }
 
     /* ─── SPLIT-SCREEN CONTAINER ──────────────────────────────── */
-    .haus-split {
+    .auth-split, .haus-split {
       display: grid;
-      grid-template-columns: 51.6% 48.4%;
-      height: 100%;
+      grid-template-columns: 52% 48%;
       width: 100%;
+      min-height: 100%;
     }
 
-    /* ─── LEFT PANEL (WARM IVORY) ─────────────────────────────── */
-    .haus-left {
-      background: var(--bg-ivory);
+    /* ─── LEFT PANEL (CLEAN PROFESSIONAL WHITE) ───────────────── */
+    .auth-left, .haus-left {
+      background: #ffffff;
       display: flex;
       flex-direction: column;
       justify-content: space-between;
-      padding: 24px 44px 22px 44px;
+      padding: 30px 44px 26px 44px;
       position: relative;
       overflow-y: auto;
     }
 
     /* Top Navigation Left */
-    .haus-header-left {
-      display: flex;
-      align-items: baseline;
-      justify-content: space-between;
-      width: 100%;
-    }
-    .haus-logo {
-      font-family: var(--font-serif);
-      font-size: 23px;
-      font-weight: 700;
-      color: var(--text-primary);
-      text-decoration: none;
-      letter-spacing: -0.4px;
-      line-height: 1;
-      transition: opacity 0.15s ease;
-    }
-    .haus-logo:hover {
-      opacity: 0.8;
-    }
-    .haus-nav-links {
+    .auth-header-left, .haus-header-left {
       display: flex;
       align-items: center;
-      gap: 22px;
+      justify-content: space-between;
+      width: 100%;
+      padding-bottom: 8px;
+    }
+    .auth-logo, .haus-logo {
+      font-family: var(--font-serif);
+      font-size: 22px;
+      font-weight: 700;
+      color: var(--navy-850);
+      text-decoration: none;
+      letter-spacing: -0.3px;
+      line-height: 1;
+      display: inline-flex;
+      align-items: baseline;
+      transition: opacity 0.15s ease;
+    }
+    .auth-logo:hover, .haus-logo:hover {
+      opacity: 0.85;
+    }
+    .auth-logo-x {
+      color: var(--accent-blue);
+      font-style: italic;
+      font-weight: 800;
+      padding: 0 1px;
+    }
+    .auth-nav, .haus-nav {
+      display: flex;
+      align-items: center;
+    }
+    .auth-nav-links, .haus-nav-links {
+      display: flex;
+      align-items: center;
+      gap: 18px;
       list-style: none;
     }
-    .haus-nav-links a {
-      font-size: 10px;
-      font-weight: 600;
+    .auth-nav-links a, .haus-nav-links a {
+      font-size: 11px;
+      font-weight: 700;
       text-transform: uppercase;
-      letter-spacing: 0.16em;
-      color: var(--text-primary);
+      letter-spacing: 0.12em;
+      color: var(--slate-500);
       text-decoration: none;
       transition: color 0.15s ease;
     }
-    .haus-nav-links a:hover {
-      color: var(--accent-champagne);
-    }
-    .haus-lang-item {
-      font-size: 10px;
-      font-weight: 700;
-      letter-spacing: 0.1em;
-      color: var(--text-secondary);
-      display: inline-flex;
-      align-items: center;
-      gap: 4px;
-      margin-left: 6px;
-      padding-left: 8px;
-      border-left: 1px solid var(--border-line);
-    }
-    .haus-lang-item a {
-      color: var(--text-secondary);
-      text-decoration: none;
-      font-size: 10px;
-    }
-    .haus-lang-item a.active {
-      color: var(--text-primary);
-      text-decoration: underline;
-      text-underline-offset: 2px;
-      font-weight: 800;
+    .auth-nav-links a:hover, .haus-nav-links a:hover {
+      color: var(--accent-blue);
     }
 
     /* Form Container Middle */
-    .haus-main {
+    .auth-main, .haus-main {
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
       width: 100%;
-      margin: auto 0;
-      padding: 16px 0;
+      margin: 16px 0 20px 0;
     }
-    .haus-form-wrap {
+    .auth-form-wrap, .haus-form-wrap {
       width: 100%;
-      max-width: 290px;
+      max-width: 370px;
     }
 
-    /* Heading: Large Elegant Serif */
-    .haus-heading {
-      font-family: var(--font-serif);
-      font-size: 38px;
-      font-weight: 600;
-      color: var(--text-primary);
-      text-align: center;
-      letter-spacing: -0.5px;
-      margin-bottom: 24px;
-      line-height: 1.15;
+    /* Heading & Subheading: Professional Hierarchy */
+    .auth-heading, .haus-heading {
+      font-family: var(--font-sans);
+      font-size: 26px;
+      font-weight: 700;
+      color: var(--navy-850);
+      text-align: left;
+      letter-spacing: -0.4px;
+      margin-bottom: 6px;
+      line-height: 1.25;
     }
-    .haus-desc {
-      font-size: 12.5px;
-      color: var(--text-secondary);
-      text-align: center;
+    .auth-subheading, .haus-desc {
+      font-size: 13px;
+      color: var(--slate-500);
+      text-align: left;
       line-height: 1.5;
-      margin-top: -16px;
-      margin-bottom: 24px;
+      margin-bottom: 20px;
     }
 
     /* Alerts */
-    .haus-alert {
-      font-size: 11.5px;
+    .auth-alert, .haus-alert {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      font-size: 12.5px;
       line-height: 1.45;
-      padding: 10px 12px;
-      border-radius: 2px;
+      padding: 10px 14px;
+      border-radius: 6px;
       margin-bottom: 18px;
       text-align: left;
     }
-    .haus-alert-error {
-      background: #fbf0f0;
-      border-left: 3px solid var(--error-color);
+    .auth-alert svg, .haus-alert svg {
+      flex-shrink: 0;
+      margin-top: 1px;
+    }
+    .auth-alert-error, .haus-alert-error {
+      background: var(--error-bg);
+      border: 1px solid var(--error-border);
       color: var(--error-color);
     }
-    .haus-alert-success {
-      background: #f0f7f2;
-      border-left: 3px solid var(--success-color);
+    .auth-alert-success, .haus-alert-success {
+      background: var(--success-bg);
+      border: 1px solid var(--success-border);
       color: var(--success-color);
     }
 
-    /* Fields: Underline minimalist */
-    .haus-field {
-      margin-bottom: 18px;
+    /* Fields: Modern Crisp Inputs */
+    .auth-field, .haus-field {
+      margin-bottom: 16px;
       position: relative;
     }
-    .haus-label {
+    .auth-label, .haus-label {
       display: block;
-      font-size: 9.5px;
-      font-weight: 600;
+      font-size: 11px;
+      font-weight: 700;
       text-transform: uppercase;
-      letter-spacing: 0.16em;
-      color: var(--text-secondary);
-      margin-bottom: 2px;
+      letter-spacing: 0.08em;
+      color: var(--navy-700);
+      margin-bottom: 6px;
     }
-    .haus-input {
+    .auth-input, .haus-input {
       width: 100%;
-      background: transparent;
-      border: none;
-      border-bottom: 1px solid var(--border-line);
-      border-radius: 0;
-      padding: 6px 0;
+      height: 42px;
+      background: var(--input-bg);
+      border: 1px solid var(--border-input);
+      border-radius: 6px;
+      padding: 0 14px;
       font-family: var(--font-sans);
       font-size: 13.5px;
-      color: var(--text-primary);
+      color: var(--navy-850);
       outline: none;
-      transition: border-color 0.2s ease;
+      transition: all 0.2s ease;
     }
-    .haus-input:focus {
-      border-bottom-color: var(--text-primary);
+    .auth-input::placeholder, .haus-input::placeholder {
+      color: var(--slate-400);
     }
-    .haus-input.has-error {
-      border-bottom-color: var(--error-color);
+    .auth-input:focus, .haus-input:focus {
+      background: #ffffff;
+      border-color: var(--accent-blue);
+      box-shadow: 0 0 0 3px var(--accent-blue-soft);
     }
-    .haus-error-text {
-      font-size: 10.5px;
+    .auth-input.has-error, .haus-input.has-error {
+      border-color: var(--error-color);
+      background: #fff8f8;
+    }
+    .auth-error-text, .haus-error-text {
+      font-size: 11px;
       color: var(--error-color);
-      margin-top: 4px;
+      margin-top: 5px;
+      display: block;
     }
 
     /* Password wrap with show/hide toggle */
-    .haus-password-wrap {
+    .auth-password-wrap, .haus-password-wrap {
       position: relative;
       display: flex;
       align-items: center;
       width: 100%;
     }
+    .auth-password-wrap .auth-input,
+    .auth-password-wrap .haus-input,
     .haus-password-wrap .haus-input {
-      padding-right: 32px;
+      padding-right: 42px;
     }
-    .haus-pw-toggle {
+    .auth-pw-toggle, .haus-pw-toggle {
       position: absolute;
-      right: 0;
-      bottom: 4px;
+      right: 8px;
+      top: 50%;
+      transform: translateY(-50%);
       background: transparent;
       border: none;
-      padding: 4px;
+      width: 30px;
+      height: 30px;
       display: inline-flex;
       align-items: center;
       justify-content: center;
       cursor: pointer;
-      color: var(--text-secondary);
-      border-radius: 2px;
+      color: var(--slate-400);
+      border-radius: 4px;
       line-height: 1;
-      transition: color 0.15s ease;
+      transition: color 0.15s ease, background 0.15s ease;
     }
+    .auth-pw-toggle:hover,
+    .auth-pw-toggle:focus-visible,
     .haus-pw-toggle:hover,
     .haus-pw-toggle:focus-visible {
-      color: var(--text-primary);
+      color: var(--navy-850);
+      background: rgba(0, 0, 0, 0.04);
       outline: none;
     }
-    .haus-pw-toggle svg {
-      width: 17px;
-      height: 17px;
+    .auth-pw-toggle svg, .haus-pw-toggle svg {
+      width: 18px;
+      height: 18px;
       display: block;
       pointer-events: none;
     }
 
-    /* Sub-field links (Forgot password, Remember me) */
-    .haus-field-sub {
+    /* Row for Remember Me & Forgot Password */
+    .auth-options-row {
       display: flex;
-      justify-content: flex-end;
       align-items: center;
-      margin-top: 6px;
+      justify-content: space-between;
+      gap: 12px;
+      margin-top: 8px;
+      margin-bottom: 20px;
     }
-    .haus-forgot-link {
-      font-size: 9.5px;
+    .auth-remember-wrap, .haus-remember-wrap {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      cursor: pointer;
+      user-select: none;
+    }
+    .auth-remember-wrap input[type="checkbox"],
+    .haus-remember-wrap input[type="checkbox"] {
+      width: 15px;
+      height: 15px;
+      accent-color: var(--navy-850);
+      cursor: pointer;
+    }
+    .auth-remember-wrap span,
+    .haus-remember-wrap span {
+      font-size: 12px;
+      color: var(--slate-500);
+    }
+    .auth-forgot-link, .haus-forgot-link {
+      font-size: 12px;
       font-weight: 600;
-      text-transform: uppercase;
-      letter-spacing: 0.14em;
-      color: var(--text-secondary);
+      color: var(--accent-blue);
       text-decoration: none;
       transition: color 0.15s ease;
+      white-space: nowrap;
     }
-    .haus-forgot-link:hover {
-      color: var(--text-primary);
+    .auth-forgot-link:hover, .haus-forgot-link:hover {
+      color: var(--accent-blue-hover);
       text-decoration: underline;
     }
 
-    /* Remember me */
-    .haus-remember-wrap {
+    /* Submit Button: Full-width Professional */
+    .auth-btn-wrap, .haus-btn-wrap {
+      margin-top: 14px;
+      width: 100%;
+    }
+    .auth-btn, .haus-btn {
       display: flex;
       align-items: center;
-      gap: 6px;
-      margin-top: 14px;
-      cursor: pointer;
-    }
-    .haus-remember-wrap input[type="checkbox"] {
-      accent-color: var(--text-primary);
-      cursor: pointer;
-    }
-    .haus-remember-wrap span {
-      font-size: 11px;
-      color: var(--text-secondary);
-      letter-spacing: 0.04em;
-    }
-
-    /* Button */
-    .haus-btn-wrap {
-      margin-top: 24px;
-      text-align: center;
-    }
-    .haus-btn {
-      display: inline-block;
-      background: var(--btn-bg);
+      justify-content: center;
+      width: 100%;
+      height: 44px;
+      background: var(--navy-850);
       color: #ffffff;
       font-family: var(--font-sans);
-      font-size: 10.5px;
+      font-size: 13.5px;
       font-weight: 600;
-      text-transform: uppercase;
-      letter-spacing: 0.22em;
-      padding: 11px 36px;
+      letter-spacing: 0.04em;
       border: none;
-      border-radius: 2px;
+      border-radius: 6px;
       cursor: pointer;
       text-decoration: none;
-      transition: background 0.18s ease, transform 0.1s ease;
+      box-shadow: 0 4px 10px rgba(15, 23, 42, 0.15);
+      transition: background 0.18s ease, transform 0.1s ease, box-shadow 0.18s ease;
     }
-    .haus-btn:hover {
-      background: var(--btn-hover);
+    .auth-btn:hover, .haus-btn:hover {
+      background: var(--navy-800);
       transform: translateY(-1px);
+      box-shadow: 0 6px 14px rgba(15, 23, 42, 0.22);
     }
-    .haus-btn:active {
+    .auth-btn:active, .haus-btn:active {
       transform: translateY(0);
+      box-shadow: 0 2px 6px rgba(15, 23, 42, 0.15);
     }
 
-    /* Footer: Thin divider and sub-link */
-    .haus-footer {
+    /* Footer: Subtle divider and bottom link */
+    .auth-footer, .haus-footer {
       width: 100%;
-      padding-top: 10px;
+      padding-top: 14px;
     }
-    .haus-divider {
+    .auth-divider, .haus-divider {
       border: none;
-      border-top: 1px solid var(--border-line);
+      border-top: 1px solid var(--border-soft);
       width: 100%;
       margin: 0 0 14px 0;
-      opacity: 0.85;
     }
-    .haus-footer-text {
+    .auth-footer-text, .haus-footer-text {
       text-align: center;
-      font-size: 9.5px;
-      font-weight: 600;
-      text-transform: uppercase;
-      letter-spacing: 0.15em;
-      color: var(--text-secondary);
-      line-height: 1.4;
+      font-size: 12.5px;
+      color: var(--slate-500);
+      line-height: 1.5;
     }
-    .haus-footer-text a {
-      color: var(--text-primary);
+    .auth-footer-text a, .haus-footer-text a {
+      color: var(--accent-blue);
       font-weight: 700;
-      text-decoration: underline;
+      text-decoration: none;
       transition: color 0.15s ease;
     }
-    .haus-footer-text a:hover {
-      color: var(--accent-champagne);
+    .auth-footer-text a:hover, .haus-footer-text a:hover {
+      color: var(--accent-blue-hover);
+      text-decoration: underline;
     }
 
-    /* ─── RIGHT PANEL (EXACT HAUS DRINK PHOTOGRAPH) ───────────── */
-    .haus-right {
+    /* ─── RIGHT PANEL (METROPOLITAN EDITORIAL HERO) ───────────── */
+    .auth-right, .haus-right {
       position: relative;
-      background-image: url('{{ asset('images/city-metropolitan.jpg') }}');
+      background-image: linear-gradient(180deg, rgba(15, 23, 42, 0.35) 0%, rgba(11, 19, 41, 0.88) 100%), url('{{ asset('images/city-metropolitan.jpg') }}');
       background-size: cover;
       background-position: center center;
       background-repeat: no-repeat;
       display: flex;
       flex-direction: column;
-      justify-content: flex-start;
+      justify-content: space-between;
+      padding: 30px 36px 36px 36px;
       overflow: hidden;
     }
-    .haus-header-right {
+    .auth-header-right, .haus-header-right {
       display: flex;
       justify-content: flex-end;
-      align-items: baseline;
-      padding: 24px 38px 0 0;
+      align-items: center;
+      width: 100%;
       z-index: 10;
     }
-    .haus-header-right a {
-      font-size: 10px;
-      font-weight: 600;
+    .auth-header-right a, .haus-header-right a {
+      font-size: 11px;
+      font-weight: 700;
       text-transform: uppercase;
-      letter-spacing: 0.16em;
-      color: var(--text-primary);
+      letter-spacing: 0.12em;
+      color: #ffffff;
       text-decoration: none;
-      background: rgba(253, 253, 252, 0.45);
+      background: rgba(255, 255, 255, 0.16);
+      border: 1px solid rgba(255, 255, 255, 0.28);
+      padding: 6px 16px;
+      border-radius: 20px;
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      transition: background 0.15s ease, border-color 0.15s ease, transform 0.1s ease;
+    }
+    .auth-header-right a:hover, .haus-header-right a:hover {
+      background: rgba(255, 255, 255, 0.28);
+      border-color: rgba(255, 255, 255, 0.5);
+      transform: translateY(-1px);
+    }
+
+    /* Right Panel Editorial Quote */
+    .auth-right-content {
+      position: relative;
+      z-index: 10;
+      color: #ffffff;
+      max-width: 420px;
+    }
+    .auth-brand-pill {
+      display: inline-block;
+      font-size: 9.5px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.18em;
+      background: var(--accent-blue);
+      color: #ffffff;
       padding: 4px 10px;
-      border-radius: 2px;
-      backdrop-filter: blur(4px);
-      transition: background 0.15s ease, color 0.15s ease;
+      border-radius: 3px;
+      margin-bottom: 12px;
     }
-    .haus-header-right a:hover {
-      background: rgba(253, 253, 252, 0.8);
-      color: var(--accent-champagne);
+    .auth-quote {
+      font-family: var(--font-serif);
+      font-size: 20px;
+      font-style: italic;
+      line-height: 1.45;
+      color: #f8fafc;
+      margin-bottom: 12px;
+      letter-spacing: -0.2px;
     }
-
-    /* ─── RESPONSIVE: TABLET & MOBILE ─────────────────────────── */
-    @media (max-width: 900px) {
-      .haus-frame {
-        max-width: 92%;
-        height: auto;
-        min-height: 600px;
-      }
-      .haus-left {
-        padding: 22px 30px 20px 30px;
-      }
-      .haus-nav-links {
-        gap: 14px;
-      }
+    .auth-edition {
+      display: block;
+      font-size: 11.5px;
+      font-weight: 500;
+      letter-spacing: 0.08em;
+      color: rgba(255, 255, 255, 0.7);
     }
 
+    /* ─── RESPONSIVE: LAPTOP & TABLET ─────────────────────────── */
+    @media (max-width: 960px) {
+      .auth-card, .haus-frame {
+        max-width: 95%;
+        min-height: 580px;
+      }
+      .auth-left, .haus-left {
+        padding: 26px 32px 22px 32px;
+      }
+      .auth-right, .haus-right {
+        padding: 26px 28px 28px 28px;
+      }
+      .auth-quote {
+        font-size: 18px;
+      }
+    }
+
+    /* ─── RESPONSIVE: SMARTPHONE ──────────────────────────────── */
     @media (max-width: 768px) {
-      .haus-viewport {
-        padding: 12px;
+      .auth-viewport, .haus-viewport {
+        padding: 14px 10px;
         min-height: 100vh;
       }
-      .haus-frame {
+      .auth-card, .haus-frame {
         max-width: 100%;
-        height: auto;
         min-height: auto;
-        border-radius: 8px;
-        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
+        border-radius: 10px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+        flex-direction: column;
       }
-      .haus-split {
+      .auth-split, .haus-split {
         display: flex;
         flex-direction: column;
       }
-      /* Photo becomes top banner on mobile per instruction */
-      .haus-right {
+      /* Photo becomes top banner on mobile */
+      .auth-right, .haus-right {
         order: 1;
-        height: 200px;
+        height: 150px;
         width: 100%;
-        border-bottom: 1px solid var(--border-line);
+        padding: 16px 20px;
+        justify-content: space-between;
       }
-      .haus-header-right {
-        padding: 14px 18px 0 0;
+      .auth-right-content {
+        display: none;
       }
-      .haus-left {
+      .auth-header-right, .haus-header-right {
+        padding: 0;
+      }
+      .auth-left, .haus-left {
         order: 2;
-        padding: 24px 22px 24px 22px;
-        min-height: 480px;
+        padding: 24px 20px 22px 20px;
+        min-height: auto;
       }
-      .haus-heading {
-        font-size: 32px;
-        margin-bottom: 20px;
+      .auth-header-left, .haus-header-left {
+        margin-bottom: 8px;
       }
-      .haus-form-wrap {
+      .auth-nav-links, .haus-nav-links {
+        gap: 12px;
+      }
+      .auth-nav-links a, .haus-nav-links a {
+        font-size: 10px;
+      }
+      .auth-heading, .haus-heading {
+        font-size: 23px;
+      }
+      .auth-subheading, .haus-desc {
+        font-size: 12.5px;
+        margin-bottom: 16px;
+      }
+      .auth-form-wrap, .haus-form-wrap {
         max-width: 100%;
+      }
+      .auth-options-row {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
       }
     }
   </style>
@@ -483,60 +559,61 @@
 </head>
 <body>
 
-<div class="haus-viewport">
+<div class="auth-viewport">
 
-  <div class="haus-frame">
-    {{-- Device camera bezel dot like HAUS reference --}}
-    <div class="haus-frame-dot" aria-hidden="true"></div>
+  <div class="auth-card">
 
-    <div class="haus-split">
+    <div class="auth-split">
 
-      {{-- LEFT PANEL: WARM IVORY AUTHENTICATION --}}
-      <section class="haus-left">
+      {{-- LEFT PANEL: FORM AUTENTIKASI UTAMA --}}
+      <section class="auth-left">
 
-        {{-- Topbar left: Logo + Navigation --}}
-        <header class="haus-header-left">
-          <a href="{{ route('articles.index') }}" class="haus-logo" aria-label="News X Paper Beranda">
-            News X Paper
+        {{-- Topbar: Logo Brand & Navigasi Bahasa Indonesia Saja --}}
+        <header class="auth-header-left">
+          <a href="{{ route('articles.index') }}" class="auth-logo" aria-label="News X Paper Beranda">
+            News<span class="auth-logo-x">X</span>Paper
           </a>
 
-          <nav class="haus-nav" aria-label="Navigasi Utama">
-            <ul class="haus-nav-links">
-              <li><a href="{{ route('articles.index') }}">{{ mb_strtoupper(__('Beranda')) }}</a></li>
-              <li><a href="{{ route('news.index') }}">{{ mb_strtoupper(__('Berita')) }}</a></li>
-              <li><a href="{{ route('about') }}">{{ mb_strtoupper(__('Tentang Kami')) }}</a></li>
-              <li class="haus-lang-item">
-                <a href="{{ route('lang.switch', 'id') }}" class="{{ app()->getLocale() === 'id' ? 'active' : '' }}" title="Bahasa Indonesia">ID</a>
-                <span aria-hidden="true">/</span>
-                <a href="{{ route('lang.switch', 'en') }}" class="{{ app()->getLocale() === 'en' ? 'active' : '' }}" title="English">EN</a>
-              </li>
+          <nav class="auth-nav" aria-label="Navigasi Utama">
+            <ul class="auth-nav-links">
+              <li><a href="{{ route('articles.index') }}">BERANDA</a></li>
+              <li><a href="{{ route('news.index') }}">BERITA</a></li>
+              <li><a href="{{ route('about') }}">TENTANG KAMI</a></li>
             </ul>
           </nav>
         </header>
 
-        {{-- Main form container --}}
-        <main class="haus-main">
-          <div class="haus-form-wrap">
-            <h1 class="haus-heading">@yield('heading')</h1>
+        {{-- Kontainer Form Tengah --}}
+        <main class="auth-main">
+          <div class="auth-form-wrap">
+            <h1 class="auth-heading">@yield('heading')</h1>
+            @hasSection('subheading')
+              <p class="auth-subheading">@yield('subheading')</p>
+            @endif
 
             @yield('content')
           </div>
         </main>
 
-        {{-- Footer area: divider line + bottom account link --}}
-        <footer class="haus-footer">
-          <hr class="haus-divider" aria-hidden="true">
-          <p class="haus-footer-text">
+        {{-- Footer Bawah: Garis Pembatas & Tautan Akun --}}
+        <footer class="auth-footer">
+          <hr class="auth-divider" aria-hidden="true">
+          <p class="auth-footer-text">
             @yield('footer_text')
           </p>
         </footer>
 
       </section>
 
-      {{-- RIGHT PANEL: EXACT HAUS DRINK PHOTOGRAPH --}}
-      <aside class="haus-right" aria-label="Visual Referensi Editorial">
-        <div class="haus-header-right">
+      {{-- RIGHT PANEL: CITRA FOTO METROPOLITAN & KUTIPAN EDITORIAL --}}
+      <aside class="auth-right" aria-label="Visual Editorial Metropolitan">
+        <div class="auth-header-right">
           @yield('top_right_nav')
+        </div>
+        <div class="auth-right-content">
+          <span class="auth-brand-pill">NEWS X PAPER INDEPENDENT</span>
+          <blockquote class="auth-quote">"Menyajikan jurnalisme berimbang, aktual, dan tepercaya untuk seluruh pembaca Indonesia."</blockquote>
+          <span class="auth-edition">Edisi Digital Berkelanjutan</span>
         </div>
       </aside>
 
@@ -548,8 +625,8 @@
 
 <script>
   /**
-   * Fitur Show/Hide Password untuk form autentikasi.
-   * Mengubah type input password <-> text tanpa reload atau reset nilai input.
+   * Fitur Lihat/Sembunyikan Kata Sandi untuk form autentikasi.
+   * Mengubah tipe input password <-> text tanpa reload halaman.
    */
   function togglePasswordVisibility(inputId, btn) {
     var input = document.getElementById(inputId);
@@ -559,7 +636,7 @@
     input.type = isPassword ? 'text' : 'password';
 
     btn.setAttribute('aria-pressed', isPassword ? 'true' : 'false');
-    btn.setAttribute('aria-label', isPassword ? 'Sembunyikan password' : 'Lihat password');
+    btn.setAttribute('aria-label', isPassword ? 'Sembunyikan kata sandi' : 'Lihat kata sandi');
 
     var eyeOpen = btn.querySelector('.icon-eye');
     var eyeClosed = btn.querySelector('.icon-eye-slash');
@@ -578,4 +655,3 @@
 @stack('scripts')
 </body>
 </html>
-
