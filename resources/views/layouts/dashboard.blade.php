@@ -22,7 +22,7 @@
       </span>
       <form method="POST" action="{{ route('logout') }}">
         @csrf
-        <button type="submit" class="btn pastel">Keluar</button>
+        <button type="submit" class="btn pastel">Logout</button>
       </form>
     </div>
   </div>

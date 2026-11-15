@@ -21,7 +21,7 @@
             <a class="link-btn" href="{{ url('/') }}">Ke beranda</a>
             <form method="POST" action="{{ route('logout') }}">
                 @csrf
-                <button type="submit" class="btn-out">Keluar</button>
+                <button type="submit" class="btn-out">Logout</button>
             </form>
         </div>
     </div>

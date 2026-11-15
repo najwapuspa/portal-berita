@@ -100,7 +100,7 @@
       @auth
         <a href="{{ route('dashboard') }}" class="hd-btn primary">Dashboard</a>
       @else
-        <a href="{{ route('login') }}" class="hd-btn primary">Masuk</a>
+        <a href="{{ route('login') }}" class="hd-btn primary">Login</a>
       @endauth
     </div>
   </div>
