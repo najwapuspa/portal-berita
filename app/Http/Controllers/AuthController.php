@@ -86,7 +86,8 @@ class AuthController extends Controller
         $request->session()->invalidate();
         $request->session()->regenerateToken();
         $request->session()->put('locale', $locale);
-        return redirect()->route('login');
+        // Kembali ke homepage publik setelah logout
+        return redirect()->route('articles.index');
     }
 
     public function showForgotPassword()
