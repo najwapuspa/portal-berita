@@ -145,7 +145,7 @@
           @endforeach
         </ul>
       </section>
-      <div class="side-block"><div class="ad-box">{{ __('Ruang Iklan') }}<br>300 × 250</div></div>
+      <div class="side-block">@include('partials.ad-banner')</div>
     </aside>
   </div>
 </div>

@@ -93,6 +93,11 @@ class Article extends Model
 
         // Hapus blok pengalihan eksternal lawas (source-notice) jika ada
         $clean = preg_replace('/<div class="source-notice"[^>]*>.*?<\/div>/s', '', $raw);
+
+        // Safety net: hapus label [Data Demo] dan kalimat placeholder demo jika masih ada
+        $clean = preg_replace('/<p[^>]*>\s*<em>\s*\[Data Demo\][^<]*<\/em>\s*<\/p>/i', '', $clean ?? '');
+        $clean = preg_replace('/Ini adalah isi contoh[^.]+\.\s*Konten ini hanya data percobaan[^.]+\.\s*/i', '', $clean ?? '');
+
         return trim($clean ?? '');
     }
 

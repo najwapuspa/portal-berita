@@ -369,7 +369,7 @@
 
       {{-- Ruang Iklan Editorial --}}
       <div class="side-block" style="margin-top:28px">
-        <div class="ad-box">{{ __('Ruang Iklan') }}<br>300 × 250</div>
+        @include('partials.ad-banner')
       </div>
 
     </aside>

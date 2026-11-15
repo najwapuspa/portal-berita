@@ -583,7 +583,7 @@
         </div>
       </section>
 
-      <div class="side-block"><div class="ad-box">{{ __('Ruang Iklan') }}<br>300 × 250</div></div>
+      <div class="side-block">@include('partials.ad-banner')</div>
 
       <section class="side-block block b-dark" style="margin-top:32px">
         <div class="block-head"><span class="block-title">{{ __('Terpopuler') }}</span></div>
