@@ -213,7 +213,7 @@
         <ul class="f-contact">
           <li>redaksi@newsxpaper.test</li>
           <li>+62 21 0000 0000</li>
-          <li>Jl. Contoh No. 1, Jakarta</li>
+          {{-- Alamat kantor belum tersedia — akan diperbarui setelah konfirmasi --}}
         </ul>
       </div>
 
