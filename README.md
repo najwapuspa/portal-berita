@@ -1,58 +1,253 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# NEWS X PAPER — Portal Berita
 
 <p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
+  <strong>Portal Berita Digital Indonesia</strong><br>
+  Dibangun dengan Laravel 13 · PHP 8.5 · MySQL
 </p>
 
-## About Laravel
+---
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+## Deskripsi
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+**NEWS X PAPER** adalah portal berita digital berbasis web yang menyajikan informasi aktual dari berbagai kategori seperti Nasional, Ekonomi, Teknologi, Olahraga, dan lainnya. Website ini dirancang untuk memberikan pengalaman membaca berita yang nyaman, modern, dan responsif di semua perangkat.
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+> _"the art of publishing"_
 
-## Learning Laravel
+---
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+## Tujuan Pembuatan
 
-In addition, [Laracasts](https://laracasts.com) contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+Proyek ini dibuat sebagai bagian dari tugas sekolah untuk mempelajari pengembangan web menggunakan framework PHP modern (Laravel), dengan menerapkan konsep:
 
-You can also watch bite-sized lessons with real-world projects on [Laravel Learn](https://laravel.com/learn), where you will be guided through building a Laravel application from scratch while learning PHP fundamentals.
+- Autentikasi dan otorisasi dua peran (admin & user)
+- Operasi CRUD lengkap
+- Pagination dan pencarian
+- Ekspor laporan (PDF & Excel)
+- Desain responsif
 
-## Agentic Development
+---
 
-Laravel's predictable structure and conventions make it ideal for AI coding agents like Claude Code, Cursor, and GitHub Copilot. Install [Laravel Boost](https://laravel.com/docs/ai) to supercharge your AI workflow:
+## Teknologi yang Digunakan
+
+| Komponen | Teknologi |
+|---|---|
+| Framework Backend | Laravel 13 |
+| Bahasa Pemrograman | PHP 8.5.1 |
+| Database | MySQL |
+| Frontend | HTML, CSS (custom), JavaScript |
+| Grafik | Chart.js 4.4 |
+| Ekspor PDF | barryvdh/laravel-dompdf ^3.1 |
+| Ekspor Excel | phpoffice/phpspreadsheet ^5.11 |
+| Versi Kontrol | Git + GitHub |
+| Server Lokal | Laragon (Windows) |
+
+---
+
+## Fitur Utama
+
+### Fitur Publik
+- 🏠 Homepage dengan berita utama, trending, dan kategori
+- 📰 Daftar berita dengan pagination
+- 🔍 Pencarian berita berdasarkan judul dan konten
+- 📂 Halaman kategori berita (12 kategori)
+- 📄 Halaman detail berita dengan komentar
+- 🔗 Tombol berbagi ke Facebook, X, WhatsApp, dan salin tautan
+- 📱 Desain responsif untuk semua ukuran layar
+- 📧 Langganan newsletter
+
+### Fitur Admin
+- 📊 Dashboard statistik lengkap
+- ✍️ CRUD berita (tambah, lihat, edit, hapus, ubah status)
+- 🗂️ CRUD kategori (tambah, lihat, edit, hapus)
+- 👥 Kelola pengguna (tambah, edit, ubah role, hapus)
+- 💬 Moderasi komentar
+- 📈 Laporan statistik berita
+- 📄 Ekspor laporan ke PDF
+- 📊 Ekspor laporan ke Excel (4 sheet)
+- 🖨️ Cetak laporan
+- 📡 Sistem RSS otomatis (CNN Indonesia, ANTARA, Republika, dll.)
+
+### Fitur User Terdaftar
+- 🔐 Login dan daftar akun
+- 💬 Menulis komentar pada berita
+- 👤 Dashboard pribadi pembaca
+- 📋 Melihat komentar sendiri
+
+---
+
+## Struktur Database (Ringkasan)
+
+| Tabel | Deskripsi |
+|---|---|
+| `users` | Data pengguna (admin & user), kolom `role` |
+| `categories` | Kategori berita (12 kategori) |
+| `articles` | Artikel berita dengan metadata lengkap |
+| `comments` | Komentar pembaca pada artikel |
+| `kunjungan` | Statistik kunjungan harian |
+| `article_bookmarks` | Bookmark artikel oleh pengguna |
+| `newsletter_subscribers` | Daftar email langganan |
+| `sessions` | Sesi pengguna |
+| `cache` | Cache aplikasi |
+
+---
+
+## Persyaratan Instalasi
+
+- PHP >= 8.3
+- Composer >= 2.x
+- MySQL >= 5.7 / MariaDB >= 10.4
+- Node.js (opsional, untuk asset building)
+- Git
+
+---
+
+## Cara Instalasi
+
+### 1. Clone Repository
 
 ```bash
-composer require laravel/boost --dev
-
-php artisan boost:install
+git clone https://github.com/najwapuspa/portal-berita.git
+cd portal-berita
 ```
 
-Boost provides your agent 15+ tools and skills that help agents build Laravel applications while following best practices.
+### 2. Install Dependencies
 
-## Contributing
+```bash
+composer install
+```
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+### 3. Konfigurasi Environment
 
-## Code of Conduct
+```bash
+cp .env.example .env
+php artisan key:generate
+```
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+### 4. Konfigurasi Database di `.env`
 
-## Security Vulnerabilities
+```env
+DB_CONNECTION=mysql
+DB_HOST=127.0.0.1
+DB_PORT=3306
+DB_DATABASE=portal_berita
+DB_USERNAME=root
+DB_PASSWORD=
+```
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+### 5. Buat Database
 
-## License
+Buka phpMyAdmin atau MySQL client, kemudian buat database baru:
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+```sql
+CREATE DATABASE portal_berita CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+```
+
+### 6. Jalankan Migration
+
+```bash
+php artisan migrate
+```
+
+### 7. (Opsional) Isi Data Contoh
+
+```bash
+php artisan db:seed
+```
+
+### 8. Buat Symbolic Link Storage
+
+```bash
+php artisan storage:link
+```
+
+### 9. Jalankan Website
+
+```bash
+php artisan serve
+```
+
+Buka browser: **http://localhost:8000**
+
+---
+
+## Cara Konfigurasi `.env`
+
+| Key | Nilai |
+|---|---|
+| `APP_NAME` | `NEWS X PAPER` |
+| `APP_ENV` | `local` (dev) atau `production` |
+| `APP_DEBUG` | `true` (dev) atau `false` (production) |
+| `APP_URL` | URL website Anda |
+| `DB_DATABASE` | Nama database MySQL |
+| `DB_USERNAME` | Username MySQL |
+| `DB_PASSWORD` | Password MySQL |
+
+---
+
+## Cara Menjalankan Scheduler (RSS Otomatis)
+
+Scheduler mengambil berita baru setiap 30 menit.
+
+**Windows (Laragon/lokal) — via Task Scheduler:**
+
+Buka PowerShell sebagai Administrator:
+
+```powershell
+$action  = New-ScheduledTaskAction `
+  -Execute "C:\laragon\bin\php\php-8.5.1-Win32-vs17-x64\php.exe" `
+  -Argument "D:\portal-berita\artisan schedule:run" `
+  -WorkingDirectory "D:\portal-berita"
+$trigger = New-ScheduledTaskTrigger -RepetitionInterval (New-TimeSpan -Minutes 1) -Once -At (Get-Date)
+Register-ScheduledTask -TaskName "LaravelScheduler-NewsXPaper" -Action $action -Trigger $trigger -RunLevel Highest -Force
+```
+
+**Jalankan manual sekali:**
+
+```bash
+php artisan news:fetch
+```
+
+---
+
+## Akun Demo
+
+> ⚠️ Ganti password di production. Jangan gunakan akun ini di server publik.
+
+| Role | Email | Password |
+|---|---|---|
+| Admin | admin@newsxpaper.test | (atur via seeder atau langsung di DB) |
+| User | user@newsxpaper.test | (atur via seeder atau langsung di DB) |
+
+Untuk membuat akun admin baru:
+
+```bash
+php artisan tinker
+>>> App\Models\User::create(['name'=>'Admin','email'=>'admin@example.com','password'=>Hash::make('password123'),'role'=>'admin'])
+```
+
+---
+
+## Struktur Folder Penting
+
+```
+portal-berita/
+├── app/
+│   ├── Http/Controllers/     ← Controller aplikasi
+│   ├── Models/               ← Model Eloquent
+│   └── Services/             ← RssNewsService
+├── database/
+│   ├── migrations/           ← Skema database
+│   └── seeders/              ← Data awal
+├── docs/                     ← ERD, screenshot, panduan
+├── public/css/               ← CSS kustom
+├── resources/views/          ← Blade templates
+├── routes/web.php            ← Semua route
+└── .env.example              ← Template konfigurasi
+```
+
+---
+
+## Lisensi
+
+Proyek ini dibuat untuk keperluan tugas sekolah.
+© 2026 NEWS X PAPER — All rights reserved.

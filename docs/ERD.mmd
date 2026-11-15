@@ -1,0 +1,90 @@
+erDiagram
+    users {
+        bigint id PK
+        varchar name
+        varchar email UK
+        timestamp email_verified_at
+        varchar password
+        varchar role "admin|user"
+        boolean is_admin
+        varchar remember_token
+        timestamp created_at
+        timestamp updated_at
+    }
+
+    categories {
+        bigint id PK
+        varchar name
+        varchar slug UK
+        text description
+        timestamp created_at
+        timestamp updated_at
+    }
+
+    articles {
+        bigint id PK
+        bigint category_id FK
+        bigint user_id FK
+        varchar title
+        varchar slug UK
+        longtext content
+        varchar image
+        enum status "draft|published"
+        int views
+        varchar source_name
+        varchar source_url
+        text excerpt
+        tinyint read_time
+        timestamp published_at
+        varchar title_en
+        text excerpt_en
+        longtext content_en
+        timestamp created_at
+        timestamp updated_at
+    }
+
+    comments {
+        bigint id PK
+        bigint article_id FK
+        bigint user_id FK
+        text body
+        timestamp created_at
+        timestamp updated_at
+    }
+
+    article_bookmarks {
+        bigint id PK
+        bigint user_id FK
+        bigint article_id FK
+        timestamp created_at
+        timestamp updated_at
+    }
+
+    kunjungan {
+        date tanggal PK
+        bigint jumlah
+    }
+
+    newsletter_subscribers {
+        bigint id PK
+        varchar email UK
+        timestamp created_at
+        timestamp updated_at
+    }
+
+    sessions {
+        varchar id PK
+        bigint user_id FK
+        varchar ip_address
+        text user_agent
+        longtext payload
+        int last_activity
+    }
+
+    users ||--o{ articles : "menulis"
+    users ||--o{ comments : "menulis"
+    users ||--o{ article_bookmarks : "menyimpan"
+    users ||--o{ sessions : "memiliki"
+    categories ||--o{ articles : "memiliki"
+    articles ||--o{ comments : "memiliki"
+    articles ||--o{ article_bookmarks : "disimpan di"

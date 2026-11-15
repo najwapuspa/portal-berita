@@ -63,6 +63,14 @@ Route::middleware('auth')->group(function () {
         // Kelola Komentar
         Route::get('/komentar', [CommentController::class, 'adminIndex'])->name('comments.index');
 
+        // Kelola Kategori
+        Route::get('/kategori',                    [CategoryController::class, 'adminIndex'])->name('categories.index');
+        Route::get('/kategori/tambah',             [CategoryController::class, 'create'])->name('categories.create');
+        Route::post('/kategori',                   [CategoryController::class, 'store'])->name('categories.store');
+        Route::get('/kategori/{category}/edit',    [CategoryController::class, 'edit'])->name('categories.edit');
+        Route::put('/kategori/{category}',         [CategoryController::class, 'update'])->name('categories.update');
+        Route::delete('/kategori/{category}',      [CategoryController::class, 'destroy'])->name('categories.destroy');
+
         // Kelola Berita
         Route::get('/berita',              [ArticleController::class, 'adminIndex'])->name('articles.index');
         Route::get('/berita/tambah',       [ArticleController::class, 'create'])->name('articles.create');
