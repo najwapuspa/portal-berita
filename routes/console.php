@@ -24,7 +24,7 @@ Artisan::command('inspire', function () {
  |
  */
 Schedule::command('news:fetch')
-    ->everyTwoHours()
-    ->withoutOverlapping()           // Cegah job berjalan bersamaan
-    ->runInBackground()              // Jalan di background, tidak memblokir scheduler
-    ->appendOutputTo(storage_path('logs/news-fetch.log')); // Log output ke file terpisah
+    ->everyThirtyMinutes()
+    ->withoutOverlapping()
+    ->runInBackground()
+    ->appendOutputTo(storage_path('logs/news-fetch.log'));

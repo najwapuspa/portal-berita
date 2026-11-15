@@ -9,70 +9,91 @@ use Illuminate\Support\Facades\Log;
 /**
  * FetchNewsCommand
  *
- * Jalankan manual:    php artisan news:fetch
- * Test dry-run:       php artisan news:fetch --dry-run
- * Lihat detail:       php artisan news:fetch --verbose
+ * Jalankan manual:   php artisan news:fetch
+ * Dry-run:           php artisan news:fetch --dry-run
+ * Satu sumber saja:  php artisan news:fetch --source=CNN
  */
 class FetchNewsCommand extends Command
 {
     protected $signature = 'news:fetch
-        {--dry-run : Simulasi tanpa menyimpan ke database}
-        {--limit=  : Batasi jumlah feed yang diproses (opsional)}';
+        {--dry-run  : Simulasi tanpa menyimpan ke database}
+        {--source=  : Filter berdasarkan nama sumber (opsional)}
+        {--verbose  : Tampilkan detail per sumber}';
 
-    protected $description = 'Ambil berita terbaru dari RSS feed CNN Indonesia, Republika, dan ANTARA';
+    protected $description = 'Ambil berita terbaru dari RSS feed (CNN Indonesia, Republika, ANTARA, CNBC, Tempo, Sindonews)';
 
     public function handle(RssNewsService $service): int
     {
         $isDryRun = $this->option('dry-run');
+        $start    = microtime(true);
 
-        $this->info('NewsXpaper RSS Fetcher — mulai...');
-        $this->info('Tanggal   : ' . now()->setTimezone('Asia/Jakarta')->format('d M Y H:i:s') . ' WIB');
-        $this->newLine();
+        $this->line('');
+        $this->line('╔══════════════════════════════════════════════╗');
+        $this->line('║       NEWS X PAPER — RSS Fetcher             ║');
+        $this->line('╚══════════════════════════════════════════════╝');
+        $this->line('  Waktu  : ' . now()->setTimezone('Asia/Jakarta')->format('d M Y H:i:s') . ' WIB');
+        $this->line('  Mode   : ' . ($isDryRun ? 'DRY-RUN (tidak ada data disimpan)' : 'LIVE'));
+        $this->line('');
 
         if ($isDryRun) {
-            $this->warn('⚠️  Mode dry-run aktif — tidak ada data yang disimpan.');
-            $this->newLine();
+            $this->warn('  ⚠  Dry-run aktif — tidak ada data yang disimpan.');
+            $this->line('');
+            return Command::SUCCESS;
         }
 
-        $startTime = microtime(true);
-
         try {
-            if ($isDryRun) {
-                $this->line('Dry-run: melewati proses fetch aktual.');
-                $stats = ['inserted' => 0, 'skipped' => 0, 'errors' => 0];
-            } else {
-                $stats = $service->fetchAll();
+            $stats   = $service->fetchAll();
+            $elapsed = round(microtime(true) - $start, 2);
+
+            // Ringkasan per sumber
+            $this->line('  HASIL PER SUMBER:');
+            $rows = [];
+            foreach ($stats['per_source'] as $src => $s) {
+                $rows[] = [
+                    $src,
+                    $s['inserted'],
+                    $s['skipped'],
+                    $s['errors'],
+                ];
             }
+            $this->table(['Sumber', 'Baru', 'Dilewati', 'Error'], $rows);
 
-            $elapsed = round(microtime(true) - $startTime, 2);
-
-            $this->newLine();
+            // Ringkasan total
+            $this->line('');
             $this->table(
-                ['Metrik', 'Jumlah'],
+                ['Metrik', 'Nilai'],
                 [
-                    ['Artikel baru tersimpan', $stats['inserted']],
-                    ['Dilewati (duplikat/invalid)', $stats['skipped']],
+                    ['Total artikel baru', $stats['inserted']],
+                    ['Total dilewati (duplikat/invalid)', $stats['skipped']],
                     ['Feed gagal diakses', $stats['errors']],
                     ['Waktu eksekusi', $elapsed . ' detik'],
                 ]
             );
 
             if ($stats['inserted'] > 0) {
-                $this->info("✅ {$stats['inserted']} berita baru berhasil diimpor.");
+                $this->info("  ✅  {$stats['inserted']} berita baru berhasil diimpor.");
             } else {
-                $this->line('ℹ️  Tidak ada berita baru (semua sudah ada atau tidak ada artikel baru).');
+                $this->line("  ℹ   Tidak ada berita baru (semua sudah ada atau feed tidak memiliki item baru).");
             }
 
             if ($stats['errors'] > 0) {
-                $this->warn("⚠️  {$stats['errors']} feed gagal diakses. Cek storage/logs/laravel.log.");
+                $this->warn("  ⚠   {$stats['errors']} feed gagal diakses. Periksa storage/logs/laravel.log.");
             }
 
-            Log::info('news:fetch selesai', array_merge($stats, ['elapsed_s' => $elapsed]));
+            $this->line('');
+
+            Log::info('news:fetch selesai', [
+                'inserted' => $stats['inserted'],
+                'skipped'  => $stats['skipped'],
+                'errors'   => $stats['errors'],
+                'elapsed'  => $elapsed,
+                'run_at'   => now()->toIso8601String(),
+            ]);
 
             return Command::SUCCESS;
 
         } catch (\Throwable $e) {
-            $this->error('❌ Error tidak terduga: ' . $e->getMessage());
+            $this->error("  ❌  Error tidak terduga: " . $e->getMessage());
             Log::error('news:fetch gagal total', [
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),

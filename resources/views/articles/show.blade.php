@@ -106,11 +106,11 @@
         </figcaption>
       </figure>
 
-      {{-- Pemberitahuan Liputan Jika Berita Bersumber dari RSS --}}
+      {{-- Pemberitahuan sumber jika berita dari RSS — ditampilkan halus --}}
       @if($isRssArticle)
-        <div class="article-summary-badge" role="note">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
-          <span>{{ __('Ringkasan Liputan') }}: {{ __('Laporan berita ini disajikan berdasarkan rangkuman fakta jurnalistik terpercaya dari :source.', ['source' => $article->source_name]) }}</span>
+        <div class="article-source-note" role="note">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+          <span>{{ __('Disajikan dari :source', ['source' => $article->source_name]) }}</span>
         </div>
       @endif
 
@@ -119,7 +119,7 @@
         {!! $article->display_content !!}
       </div>
 
-      {{-- Kotak Atribusi Sumber & Hak Cipta (Elegan & Sesuai Etika Jurnalistik) --}}
+      {{-- Kotak Atribusi Sumber & Hak Cipta --}}
       @if($isRssArticle)
         <aside class="article-attribution-card" aria-label="{{ __('Atribusi Sumber Berita') }}">
           <div class="aac-header">
@@ -130,15 +130,12 @@
             <span class="aac-source">{{ $article->source_name }}</span>
           </div>
           <p class="aac-text">
-            {{ __('Laporan berita ini dikurasi dan disadur dari kanal resmi :source untuk menghadirkan cakupan informasi yang aktual, berimbang, dan tepercaya bagi pembaca NEWS X PAPER.', ['source' => $article->source_name]) }}
+            {{ __('Berita ini disajikan oleh NEWS X PAPER berdasarkan informasi dari :source dengan tetap memperhatikan ketentuan atribusi dan hak cipta yang berlaku.', ['source' => $article->source_name]) }}
           </p>
           <div class="aac-footer">
             <span class="aac-copyright">
-              © {{ optional($displayDate)->format('Y') ?? date('Y') }} {{ $article->source_name }}. {{ __('Hak cipta materi berita sepenuhnya milik penerbit asli.') }}
+              &copy; {{ optional($displayDate)->format('Y') ?? date('Y') }} {{ $article->source_name }}. {{ __('Hak cipta materi berita sepenuhnya milik penerbit asli.') }}
             </span>
-            <a href="{{ $article->source_url }}" target="_blank" rel="noopener noreferrer" class="aac-link" title="{{ __('Kunjungi publikasi asli di tab baru') }}">
-              {{ __('Tautan Artikel Asli') }} ↗
-            </a>
           </div>
         </aside>
       @endif

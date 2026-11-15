@@ -163,17 +163,28 @@ class ArticleController extends Controller
             ->get();
 
         // ── Navigasi prev/next berdasarkan published_at (fallback created_at) ──
-        $dateCol     = 'created_at';
-        $articleDate = $article->created_at;
+        $articleDate = $article->published_at ?? $article->created_at;
 
         $prevArticle = Article::where('status', 'published')
-            ->where($dateCol, '<', $articleDate)
-            ->orderByDesc($dateCol)
+            ->where(function ($q) use ($articleDate) {
+                $q->where('published_at', '<', $articleDate)
+                  ->orWhere(function ($q2) use ($articleDate) {
+                      $q2->whereNull('published_at')->where('created_at', '<', $articleDate);
+                  });
+            })
+            ->orderByDesc('published_at')
+            ->orderByDesc('created_at')
             ->first(['id', 'title', 'title_en', 'slug']);
 
         $nextArticle = Article::where('status', 'published')
-            ->where($dateCol, '>', $articleDate)
-            ->orderBy($dateCol)
+            ->where(function ($q) use ($articleDate) {
+                $q->where('published_at', '>', $articleDate)
+                  ->orWhere(function ($q2) use ($articleDate) {
+                      $q2->whereNull('published_at')->where('created_at', '>', $articleDate);
+                  });
+            })
+            ->orderBy('published_at')
+            ->orderBy('created_at')
             ->first(['id', 'title', 'title_en', 'slug']);
 
         return view('articles.show', compact(
