@@ -145,27 +145,59 @@
 
       {{-- Tombol Bagikan Berita --}}
       @php
-        $shareUrl   = urlencode(url()->current());
-        $shareTitle = urlencode($article->display_title);
+        $shareUrlRaw   = url()->current();
+        $shareUrl      = urlencode($shareUrlRaw);
+        $shareTitle    = urlencode($article->display_title);
+        $waMsg         = urlencode(
+            "[Baca berita terbaru di NEWS X PAPER]\n" .
+            "Judul: " . $article->display_title . "\n" .
+            "Baca selengkapnya: " . $shareUrlRaw
+        );
+        $xHashtags     = urlencode('#NewsXPaper #BeritaTerkini');
+        $xIntent       = "https://twitter.com/intent/tweet?text={$shareTitle}&url={$shareUrl}&hashtags=" . rawurlencode('NewsXPaper,BeritaTerkini');
       @endphp
+
+      {{-- Toast notifikasi salin tautan --}}
+      <div id="copy-toast" class="copy-toast" role="status" aria-live="polite" aria-atomic="true">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>
+        {{ __('Tautan berhasil disalin!') }}
+      </div>
+
       <div class="article-share">
         <span>{{ __('Bagikan:') }}</span>
+
+        {{-- Facebook Share Dialog --}}
         <a href="https://www.facebook.com/sharer/sharer.php?u={{ $shareUrl }}"
-           target="_blank" rel="noopener noreferrer" class="share-btn share-fb" aria-label="Facebook">
+           target="_blank" rel="noopener noreferrer"
+           class="share-btn share-fb"
+           aria-label="{{ __('Bagikan ke Facebook') }}">
           <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"/></svg>
           Facebook
         </a>
-        <a href="https://twitter.com/intent/tweet?text={{ $shareTitle }}&url={{ $shareUrl }}"
-           target="_blank" rel="noopener noreferrer" class="share-btn share-tw" aria-label="X">
-          <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M23 3a10.9 10.9 0 0 1-3.14 1.53 4.48 4.48 0 0 0-7.86 3v1A10.66 10.66 0 0 1 3 4s-4 9 5 13a11.64 11.64 0 0 1-7 2c9 5 20 0 20-11.5a4.5 4.5 0 0 0-.08-.83A7.72 7.72 0 0 0 23 3z"/></svg>
+
+        {{-- X (Twitter) Intent Tweet --}}
+        <a href="{{ $xIntent }}"
+           target="_blank" rel="noopener noreferrer"
+           class="share-btn share-tw"
+           aria-label="{{ __('Bagikan ke X') }}">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.746l7.73-8.835L2.021 2.25H8.1l4.265 5.638L18.244 2.25Zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
           X
         </a>
-        <a href="https://api.whatsapp.com/send?text={{ $shareTitle }}%20{{ $shareUrl }}"
-           target="_blank" rel="noopener noreferrer" class="share-btn share-wa" aria-label="WhatsApp">
-          <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>
+
+        {{-- WhatsApp Share --}}
+        <a href="https://api.whatsapp.com/send?text={{ $waMsg }}"
+           target="_blank" rel="noopener noreferrer"
+           class="share-btn share-wa"
+           aria-label="{{ __('Bagikan ke WhatsApp') }}">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51a12.8 12.8 0 0 0-.57-.01c-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 0 0-3.48-8.413z"/></svg>
           WhatsApp
         </a>
-        <button class="share-btn share-copy" id="btn-copy-link" aria-label="{{ __('Salin Tautan') }}">
+
+        {{-- Salin Tautan --}}
+        <button class="share-btn share-copy"
+                id="btn-copy-link"
+                data-url="{{ $shareUrlRaw }}"
+                aria-label="{{ __('Salin Tautan') }}">
           <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
           <span id="copy-label">{{ __('Salin Tautan') }}</span>
         </button>
@@ -347,14 +379,58 @@
 
 @push('scripts')
 <script>
-document.getElementById('btn-copy-link')?.addEventListener('click', () => {
-  navigator.clipboard.writeText(window.location.href).then(() => {
-    const label = document.getElementById('copy-label');
-    const oldText = label.textContent;
-    label.textContent = "{{ __('Tersalin!') }}";
-    setTimeout(() => label.textContent = oldText, 2000);
+(function () {
+  var btn   = document.getElementById('btn-copy-link');
+  var label = document.getElementById('copy-label');
+  var toast = document.getElementById('copy-toast');
+  if (!btn) return;
+
+  var originalLabel = label ? label.textContent.trim() : '';
+  var toastTimer;
+
+  function showToast() {
+    if (!toast) return;
+    toast.classList.add('copy-toast--show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(function () {
+      toast.classList.remove('copy-toast--show');
+    }, 2500);
+  }
+
+  function onSuccess() {
+    if (label) {
+      label.textContent = '{{ __("Tersalin!") }}';
+      setTimeout(function () { label.textContent = originalLabel; }, 2500);
+    }
+    btn.classList.add('share-copy--done');
+    setTimeout(function () { btn.classList.remove('share-copy--done'); }, 2500);
+    showToast();
+  }
+
+  function fallbackCopy(text) {
+    var ta = document.createElement('textarea');
+    ta.value = text;
+    ta.style.cssText = 'position:fixed;top:-9999px;left:-9999px;opacity:0;';
+    document.body.appendChild(ta);
+    ta.focus();
+    ta.select();
+    var ok = false;
+    try { ok = document.execCommand('copy'); } catch (e) {}
+    document.body.removeChild(ta);
+    return ok;
+  }
+
+  btn.addEventListener('click', function () {
+    var url = btn.getAttribute('data-url') || window.location.href;
+    if (navigator.clipboard && window.isSecureContext) {
+      navigator.clipboard.writeText(url).then(onSuccess).catch(function () {
+        if (fallbackCopy(url)) onSuccess();
+      });
+    } else {
+      if (fallbackCopy(url)) onSuccess();
+    }
   });
-});
+})();
 (function() {
   const ta = document.getElementById('comment-body');
   const counter = document.getElementById('cf-counter');
