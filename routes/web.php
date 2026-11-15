@@ -7,6 +7,7 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\CommentController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\LaporanController;
 use App\Http\Controllers\LocalizationController;
 use App\Http\Controllers\NewsletterController;
 use App\Http\Controllers\ProfilController;
@@ -82,5 +83,10 @@ Route::middleware('auth')->group(function () {
 
         // Statistik
         Route::get('/statistik', [StatistikController::class, 'index'])->name('statistik');
+
+        // Laporan Statistik Berita
+        Route::get('/laporan',               [LaporanController::class, 'index'])->name('laporan.index');
+        Route::get('/laporan/export-pdf',    [LaporanController::class, 'exportPdf'])->name('laporan.pdf');
+        Route::get('/laporan/export-excel',  [LaporanController::class, 'exportExcel'])->name('laporan.excel');
     });
 });
