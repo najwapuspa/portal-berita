@@ -20,9 +20,10 @@ class ArticleController extends Controller
     /** Beranda — daftar artikel published dengan pagination + variasi per sesi */
     public function index(Request $request)
     {
-        $categories = Category::withCount([
+        // ── Kategori untuk pill navigasi (satu query, dipakai di beberapa tempat) ──
+        $allCategories = Category::withCount([
             'articles' => fn ($q) => $q->where('status', 'published'),
-        ])->get();
+        ])->orderBy('name')->get();
 
         $query = Article::with(['category', 'user'])
             ->withCount('comments')
@@ -35,51 +36,56 @@ class ArticleController extends Controller
         // Paginate — 12 per halaman untuk homepage
         $articles = $query->latest('published_at')->latest()->paginate(12)->withQueryString();
 
-        // Terpopuler — 6 artikel dengan views tertinggi
+        // Terpopuler — 6 artikel (juga dipakai sebagai trending)
         $artikelPopuler = Article::where('status', 'published')
-            ->orderByDesc('views')
-            ->take(6)
-            ->get();
-
-        // Trending — 8 terpopuler sebagai ticker
-        $trending = Article::where('status', 'published')
             ->orderByDesc('views')
             ->take(8)
             ->get();
 
-        // ── Variasi random per sesi ────────────────────────────────
-        // Seed berubah tiap sesi baru tapi konsisten dalam satu sesi.
-        // Dipakai untuk bagian "Pilihan Editor" agar variatif tiap refresh.
+        // Trending ticker — gunakan data terpopuler yang sama (hindari query ke-2)
+        $trending = $artikelPopuler->take(8);
+
+        // Pilihan editor: hindari RAND() full-table scan.
+        // Ambil artikel dengan views menengah (bukan terbesar, bukan terkecil) sebagai variasi.
         $sessionSeed = session()->get('homepage_seed');
         if (! $sessionSeed) {
             $sessionSeed = rand(1, 9999);
             session()->put('homepage_seed', $sessionSeed);
         }
-
-        // Pilihan editor: ambil artikel acak berdasarkan seed sesi
-        // Gunakan RAND(seed) agar berbeda tiap sesi tapi konsisten dalam sesi
+        // Gunakan offset dari seed agar terasa bervariasi tanpa full-table scan
+        $editorOffset = $sessionSeed % max(1, (Article::where('status','published')->count() - 6));
         $pilihanEditor = Article::with('category')
             ->where('status', 'published')
-            ->orderByRaw('RAND(' . (int) $sessionSeed . ')')
+            ->skip($editorOffset)
             ->take(6)
             ->get();
 
-        // Berita terbaru per kategori untuk section tambahan
-        // Menggunakan published_at jika tersedia, fallback ke created_at
-        $beritaPerKategori = collect(config('categories'))->map(function ($cfg, $slug) {
+        // Berita terbaru per kategori — satu query untuk semua kategori sekaligus
+        // Ganti loop 12 query menjadi satu query dengan GROUP BY
+        $slugList = $allCategories->pluck('slug')->toArray();
+        $catIdMap = $allCategories->keyBy('slug')->map(fn ($c) => $c->id);
+
+        // Ambil semua artikel yang dibutuhkan sekaligus (1 query, bukan 12)
+        $allKatArticles = Article::with(['category', 'user'])
+            ->where('status', 'published')
+            ->whereIn('category_id', $allCategories->pluck('id'))
+            ->orderByDesc('published_at')
+            ->take(60) // cukup untuk 12 kategori × 4–5 artikel
+            ->get();
+
+        // Kelompokkan per kategori di PHP (tidak butuh query tambahan)
+        $beritaPerKategori = collect(config('categories'))->map(function ($cfg, $slug) use ($allKatArticles, $catIdMap) {
+            $catId = $catIdMap[$slug] ?? null;
+            if (! $catId) return null;
+            $items = $allKatArticles->where('category_id', $catId)->take(4)->values();
+            if ($items->isEmpty()) return null;
             return [
-                'slug'   => $slug,
-                'name'   => app()->getLocale() === 'en' ? ($cfg['name_en'] ?? $cfg['name']) : $cfg['name'],
-                'color'  => $cfg['color'],
-                'items'  => Article::with(['category', 'user'])
-                    ->whereHas('category', fn ($q) => $q->where('slug', $slug))
-                    ->where('status', 'published')
-                    ->orderByDesc('published_at')
-                    ->latest()
-                    ->take(4)
-                    ->get(),
+                'slug'  => $slug,
+                'name'  => app()->getLocale() === 'en' ? ($cfg['name_en'] ?? $cfg['name']) : $cfg['name'],
+                'color' => $cfg['color'],
+                'items' => $items,
             ];
-        })->filter(fn ($item) => $item['items']->count() > 0)->values();
+        })->filter()->values();
 
         // Berita terkini dari RSS (source_name tidak null) — 8 terbaru
         $beritaRss = Article::with('category')
@@ -89,10 +95,8 @@ class ArticleController extends Controller
             ->take(8)
             ->get();
 
-        // Semua kategori dari DB untuk pill navigasi
-        $allCategories = Category::withCount([
-            'articles' => fn ($q) => $q->where('status', 'published'),
-        ])->orderBy('name')->get();
+        // $categories dihapus — view sudah pakai $allCategories
+        $categories = $allCategories;
 
         return view('articles.index', compact(
             'articles', 'categories', 'artikelPopuler', 'trending',

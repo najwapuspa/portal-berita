@@ -35,8 +35,10 @@
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700;900&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="{{ asset('css/newspaper.css') }}">
+  {{-- Preload font paling penting (regular + bold) untuk mempercepat render teks --}}
+  <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700;900&display=swap">
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{{ asset('css/newspaper.min.css') }}">
   @stack('head')
 </head>
 <body>

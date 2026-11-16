@@ -84,6 +84,8 @@
            alt="{{ $featured['title'] }}"
            class="fa-img"
            loading="eager"
+           fetchpriority="high"
+           width="800" height="533"
            onerror="this.src='{{ $placeholder }}'">
       <div class="fa-img-overlay" aria-hidden="true"></div>
       <a href="{{ $featured['catSlug'] ? route('categories.show', $featured['catSlug']) : '#' }}"
@@ -201,11 +203,9 @@
     @foreach([0, 1, 2, 3] as $k)
       @php $a = $pick($k); $bg = $a['img'] ?? $placeholder; @endphp
       <a href="{{ $a['url'] }}" class="hero-item hero-{{ $k }} g{{ $k % 5 }}"
-         style="background-image: url('{{ $bg }}')"
+         data-bg="{{ $bg }}"
+         style="{{ $k === 0 ? 'background-image: url(\'' . $bg . '\')' : '' }}"
          aria-label="{{ $a['title'] }}">
-        <img src="{{ $bg }}" alt="" loading="{{ $k === 0 ? 'eager' : 'lazy' }}"
-             style="position:absolute;width:0;height:0;opacity:0;pointer-events:none"
-             onerror="this.closest('.hero-item').style.backgroundImage='url({{ $placeholder }})'">
         <div class="hero-body">
           <span class="tag" style="{{ $a['catColor'] !== '#222' ? 'background:' . $a['catColor'] : '' }}">{{ $a['cat'] }}</span>
           <h2 class="hero-title">{{ $a['title'] }}</h2>
@@ -238,7 +238,7 @@
           <div class="dm">
             <article>
               <a href="{{ $big['url'] }}" class="card-thumb g4"
-                 style="background-image: url('{{ $bigBg }}')"
+                 data-bg="{{ $bigBg }}"
                  aria-label="{{ $big['title'] }}">
                 <span class="tag">{{ $big['cat'] }}</span>
               </a>
@@ -256,7 +256,7 @@
                 @php $a = $tp($i); @endphp
                 <a href="{{ $a['url'] }}" class="list-item">
                   <span class="list-thumb g{{ $i % 5 }}"
-                        style="background-image: url('{{ $a['img'] ?? $placeholder }}')"></span>
+                        data-bg="{{ $a['img'] ?? $placeholder }}"></span>
                   <div>
                     <h4 class="list-title">{{ $a['title'] }}</h4>
                     <span class="card-meta">{{ $a['date'] }}</span>
@@ -280,7 +280,7 @@
               @php $a = $pp($i); @endphp
               <a href="{{ $a['url'] }}" class="list-item">
                 <span class="list-thumb g{{ $i % 5 }}"
-                      style="background-image: url('{{ $a['img'] ?? $placeholder }}')"></span>
+                      data-bg="{{ $a['img'] ?? $placeholder }}"></span>
                 <div><h4 class="list-title">{{ $a['title'] }}</h4><span class="card-meta">{{ $a['date'] }}</span></div>
               </a>
             @endfor
@@ -294,7 +294,7 @@
               @php $a = $ek($i); @endphp
               <a href="{{ $a['url'] }}" class="list-item">
                 <span class="list-thumb g{{ $i % 5 }}"
-                      style="background-image: url('{{ $a['img'] ?? $placeholder }}')"></span>
+                      data-bg="{{ $a['img'] ?? $placeholder }}"></span>
                 <div><h4 class="list-title">{{ $a['title'] }}</h4><span class="card-meta">{{ $a['date'] }}</span></div>
               </a>
             @endfor
@@ -318,7 +318,7 @@
               @php $a = $ek($i); @endphp
               <article>
                 <a href="{{ $a['url'] }}" class="card-thumb g{{ ($i+1)%5 }}"
-                   style="background-image: url('{{ $a['img'] ?? $placeholder }}')">
+                   data-bg="{{ $a['img'] ?? $placeholder }}">
                   <span class="tag">{{ $a['cat'] }}</span>
                 </a>
                 <h3 class="card-title"><a href="{{ $a['url'] }}">{{ $a['title'] }}</a></h3>
@@ -331,7 +331,7 @@
             @for($i = 2; $i < min(6, $eN); $i++)
               @php $a = $ek($i); @endphp
               <a href="{{ $a['url'] }}" class="list-item">
-                <span class="list-thumb g{{ $i%5 }}" style="background-image: url('{{ $a['img'] ?? $placeholder }}')"></span>
+                <span class="list-thumb g{{ $i%5 }}" data-bg="{{ $a['img'] ?? $placeholder }}"></span>
                 <div><h4 class="list-title">{{ $a['title'] }}</h4><span class="card-meta">{{ $a['date'] }}</span></div>
               </a>
             @endfor
@@ -341,7 +341,7 @@
           @php $a = $ek(0); @endphp
           <div class="list">
             <a href="{{ $a['url'] }}" class="list-item">
-              <span class="list-thumb g1" style="background-image: url('{{ $a['img'] ?? $placeholder }}')"></span>
+              <span class="list-thumb g1" data-bg="{{ $a['img'] ?? $placeholder }}"></span>
               <div><h4 class="list-title">{{ $a['title'] }}</h4><span class="card-meta">{{ $a['date'] }}</span></div>
             </a>
           </div>
@@ -350,7 +350,7 @@
           @php $a = $ek(1 % $eN); @endphp
           <div class="list">
             <a href="{{ $a['url'] }}" class="list-item">
-              <span class="list-thumb g3" style="background-image: url('{{ $a['img'] ?? $placeholder }}')"></span>
+              <span class="list-thumb g3" data-bg="{{ $a['img'] ?? $placeholder }}"></span>
               <div><h4 class="list-title">{{ $a['title'] }}</h4><span class="card-meta">{{ $a['date'] }}</span></div>
             </a>
           </div>
@@ -374,11 +374,8 @@
             @endphp
             <article class="eg-card">
               <a href="{{ route('articles.show', $ep->slug) }}" class="eg-img"
-                 style="background-image: url('{{ $epImg }}')"
+                 data-bg="{{ $epImg }}"
                  aria-label="{{ $ep->display_title }}">
-                <img src="{{ $epImg }}" alt="" loading="lazy"
-                     style="position:absolute;width:0;height:0;opacity:0"
-                     onerror="this.closest('.eg-img').style.backgroundImage='url({{ $placeholder }})'">
                 <span class="tag" style="{{ $epColor !== '#222' ? 'background:' . $epColor : '' }}">
                   {{ optional($ep->category)->display_name ?? 'Berita' }}
                 </span>
@@ -424,7 +421,7 @@
             @endphp
             <a href="{{ route('articles.show', $rItem->slug) }}" class="rss-item">
               <span class="rss-thumb"
-                    style="background-image: url('{{ $rImg }}')"
+                    data-bg="{{ $rImg }}"
                     role="img" aria-label="{{ $rItem->display_title }}"></span>
               <div class="rss-item-body">
                 <div class="rss-item-meta">
@@ -473,9 +470,7 @@
               @endphp
               <article class="kat-big">
                 <a href="{{ route('articles.show', $katBig->slug) }}" class="card-thumb g0"
-                   style="background-image: url('{{ $katBigImg }}')" aria-label="{{ $katBig->display_title }}">
-                  <img src="{{ $katBigImg }}" alt="" loading="lazy" style="display:none"
-                       onerror="this.parentElement.style.backgroundImage='url({{ asset('images/placeholder-news.svg') }})'">
+                   data-bg="{{ $katBigImg }}" aria-label="{{ $katBig->display_title }}">
                   <span class="tag" style="background: {{ $katGroup['color'] }}">{{ $katGroup['name'] }}</span>
                 </a>
                 <h3 class="card-title" style="font-size:17px">
@@ -493,7 +488,7 @@
                 @foreach($katGroup['items']->skip(1) as $katItem)
                   @php $katImg = $katItem->image_url; @endphp
                   <a href="{{ route('articles.show', $katItem->slug) }}" class="list-item">
-                    <span class="list-thumb g{{ $loop->index % 5 }}" style="background-image: url('{{ $katImg }}')">
+                    <span class="list-thumb g{{ $loop->index % 5 }}" data-bg="{{ $katImg }}">
                     </span>
                     <div>
                       <h4 class="list-title">{{ \Illuminate\Support\Str::limit($katItem->display_title, 65) }}</h4>
@@ -525,7 +520,7 @@
                 @foreach($katGroup['items']->take(3) as $km)
                   @php $kmImg = $km->image_url; @endphp
                   <a href="{{ route('articles.show', $km->slug) }}" class="kat-mini-item">
-                    <span class="kat-mini-thumb" style="background-image: url('{{ $kmImg }}')" aria-hidden="true"></span>
+                    <span class="kat-mini-thumb" data-bg="{{ $kmImg }}" aria-hidden="true"></span>
                     <div class="kat-mini-info">
                       <span class="kat-mini-title">{{ \Illuminate\Support\Str::limit($km->display_title, 70) }}</span>
                       <span class="kat-mini-meta">{{ $km->formatted_date }}</span>
@@ -596,7 +591,7 @@
                   : $placeholder;
               @endphp
               <a href="{{ route('articles.show', $pop->slug) }}" aria-label="{{ $pop->display_title }}">
-                <span class="pop-thumb g{{ $i % 5 }}" style="background-image: url('{{ $popImg }}')"></span>
+                <span class="pop-thumb g{{ $i % 5 }}" data-bg="{{ $popImg }}"></span>
                 <div class="pop-title">{{ \Illuminate\Support\Str::limit($pop->display_title, 55) }}</div>
               </a>
             @endforeach
@@ -604,7 +599,7 @@
             @foreach([1, 2, 3, 4] as $i)
               @php $a = $pick($i); @endphp
               <a href="{{ $a['url'] }}">
-                <span class="pop-thumb g{{ $i % 5 }}" style="background-image: url('{{ $a['img'] ?? $placeholder }}')"></span>
+                <span class="pop-thumb g{{ $i % 5 }}" data-bg="{{ $a['img'] ?? $placeholder }}"></span>
                 <div class="pop-title">{{ $a['title'] }}</div>
               </a>
             @endforeach
@@ -668,6 +663,45 @@ document.querySelectorAll('.block-tabs').forEach(tabGroup => {
   });
   document.addEventListener('click', close);
   document.addEventListener('keydown', (e) => { if(e.key === 'Escape') close(); });
+})();
+
+// ── Lazy-load background-image (IntersectionObserver) ────────
+// Semua elemen dengan data-bg dimuat hanya saat mendekati viewport
+(function() {
+  const placeholder = '{{ asset('images/placeholder-news.svg') }}';
+
+  if ('IntersectionObserver' in window) {
+    const bgObserver = new IntersectionObserver(function(entries) {
+      entries.forEach(function(entry) {
+        if (entry.isIntersecting) {
+          const el  = entry.target;
+          const src = el.dataset.bg;
+          if (src) {
+            const img = new Image();
+            img.onload  = function() { el.style.backgroundImage = 'url(' + src + ')'; };
+            img.onerror = function() { el.style.backgroundImage = 'url(' + placeholder + ')'; };
+            img.src = src;
+          }
+          bgObserver.unobserve(el);
+        }
+      });
+    }, { rootMargin: '200px 0px' });
+
+    // Observe semua elemen dengan data-bg yang belum punya background-image
+    document.querySelectorAll('[data-bg]').forEach(function(el) {
+      if (!el.style.backgroundImage) {
+        bgObserver.observe(el);
+      }
+    });
+
+  } else {
+    // Fallback untuk browser tanpa IntersectionObserver — langsung load semua
+    document.querySelectorAll('[data-bg]').forEach(function(el) {
+      if (el.dataset.bg && !el.style.backgroundImage) {
+        el.style.backgroundImage = 'url(' + el.dataset.bg + ')';
+      }
+    });
+  }
 })();
 </script>
 @endpush
