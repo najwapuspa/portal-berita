@@ -153,7 +153,6 @@ class RssNewsService
         $response = Http::timeout(self::HTTP_TIMEOUT)
             ->withOptions([
                 'version' => 1.0,   // HTTP/1.0 — bekerja lebih baik dengan beberapa feed (mis. ANTARA)
-                'verify'  => false,
                 'curl'    => [CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_0],
             ])
             ->withHeaders([

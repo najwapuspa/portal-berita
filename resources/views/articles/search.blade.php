@@ -100,6 +100,12 @@
 
         @else
 
+          @php
+            // C1 Fix: escape $q SATU KALI di luar loop — aman untuk semua iterasi
+            // e() mengkonversi <, >, ", ', & menjadi HTML entities
+            $safeQ = e($q);
+          @endphp
+
           @foreach($paginator as $i => $a)
             @php
               $resImg = $a['img'] ?: asset('images/placeholder-news.svg');
@@ -113,7 +119,14 @@
               <div>
                 <h3 class="card-title">
                   <a href="{{ $a['url'] }}">
-                    {!! \Illuminate\Support\Str::of($a['title'])->replace($q, '<mark>' . $q . '</mark>') !!}
+                    @php
+                      // Escape teks artikel, lalu sisipkan <mark> hanya di sekitar keyword yang sudah aman
+                      $safeTitle   = e($a['title']);
+                      $highlighted = $safeQ !== ''
+                          ? str_ireplace($safeQ, '<mark>' . $safeQ . '</mark>', $safeTitle)
+                          : $safeTitle;
+                    @endphp
+                    {!! $highlighted !!}
                   </a>
                 </h3>
                 <div class="card-meta">
@@ -123,7 +136,14 @@
                   <span class="badge-count">{{ $a['comments'] }}</span>
                 </div>
                 <p class="excerpt">
-                  {!! \Illuminate\Support\Str::of($a['excerpt'])->replace($q, '<mark>' . $q . '</mark>') !!}
+                  @php
+                    // Escape excerpt, lalu sisipkan <mark> hanya di sekitar keyword yang sudah aman
+                    $safeExcerpt        = e($a['excerpt']);
+                    $highlightedExcerpt = $safeQ !== ''
+                        ? str_ireplace($safeQ, '<mark>' . $safeQ . '</mark>', $safeExcerpt)
+                        : $safeExcerpt;
+                  @endphp
+                  {!! $highlightedExcerpt !!}
                 </p>
               </div>
             </article>
