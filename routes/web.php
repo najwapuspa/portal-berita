@@ -28,7 +28,7 @@ Route::get('/api/suggest',    [SearchController::class, 'suggest'])->name('searc
 
 // ── Auth ─────────────────────────────────────────────────────────────────────
 Route::get('/login',    [AuthController::class, 'showLogin'])->name('login');
-Route::post('/login',   [AuthController::class, 'login']);
+Route::post('/login',   [AuthController::class, 'login'])->middleware('throttle:5,1');
 Route::get('/daftar',   [AuthController::class, 'showRegister'])->name('register');
 Route::post('/daftar',  [AuthController::class, 'register']);
 Route::post('/logout',  [AuthController::class, 'logout'])->name('logout')->middleware('auth');
