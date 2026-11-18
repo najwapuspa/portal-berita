@@ -75,12 +75,19 @@
       @endif
 
       {{-- Meta: Penulis / Sumber, Waktu Publikasi, Waktu Baca, Views --}}
+      @php
+        $rawShowAuthor = optional($article->user)->name;
+        $trimmedShow = trim($rawShowAuthor ?? '');
+        $authorDisplay = (!$rawShowAuthor || preg_match('/^admin(\s*news\s*x\s*paper)?$/i', $trimmedShow) || strtolower($trimmedShow) === 'redaksi')
+          ? 'NewsXPaper'
+          : $rawShowAuthor;
+      @endphp
       <div class="article-meta">
         <span class="am-avatar" aria-hidden="true">
-          {{ mb_strtoupper(mb_substr($isRssArticle ? $article->source_name : (optional($article->user)->name ?? 'A'), 0, 1)) }}
+          {{ mb_strtoupper(mb_substr($isRssArticle ? $article->source_name : $authorDisplay, 0, 1)) }}
         </span>
         <div class="am-info">
-          <strong>{{ $isRssArticle ? $article->source_name : (optional($article->user)->name ?? 'Redaksi NEWS X PAPER') }}</strong>
+          <strong>{{ $isRssArticle ? $article->source_name : $authorDisplay }}</strong>
           <div class="am-sub">
             <time datetime="{{ $displayDate->toIso8601String() }}">
               {{ $displayDate->setTimezone('Asia/Jakarta')->locale(app()->getLocale())->translatedFormat('j F Y, H:i') }} WIB

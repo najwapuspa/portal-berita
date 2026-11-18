@@ -3,6 +3,16 @@
 @section('title', ($q !== '' ? __('Cari') . ': ' . $q : __('Cari Berita')) . ' – News X Paper')
 
 @section('content')
+@php
+  $formatAuthor = function(?string $name): string {
+    if (!$name) return 'NewsXPaper';
+    $trimmed = trim($name);
+    if (preg_match('/^admin(\s*news\s*x\s*paper)?$/i', $trimmed) || strtolower($trimmed) === 'redaksi') {
+      return 'NewsXPaper';
+    }
+    return $trimmed;
+  };
+@endphp
 <div class="container">
 
   <div class="cat-head" style="--accent: #222">
@@ -87,7 +97,7 @@
                   <div>
                     <h3 class="card-title"><a href="{{ route('articles.show', $pop->slug) }}">{{ $pop->display_title }}</a></h3>
                     <div class="card-meta">
-                      <b>{{ optional($pop->user)->name ?? 'Admin' }}</b>
+                      <b>{{ $formatAuthor(optional($pop->user)->name) }}</b>
                       <span>–</span><span>{{ $pop->formatted_date }}</span>
                       <span>👁 {{ number_format($pop->views, 0, ',', '.') }}</span>
                     </div>
@@ -130,7 +140,7 @@
                   </a>
                 </h3>
                 <div class="card-meta">
-                  <b>{{ $a['author'] }}</b><span>–</span>
+                  <b>{{ $formatAuthor($a['author'] ?? null) }}</b><span>–</span>
                   <span>{{ $a['date'] }}</span>
                   <span>👁 {{ number_format($a['views'], 0, ',', '.') }}</span>
                   <span class="badge-count">{{ $a['comments'] }}</span>

@@ -16,8 +16,17 @@
 
   $str = fn($v) => is_string($v) && $v !== '' ? $v : null;
 
+  $formatAuthor = function(?string $name): string {
+    if (!$name) return 'NewsXPaper';
+    $trimmed = trim($name);
+    if (preg_match('/^admin(\s*news\s*x\s*paper)?$/i', $trimmed) || strtolower($trimmed) === 'redaksi') {
+      return 'NewsXPaper';
+    }
+    return $trimmed;
+  };
+
   // $articles adalah LengthAwarePaginator dari controller
-  $items = collect($articles->items())->values()->map(function ($a) use ($str, $imgUrl) {
+  $items = collect($articles->items())->values()->map(function ($a) use ($str, $imgUrl, $formatAuthor) {
     $catSlug = $str(data_get($a, 'category.slug')) ?? '';
     $catColor= config('categories.' . $catSlug . '.color', '#222');
     $cat     = data_get($a, 'category.display_name') ?? ($str(data_get($a, 'category.name')) ?? 'Berita');
@@ -29,7 +38,7 @@
       'cat'      => $cat,
       'catSlug'  => $catSlug,
       'catColor' => $catColor,
-      'author'   => $str(data_get($a, 'user.name')) ?? 'Admin',
+      'author'   => $formatAuthor($str(data_get($a, 'user.name'))),
       'img'      => $imgUrl(data_get($a, 'image')),
       'date'     => data_get($a, 'formatted_date') ?? \Illuminate\Support\Carbon::parse(data_get($a, 'created_at') ?? now())->locale(app()->getLocale())->translatedFormat('j M Y'),
       'comments' => (int) data_get($a, 'comments_count', 0),
@@ -48,7 +57,7 @@
       ['title'=>'Tim Nasional Lolos Kualifikasi','cat'=>'Olahraga','catSlug'=>'olahraga'],
       ['title'=>'Opini: Membaca Berita Kritis','cat'=>'Opini','catSlug'=>'opini'],
     ])->map(fn($s) => $s + [
-      'url'=>'#','author'=>'Admin','img'=>null,'comments'=>0,'views'=>0,
+      'url'=>'#','author'=>'NewsXPaper','img'=>null,'comments'=>0,'views'=>0,
       'catColor'=>'#222',
       'date'=>now()->locale(app()->getLocale())->translatedFormat('j M Y'),
       'excerpt'=>'Ringkasan berita akan tampil setelah artikel pertama dipublikasikan.',
@@ -477,7 +486,7 @@
                   <a href="{{ route('articles.show', $katBig->slug) }}">{{ $katBig->display_title }}</a>
                 </h3>
                 <div class="card-meta">
-                  <b>{{ optional($katBig->user)->name ?? 'Admin' }}</b>
+                  <b>{{ $formatAuthor(optional($katBig->user)->name) }}</b>
                   <span>–</span>
                   <span>{{ $katBig->formatted_date }}</span>
                   <span>👁 {{ number_format($katBig->views, 0, ',', '.') }}</span>

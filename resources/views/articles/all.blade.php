@@ -408,7 +408,14 @@
             </h2>
 
             <div class="news-card-meta">
-              <span class="news-card-author">{{ $a->user->name ?? 'Redaksi' }}</span>
+              @php
+                $cardAuthor = $a->user->name ?? 'NewsXPaper';
+                $cardTrimmed = trim($cardAuthor);
+                if (preg_match('/^admin(\s*news\s*x\s*paper)?$/i', $cardTrimmed) || strtolower($cardTrimmed) === 'redaksi') {
+                    $cardAuthor = 'NewsXPaper';
+                }
+              @endphp
+              <span class="news-card-author">{{ $cardAuthor }}</span>
               <span aria-hidden="true">–</span>
               <time datetime="{{ $a->published_at ? $a->published_at->toIso8601String() : '' }}">{{ $dateString }}</time>
               @if(!empty($a->read_time_formatted))

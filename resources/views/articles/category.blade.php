@@ -18,6 +18,15 @@
   if (!file_exists(public_path('images/placeholder-' . $slug . '.svg'))) {
       $imgFallback = asset('images/placeholder-news.svg');
   }
+
+  $formatAuthor = function(?string $name): string {
+    if (!$name) return 'NewsXPaper';
+    $trimmed = trim($name);
+    if (preg_match('/^admin(\s*news\s*x\s*paper)?$/i', $trimmed) || strtolower($trimmed) === 'redaksi') {
+      return 'NewsXPaper';
+    }
+    return $trimmed;
+  };
 @endphp
 
 <div class="container">
@@ -55,7 +64,7 @@
           <div>
             <h2 class="card-title lg"><a href="{{ $first['url'] }}">{{ $first['title'] }}</a></h2>
             <div class="card-meta">
-              <b>{{ $first['author'] }}</b>
+              <b>{{ $formatAuthor($first['author'] ?? null) }}</b>
               <span>–</span>
               <span>{{ $first['date'] }}</span>
               @if(!empty($first['read_time']))
@@ -90,7 +99,7 @@
                 </a>
                 <h3 class="card-title"><a href="{{ $a['url'] }}">{{ $a['title'] }}</a></h3>
                 <div class="card-meta">
-                  <b>{{ $a['author'] }}</b><span>–</span><span>{{ $a['date'] }}</span>
+                  <b>{{ $formatAuthor($a['author'] ?? null) }}</b><span>–</span><span>{{ $a['date'] }}</span>
                   @if(!empty($a['read_time']))
                     <span>· {{ $a['read_time'] }} {{ __('mnt') }}</span>
                   @endif

@@ -7,6 +7,13 @@
   <div class="ocin">
     <span class="tag">{{ $a->category->name }}</span>
     <h3>{{ $a->title }}</h3>
-    <div class="by"><i>{{ mb_substr($a->user->name, 0, 1) }}</i>oleh {{ $a->user->name }} &bull; {{ $a->created_at->format('d M Y') }} &bull; {{ $a->comments_count }} Komentar</div>
+    @php
+      $ocAuthor = $a->user->name ?? 'NewsXPaper';
+      $ocTrimmed = trim($ocAuthor);
+      if (preg_match('/^admin(\s*news\s*x\s*paper)?$/i', $ocTrimmed) || strtolower($ocTrimmed) === 'redaksi') {
+          $ocAuthor = 'NewsXPaper';
+      }
+    @endphp
+    <div class="by"><i>{{ mb_substr($ocAuthor, 0, 1) }}</i>oleh {{ $ocAuthor }} &bull; {{ $a->created_at->format('d M Y') }} &bull; {{ $a->comments_count }} Komentar</div>
   </div>
 </a>
