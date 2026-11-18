@@ -8,6 +8,11 @@
   $excerpt      = $article->display_excerpt;
   $ogImage      = $article->image_url ?? asset('images/placeholder-news.svg');
   $isRssArticle = ! empty($article->source_name) && ! empty($article->source_url);
+  $rawShowAuthor = optional($article->user)->name;
+  $trimmedShow = trim($rawShowAuthor ?? '');
+  $authorDisplay = (!$rawShowAuthor || preg_match('/^admin(\s*news\s*x\s*paper)?$/i', $trimmedShow) || strtolower($trimmedShow) === 'redaksi')
+    ? 'NewsXPaper'
+    : $rawShowAuthor;
 @endphp
 
 @section('title', $article->display_title . ' – News X Paper')
@@ -18,7 +23,7 @@
 
 @push('meta')
   <meta property="og:type"                content="article">
-  <meta property="article:author"         content="{{ optional($article->user)->name }}">
+  <meta property="article:author"         content="{{ $authorDisplay }}">
   <meta property="article:published_time" content="{{ $displayDate->toIso8601String() }}">
   <meta property="article:section"        content="{{ $catName }}">
 @endpush
