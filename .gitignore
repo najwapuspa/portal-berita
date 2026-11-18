@@ -1,8 +1,10 @@
 *.log
 .DS_Store
 .env
+.env.*
 .env.backup
 .env.production
+.env.infinityfree
 .phpactor.json
 .phpunit.result.cache
 /.codex
@@ -29,6 +31,12 @@ Thumbs.db
 # Backup database — jangan commit ke repository
 *.sql
 backup_*.sql
+
+# File arsip dan deploy sementara
+laravel.zip
+laravel.zip.zip
+composer-installed-check.json
+vendor_backup/
 
 # File test/scratch sementara — tidak perlu di-commit
 /scratch/

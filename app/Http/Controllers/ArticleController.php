@@ -232,20 +232,26 @@ class ArticleController extends Controller
     public function store(Request $request)
     {
         $data = $request->validate([
-            'title'       => ['required', 'string', 'max:255'],
+            'title'       => ['required', 'string', 'max:255', 'min:3'],
             'category_id' => ['required', 'exists:categories,id'],
-            'content'     => ['required', 'string'],
+            'content'     => ['required', 'string', 'min:10', 'max:50000'],
             'status'      => ['required', 'in:draft,published'],
             // Gambar: bisa upload file ATAU URL
             'image_file'  => ['nullable', 'image', 'mimes:jpeg,png,webp,gif', 'max:2048'],
-            'image_url'   => ['nullable', 'url', 'max:500'],
+            // H2 Fix: URL gambar hanya boleh http/https — tolak javascript:, data:, ftp:
+            'image_url'   => ['nullable', 'string', 'max:500', 'regex:/^https?:\/\/.+/i'],
         ], [
             'title.required'       => 'Judul wajib diisi.',
+            'title.min'            => 'Judul minimal 3 karakter.',
+            'title.max'            => 'Judul maksimal 255 karakter.',
             'category_id.required' => 'Pilih kategori.',
             'content.required'     => 'Isi artikel wajib diisi.',
+            'content.min'          => 'Isi artikel minimal 10 karakter.',
+            'content.max'          => 'Isi artikel maksimal 50.000 karakter.',
             'image_file.image'     => 'File harus berupa gambar.',
             'image_file.mimes'     => 'Gambar harus berformat JPEG, PNG, WebP, atau GIF.',
             'image_file.max'       => 'Ukuran gambar maksimal 2 MB.',
+            'image_url.regex'      => 'URL gambar harus diawali dengan http:// atau https://',
         ]);
 
         // Tentukan nilai kolom image
@@ -276,16 +282,25 @@ class ArticleController extends Controller
     public function update(Request $request, Article $article)
     {
         $data = $request->validate([
-            'title'       => ['required', 'string', 'max:255'],
+            'title'       => ['required', 'string', 'max:255', 'min:3'],
             'category_id' => ['required', 'exists:categories,id'],
-            'content'     => ['required', 'string'],
+            'content'     => ['required', 'string', 'min:10', 'max:50000'],
             'status'      => ['required', 'in:draft,published'],
             'image_file'  => ['nullable', 'image', 'mimes:jpeg,png,webp,gif', 'max:2048'],
-            'image_url'   => ['nullable', 'url', 'max:500'],
+            // H2 Fix: URL gambar hanya boleh http/https
+            'image_url'   => ['nullable', 'string', 'max:500', 'regex:/^https?:\/\/.+/i'],
         ], [
-            'image_file.image' => 'File harus berupa gambar.',
-            'image_file.mimes' => 'Gambar harus berformat JPEG, PNG, WebP, atau GIF.',
-            'image_file.max'   => 'Ukuran gambar maksimal 2 MB.',
+            'title.required'       => 'Judul wajib diisi.',
+            'title.min'            => 'Judul minimal 3 karakter.',
+            'title.max'            => 'Judul maksimal 255 karakter.',
+            'category_id.required' => 'Pilih kategori.',
+            'content.required'     => 'Isi artikel wajib diisi.',
+            'content.min'          => 'Isi artikel minimal 10 karakter.',
+            'content.max'          => 'Isi artikel maksimal 50.000 karakter.',
+            'image_file.image'     => 'File harus berupa gambar.',
+            'image_file.mimes'     => 'Gambar harus berformat JPEG, PNG, WebP, atau GIF.',
+            'image_file.max'       => 'Ukuran gambar maksimal 2 MB.',
+            'image_url.regex'      => 'URL gambar harus diawali dengan http:// atau https://',
         ]);
 
         // Update slug hanya jika judul berubah

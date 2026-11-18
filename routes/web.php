@@ -98,3 +98,13 @@ Route::middleware('auth')->group(function () {
         Route::get('/laporan/export-excel',  [LaporanController::class, 'exportExcel'])->name('laporan.excel');
     });
 });
+
+// Fallback penyajian file storage publik untuk hosting tanpa dukungan symlink SSH
+Route::get('/storage/{path}', function ($path) {
+    $filePath = storage_path('app/public/' . $path);
+    if (!file_exists($filePath)) {
+        abort(404);
+    }
+    return response()->file($filePath);
+})->where('path', '.*')->name('storage.local');
+

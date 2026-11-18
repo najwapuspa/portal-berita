@@ -1,0 +1,21 @@
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+
+    # ── 1. KEAMANAN: Blokir akses langsung ke file tersembunyi & konfigurasi ──
+    # Blokir akses ke file .env, .git, .editorconfig, dll
+    RewriteRule ^\.(.*)$ - [F,L]
+
+    # Blokir akses langsung ke folder internal Laravel
+    RewriteRule ^(app|bootstrap|config|database|resources|routes|storage|tests|vendor)/ - [F,L]
+
+    # Blokir akses ke file sensitif
+    RewriteRule \.(env.*|sql|md|lock|json|yml|yaml|bak|config\.js)$ - [F,L]
+
+    # ── 2. REWRITE KE FOLDER PUBLIC ──────────────────────────────────────────
+    # Jika request bukan mengarah ke folder public, arahkan ke public/
+    RewriteCond %{REQUEST_URI} !^/public/
+    RewriteRule ^(.*)$ public/$1 [L]
+</IfModule>
+
+# Fallback DirectoryIndex
+DirectoryIndex public/index.php index.php index.html
