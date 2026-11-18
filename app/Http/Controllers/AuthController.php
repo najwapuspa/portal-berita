@@ -8,6 +8,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Password;
+use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Str;
 
 class AuthController extends Controller
@@ -25,11 +26,15 @@ class AuthController extends Controller
         $credentials = $request->validate([
             'email'    => ['required', 'email'],
             'password' => ['required'],
+        ], [
+            'email.required'    => 'Email wajib diisi.',
+            'email.email'       => 'Format email tidak valid.',
+            'password.required' => 'Kata sandi wajib diisi.',
         ]);
 
         if (Auth::attempt($credentials, $request->boolean('remember'))) {
             $request->session()->regenerate();
-            return redirect()->route('dashboard');
+            return redirect()->intended(route('dashboard'));
         }
 
         return back()
@@ -56,7 +61,7 @@ class AuthController extends Controller
             'email'    => ['required', 'email', 'max:255', 'unique:users,email'],
             'password' => ['required', 'string', 'min:8', 'confirmed'],
         ], [
-            'name.required'     => 'Nama wajib diisi.',
+            'name.required'     => 'Nama lengkap wajib diisi.',
             'email.required'    => 'Email wajib diisi.',
             'email.email'       => 'Format email tidak valid.',
             'email.unique'      => 'Email ini sudah terdaftar. Silakan masuk.',
@@ -65,18 +70,25 @@ class AuthController extends Controller
             'password.confirmed'=> 'Konfirmasi kata sandi tidak cocok.',
         ]);
 
-        $user = User::create([
+        $userData = [
             'name'     => $data['name'],
             'email'    => $data['email'],
             'password' => Hash::make($data['password']),
-            'role'     => 'user',
-            'is_admin' => false,
-        ]);
+        ];
 
-        Auth::login($user);
-        $request->session()->regenerate();
+        // Pastikan kompatibel jika database hosting belum memiliki kolom role atau is_admin
+        if (Schema::hasColumn('users', 'role')) {
+            $userData['role'] = 'user';
+        }
 
-        return redirect()->route('dashboard');
+        if (Schema::hasColumn('users', 'is_admin')) {
+            $userData['is_admin'] = false;
+        }
+
+        User::create($userData);
+
+        return redirect()->route('login')
+            ->with('status', 'Pendaftaran berhasil! Akun Anda telah aktif, silakan masuk.');
     }
 
     public function logout(Request $request)

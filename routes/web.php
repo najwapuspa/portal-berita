@@ -27,11 +27,15 @@ Route::get('/cari',           [SearchController::class, 'index'])->name('search'
 Route::get('/api/suggest',    [SearchController::class, 'suggest'])->name('search.suggest');
 
 // ── Auth ─────────────────────────────────────────────────────────────────────
-Route::get('/login',    [AuthController::class, 'showLogin'])->name('login');
-Route::post('/login',   [AuthController::class, 'login'])->middleware('throttle:5,1');
-Route::get('/daftar',   [AuthController::class, 'showRegister'])->name('register');
-Route::post('/daftar',  [AuthController::class, 'register']);
-Route::post('/logout',  [AuthController::class, 'logout'])->name('logout')->middleware('auth');
+Route::get('/login',     [AuthController::class, 'showLogin'])->name('login');
+Route::post('/login',    [AuthController::class, 'login'])->middleware('throttle:5,1');
+Route::get('/masuk',     [AuthController::class, 'showLogin'])->name('login.id');
+Route::post('/masuk',    [AuthController::class, 'login'])->middleware('throttle:5,1');
+Route::get('/daftar',    [AuthController::class, 'showRegister'])->name('register');
+Route::post('/daftar',   [AuthController::class, 'register'])->middleware('throttle:6,1');
+Route::get('/register',  [AuthController::class, 'showRegister'])->name('register.en');
+Route::post('/register', [AuthController::class, 'register'])->middleware('throttle:6,1');
+Route::post('/logout',   [AuthController::class, 'logout'])->name('logout')->middleware('auth');
 
 Route::get('/forgot-password',        [AuthController::class, 'showForgotPassword'])->name('password.request');
 Route::post('/forgot-password',       [AuthController::class, 'sendResetLinkEmail'])->name('password.email');

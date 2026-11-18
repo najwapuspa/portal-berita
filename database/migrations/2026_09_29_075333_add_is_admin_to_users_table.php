@@ -8,15 +8,16 @@ return new class extends Migration
 {
     public function up(): void
     {
-        Schema::table('users', function (Blueprint $table) {
-            $table->boolean('is_admin')->default(false)->after('password');
-        });
+        if (Schema::hasTable('users') && !Schema::hasColumn('users', 'is_admin')) {
+            Schema::table('users', function (Blueprint $table) {
+                $table->boolean('is_admin')->default(false)->after('password');
+            });
+        }
     }
 
     public function down(): void
     {
-        Schema::table('users', function (Blueprint $table) {
-            $table->dropColumn('is_admin');
-        });
+        // Sengaja dikosongkan (no-op) saat rollback untuk menjamin kolom 'is_admin'
+        // dan hak akses pengguna yang sudah ada tidak terhapus secara tidak sengaja.
     }
 };

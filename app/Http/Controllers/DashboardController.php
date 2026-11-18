@@ -15,7 +15,12 @@ class DashboardController extends Controller
     /** /dashboard → arahkan sesuai role */
     public function index(Request $request)
     {
-        return $request->user()->role === 'admin'
+        $user = $request->user() ?? Auth::user();
+        if (!$user) {
+            return redirect()->route('login');
+        }
+
+        return $user->isAdmin()
             ? redirect()->route('admin.dashboard')
             : redirect()->route('user.dashboard');
     }

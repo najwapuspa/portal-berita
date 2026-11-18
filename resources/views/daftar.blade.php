@@ -15,7 +15,7 @@
     </div>
   @endif
 
-  <form method="POST" action="{{ route('register') }}" novalidate>
+  <form method="POST" action="{{ request()->is('register') ? url('/register') : route('register') }}" novalidate>
     @csrf
 
     {{-- Full Name --}}
